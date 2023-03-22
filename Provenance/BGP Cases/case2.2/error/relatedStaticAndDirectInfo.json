@@ -1,0 +1,1 @@
+{"directRouteInfo":{},"staticRouteInfo":{"BNG30":{"_public_":{"179.0.0.116/30":[{"deviceName":"BNG30","vpnName":"_public_","addressIp":"179.0.0.116/30","nextHop":"39.0.0.118/32","outInf":{"deviceName":"BNG30","infName":"GigabitEthernet4/0/1.10","vpnName":"_public_","infIpv4Ip":"39.0.0.116/30","infIpv4HostIp":"39.0.0.117/32","infIpv6Ip":null,"infIpv6HostIp":null}}]}}}}
