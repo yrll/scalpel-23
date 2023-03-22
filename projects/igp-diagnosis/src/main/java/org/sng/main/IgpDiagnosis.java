@@ -75,7 +75,7 @@ public class IgpDiagnosis {
             int depth = 0;
             List<Set<IsisEdge>> repairPlans = new ArrayList<>();
             if (!canReach){
-                repairPlans.addAll(findMinimalRepairs(srcNodes,dstNode,prefixFwdGraph));
+                repairPlans.addAll(findMinimalDisconnectionRepairs(srcNodes,dstNode,prefixFwdGraph));
                 depth = repairPlans.get(0).size();
             }
             System.out.println(dstPrefix+"\t"+canReach+"\t"+depth);
@@ -103,7 +103,7 @@ public class IgpDiagnosis {
     }
 
     // find minimal repair to connect src and dst by BFS
-    private List<Set<IsisEdge>> findMinimalRepairs(List<IsisNode> srcNodes, IsisNode dstNode,
+    private List<Set<IsisEdge>> findMinimalDisconnectionRepairs(List<IsisNode> srcNodes, IsisNode dstNode,
                                                           MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph){
         int maxDepth = 10;
         List<Set<IsisEdge>> repairPlans = new ArrayList<>();
