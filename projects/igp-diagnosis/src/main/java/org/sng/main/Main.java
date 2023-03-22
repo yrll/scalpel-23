@@ -25,7 +25,7 @@ public class Main {
         Layer1Topology layer1Topology = getLayer1Topology();
 
         // get common graph and import edges of each prefix
-        String isisInfoFilePath = "projects/networks/provenanceInfo/isis/case3/isisProtocolInfo.json";
+        String isisInfoFilePath = "networks/provenanceInfo/isis/case1.4/isisProtocolInfo.json";
         JsonObject jsonObject = JsonParser.getJsonObject(isisInfoFilePath);
         ValueGraph<IsisNode, IsisEdgeValue> commonFwdGraph = JsonParser.parseIsisCommonGraph(jsonObject.get("isisNodes").getAsJsonObject());
         Map<Prefix, List<IsisEdge>> prefixEdgesMap = JsonParser.

@@ -19,22 +19,18 @@ import java.util.stream.Collectors;
 
 public class IgpDiagnosis {
 
-    // ISIS adjacency graph
-    private final ValueGraph<IsisNode,IsisEdgeValue> _commonFwdGraph;
     private final MutableValueGraph<IsisNode,IsisEdgeValue> _newCommonGraph;
 
     // ISIS forwarding graph for each prefix
     private final Map<Prefix,MutableValueGraph<IsisNode, IsisEdgeValue>> _prefixFwdGraphMap;
 
     private final Set<Pair<String,String>> _edgesNotPeering;
-
-
+    private final Map<Pair<String,String>,Boolean> _hasProcessWithSameIdMap;
 
     public IgpDiagnosis(Layer1Topology layer1Topology, ValueGraph<IsisNode,IsisEdgeValue> commonFwdGraph, Map<Prefix, List<IsisEdge>> prefixEdgesMap) {
-        _commonFwdGraph = commonFwdGraph;
-
         // get physical edge that have not established ISIS neighbor (help finding repair plan)
         _edgesNotPeering = getL1EdgesNotPeering(layer1Topology, commonFwdGraph);
+        _hasProcessWithSameIdMap = findProcessesWithSameId(_edgesNotPeering,commonFwdGraph);
 
         // generate new common graph to make sure that can compute a repair plan
         _newCommonGraph = Graphs.copyOf(commonFwdGraph);
@@ -173,11 +169,12 @@ public class IgpDiagnosis {
                 }
                 // establish ISIS neighbor between devices
                 else {
-                    if (!_edgesNotPeering.contains(new ImmutablePair<>(srcReachableNode.getDevName(),dstReachableNode.getDevName()))){
+                    Pair<String,String> deviceEdge = new ImmutablePair<>(srcReachableNode.getDevName(),dstReachableNode.getDevName());
+                    if (!_edgesNotPeering.contains(deviceEdge)){
                         continue;
                     }
                     // heuristic: if two devices have processes with same ID, only connect them.
-                    if (hasProcessesWithSameId(srcReachableNode.getDevName(),dstReachableNode.getDevName(),prefixFwdGraph.nodes())){
+                    if (_hasProcessWithSameIdMap.get(deviceEdge)){
                         if (srcReachableNode.getIsisId() == dstReachableNode.getIsisId()){
                             repairEdges.add(new IsisEdge(srcReachableNode,dstReachableNode,null));
                         }
@@ -208,7 +205,7 @@ public class IgpDiagnosis {
 
 
 
-    // get physical edges that have not established ISIS neighbor
+    // get physical edges that have not established ISIS neighbor (todo: necessary?)
     private Set<Pair<String,String>> getL1EdgesNotPeering(Layer1Topology layer1Topology,
                                                                  ValueGraph<IsisNode, IsisEdgeValue> isisFwdGraph){
 
@@ -244,20 +241,28 @@ public class IgpDiagnosis {
     }
 
     //todo: cache
-    private boolean hasProcessesWithSameId(String device1, String device2, Set<IsisNode> isisNodes){
-        Set<Integer> device1IsisIds = new HashSet<>();
-        Set<Integer> device2IsisIds = new HashSet<>();
+    private Map<Pair<String, String>, Boolean> findProcessesWithSameId(Set<Pair<String,String>> _edgesNotPeering,
+                                                                       ValueGraph<IsisNode,IsisEdgeValue> commonFwdGraph){
+        Map<Pair<String, String>, Boolean> hasProcessWithSameIdMap = new HashMap<>();
+        Set<IsisNode> isisNodes = commonFwdGraph.nodes();
+        for (Pair<String,String> edgeNotPeering: _edgesNotPeering){
+            String device1 = edgeNotPeering.getLeft();
+            String device2 = edgeNotPeering.getRight();
+            Set<Integer> device1IsisIds = new HashSet<>();
+            Set<Integer> device2IsisIds = new HashSet<>();
 
-        for (IsisNode isisNode: isisNodes){
-            if (isisNode.getDevName().equals(device1)){
-                device1IsisIds.add(isisNode.getIsisId());
+            for (IsisNode isisNode: isisNodes){
+                if (isisNode.getDevName().equals(device1)){
+                    device1IsisIds.add(isisNode.getIsisId());
+                }
+                if (isisNode.getDevName().equals(device2)){
+                    device2IsisIds.add(isisNode.getIsisId());
+                }
             }
-            if (isisNode.getDevName().equals(device2)){
-                device2IsisIds.add(isisNode.getIsisId());
-            }
+            boolean hasProcessWithSameId = !Collections.disjoint(device1IsisIds,device2IsisIds);
+            hasProcessWithSameIdMap.put(edgeNotPeering,hasProcessWithSameId);
         }
-
-        return !Collections.disjoint(device1IsisIds,device2IsisIds);
+        return  hasProcessWithSameIdMap;
     }
 
     // get origin prefixes for dst ip
@@ -307,6 +312,7 @@ public class IgpDiagnosis {
         return srcNodes;
     }
 
+    // reverse reachability (BFS)
     private Set<IsisNode> reachableNodesToDst(MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph, IsisNode dstNode){
         Set<IsisNode> reachableNodes  = new HashSet<>();
         reachableNodes.add(dstNode);
