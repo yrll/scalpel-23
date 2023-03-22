@@ -3,63 +3,199 @@ package org.sng.main;
 import com.google.common.graph.Graphs;
 import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraph;
-import com.google.gson.JsonObject;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.sng.datamodel.Ip;
+import org.sng.datamodel.Layer1Node;
+import org.sng.datamodel.Layer1Topology;
 import org.sng.datamodel.Prefix;
-import org.sng.datamodel.isis.IBgpNode;
+import org.sng.datamodel.ibgp.IBgpNode;
 import org.sng.datamodel.isis.IsisEdge;
 import org.sng.datamodel.isis.IsisEdgeValue;
 import org.sng.datamodel.isis.IsisNode;
-import org.sng.parse.JsonParser;
 
-import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class IgpDiagnosis {
-    public static void main(String[] args) throws IOException {
 
-        // get common graph and import edges of each prefix
-        String isisInfoFilePath = "C:\\Users\\lovex\\Desktop\\isisProtocolInfo.json";
-        JsonObject jsonObject = JsonParser.getJsonObject(isisInfoFilePath);
-        ValueGraph<IsisNode, IsisEdgeValue> isisFwdGraph = JsonParser.parseIsisCommonGraph(jsonObject.get("isisNodes").getAsJsonObject());
-        Map<Prefix, List<IsisEdge>> prefixEdgesMap = JsonParser.
-                parsePrefixImportEdges(jsonObject.get("dstPrefix2ImportNodes").getAsJsonObject(), isisFwdGraph.nodes());
+    // ISIS adjacency graph
+    private final ValueGraph<IsisNode,IsisEdgeValue> _commonFwdGraph;
+    private final MutableValueGraph<IsisNode,IsisEdgeValue> _newCommonGraph;
+
+    // ISIS forwarding graph for each prefix
+    private final Map<Prefix,MutableValueGraph<IsisNode, IsisEdgeValue>> _prefixFwdGraphMap;
+
+    private final Set<Pair<String,String>> _edgesNotPeering;
+
+
+
+    public IgpDiagnosis(Layer1Topology layer1Topology, ValueGraph<IsisNode,IsisEdgeValue> commonFwdGraph, Map<Prefix, List<IsisEdge>> prefixEdgesMap) {
+        _commonFwdGraph = commonFwdGraph;
+
+        // get physical edge that have not established ISIS neighbor (help finding repair plan)
+        _edgesNotPeering = getL1EdgesNotPeering(layer1Topology, commonFwdGraph);
+
+        // generate new common graph to make sure that can compute a repair plan
+        _newCommonGraph = Graphs.copyOf(commonFwdGraph);
+        enableIsisProcess(layer1Topology,_newCommonGraph);
 
         // get forwarding graph for each prefix
-        Map<Prefix,MutableValueGraph> prefixFwdGraphMap = getPrefixFwdGraphMap(isisFwdGraph,prefixEdgesMap);
+        _prefixFwdGraphMap = getPrefixFwdGraphMap(_newCommonGraph, prefixEdgesMap);
+    }
 
+
+    public void igpDiagnosis(Map<IBgpNode,IBgpNode> peerMap, List<Prefix> origins){
         //todo: diagnose duplicate subnets (error due to route priority)
+        // diagnose multiple prefixes? (such as /32 and /24)
 
         // diagnose reachability for each iBGP peer
-        Map<IBgpNode,IBgpNode> peerMap = new HashMap<>();
-        List<Prefix> origins = new ArrayList<>();
-        peerMap.put(new IBgpNode(Ip.parse("70.0.0.6"),"CSG1-1-1"),
-                new IBgpNode(Ip.parse("110.0.0.8"),"ASG1"));
-        origins.add(Prefix.parse("110.0.0.8/32"));
-
         for (Map.Entry<IBgpNode,IBgpNode> entry: peerMap.entrySet()){
             IBgpNode srcIBgpNode = entry.getKey();
             IBgpNode dstIBgpNode = entry.getValue();
             Ip dstIp = dstIBgpNode.getIp();
 
-            // get import prefixes for dst iBGP ip
-            List<Prefix> dstPrefixList = getDstPrefixList(dstIp,origins);
+            // get prefix of dst iBGP ip
+            Prefix dstPrefix = getDstPrefix(dstIp,origins);
 
-            // compute connection for src to each prefix
-            for (Prefix dstPrefix : dstPrefixList){
-                MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph = prefixFwdGraphMap.get(dstPrefix);
-                isSrcToPrefixConnected(srcIBgpNode,dstIBgpNode,prefixFwdGraph);
+            // if prefix not imported, creat direct prefix node and corresponding graph
+            if (!_prefixFwdGraphMap.containsKey(dstPrefix)){
+                MutableValueGraph<IsisNode,IsisEdgeValue> dstPrefixGraph = Graphs.copyOf(_newCommonGraph);
+                dstPrefixGraph.addNode(IsisNode.creatDirectNode(dstIBgpNode.getDevName()));
+                _prefixFwdGraphMap.put(dstPrefix,dstPrefixGraph);
             }
+            MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph = _prefixFwdGraphMap.get(dstPrefix);
+
+            // compute connection between src processes and dst prefix
+            List<IsisNode> srcNodes = getSrcNodes(srcIBgpNode.getDevName(), prefixFwdGraph.nodes());
+            IsisNode dstNode = getDstNode(dstIBgpNode.getDevName(), prefixFwdGraph.nodes());
+            boolean canReach = isSrcToPrefixConnected(srcNodes,dstNode,prefixFwdGraph);
+
+            // find repair plans and diagnose errors
+            int depth = 0;
+            List<Set<IsisEdge>> repairPlans = new ArrayList<>();
+            if (!canReach){
+                repairPlans.addAll(findMinimalRepairs(srcNodes,dstNode,prefixFwdGraph));
+                depth = repairPlans.get(0).size();
+            }
+            System.out.println(dstPrefix+"\t"+canReach+"\t"+depth);
+        }
+    }
+
+    private boolean isSrcToPrefixConnected(List<IsisNode> srcNodes, IsisNode dstNode,
+                                                  MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph){
+        boolean canReach = true;
+
+        if (srcNodes.size() == 1 && srcNodes.get(0).getIsisId() == IsisNode.NEW_ISIS_PROCESS){
+            canReach = false;
         }
 
+        if (canReach){
+            Set<IsisNode> reachableNodes = new HashSet<>();
+            for (IsisNode srcNode : srcNodes){
+                reachableNodes.addAll(Graphs.reachableNodes(prefixFwdGraph.asGraph(),srcNode));
+            }
+            if (!reachableNodes.contains(dstNode)){
+                canReach = false;
+            }
+        }
+        return canReach;
+    }
+
+    // find minimal repair to connect src and dst by BFS
+    private List<Set<IsisEdge>> findMinimalRepairs(List<IsisNode> srcNodes, IsisNode dstNode,
+                                                          MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph){
+        int maxDepth = 10;
+        List<Set<IsisEdge>> repairPlans = new ArrayList<>();
+        Set<IsisNode> srcReachableNodes = new HashSet<>();
+        for (IsisNode srcNode : srcNodes){
+            srcReachableNodes.addAll(Graphs.reachableNodes(prefixFwdGraph.asGraph(),srcNode));
+        }
+        Set<IsisNode> dstReachableNodes =  reachableNodesToDst(prefixFwdGraph,dstNode);
+
+        Queue<Pair<Set<IsisNode>,Set<IsisEdge>>> taskQueue = new LinkedList<>();
+        Set<IsisEdge> edges= new HashSet<>();
+        taskQueue.add(new ImmutablePair<>(srcReachableNodes,edges));
+
+        // BFS main loop
+        for (int depth = 0; depth < maxDepth && !taskQueue.isEmpty() ; depth++){
+            Queue<Pair<Set<IsisNode>,Set<IsisEdge>>> currentTaskQueue = new LinkedList<>(taskQueue);
+            taskQueue.clear();
+            while (!currentTaskQueue.isEmpty()){
+                // has found minimal repair plans, break
+                if (repairPlans.size() !=0){
+                    break;
+                }
+
+                Pair<Set<IsisNode>,Set<IsisEdge>> task = currentTaskQueue.poll();
+                Set<IsisNode> srcComponent = task.getLeft();
+                Set<IsisEdge> currentEdges = task.getRight();
+                // find edge to connect src and dst
+                List<IsisEdge> repairEdgesOfSrcAndDst = findRepairEdgeBetweenComponents(srcComponent,dstReachableNodes,prefixFwdGraph);
+
+                // if found, record all possible repair plans
+                if (!repairEdgesOfSrcAndDst.isEmpty()){
+                    for (IsisEdge repairEdgeOfSrcAndDst : repairEdgesOfSrcAndDst){
+                        Set<IsisEdge> repairPlan = new HashSet<>(currentEdges);
+                        repairPlan.add(repairEdgeOfSrcAndDst);
+                        repairPlans.add(repairPlan);
+                    }
+                }
+                // else, connect src component with a left node, then find the repair plan in next iteration
+                else {
+                    // connect with a left node and branch
+                    Set<IsisNode> leftNodes = getLeftNodes(prefixFwdGraph,srcReachableNodes,dstReachableNodes);
+                    List<IsisEdge> repairEdgesOfSrcAndLeft = findRepairEdgeBetweenComponents(srcComponent,leftNodes, prefixFwdGraph);
+                    for (IsisEdge repairEdgeOfSrcAndLeft: repairEdgesOfSrcAndLeft){
+                        Set<IsisNode> leftNodeComponent = Graphs.reachableNodes(prefixFwdGraph.asGraph(),
+                                repairEdgeOfSrcAndLeft.getTarget());
+                        Set<IsisNode> newSrcComponent = new HashSet<>(leftNodeComponent);
+                        Set<IsisEdge> newEdges = new HashSet<>(currentEdges);
+                        newEdges.add(repairEdgeOfSrcAndLeft);
+                        taskQueue.add(new ImmutablePair<>(newSrcComponent,newEdges));
+                    }
+                }
+            }
+        }
+        return repairPlans;
+    }
+
+
+    // find edge that connects two components (route import or establish ISIS neighbor)
+    private List<IsisEdge> findRepairEdgeBetweenComponents(Set<IsisNode> srcReachableNodes, Set<IsisNode> dstReachableNodes,
+                                                           MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph){
+        List<IsisEdge> repairEdges = new ArrayList<>();
+        for (IsisNode srcReachableNode: srcReachableNodes){
+            for (IsisNode dstReachableNode: dstReachableNodes){
+                // route import between ISIS processes
+                if (srcReachableNode.getDevName().equals(dstReachableNode.getDevName())){
+                    repairEdges.add(new IsisEdge(srcReachableNode,dstReachableNode,null));
+                }
+                // establish ISIS neighbor between devices
+                else {
+                    if (!_edgesNotPeering.contains(new ImmutablePair<>(srcReachableNode.getDevName(),dstReachableNode.getDevName()))){
+                        continue;
+                    }
+                    // heuristic: if two devices have processes with same ID, only connect them.
+                    if (hasProcessesWithSameId(srcReachableNode.getDevName(),dstReachableNode.getDevName(),prefixFwdGraph.nodes())){
+                        if (srcReachableNode.getIsisId() == dstReachableNode.getIsisId()){
+                            repairEdges.add(new IsisEdge(srcReachableNode,dstReachableNode,null));
+                        }
+                    }
+                    // Otherwise, connect two processes directly
+                    else {
+                        repairEdges.add(new IsisEdge(srcReachableNode,dstReachableNode,null));
+                    }
+                }
+            }
+        }
+        return repairEdges;
     }
 
     // complete forwarding graph for each prefix.
-    private static Map<Prefix,MutableValueGraph> getPrefixFwdGraphMap(ValueGraph<IsisNode, IsisEdgeValue> isisFwdGraph,
-                                                           Map<Prefix, List<IsisEdge>> prefixEdgesMap){
-        Map<Prefix,MutableValueGraph> prefixFwdGraphMap = new HashMap<>();
+    private Map<Prefix,MutableValueGraph<IsisNode, IsisEdgeValue>> getPrefixFwdGraphMap(ValueGraph<IsisNode, IsisEdgeValue> isisFwdGraph,
+                                                                      Map<Prefix, List<IsisEdge>> prefixEdgesMap){
+        Map<Prefix,MutableValueGraph<IsisNode, IsisEdgeValue>> prefixFwdGraphMap = new HashMap<>();
         for (Map.Entry<Prefix, List<IsisEdge>> entry: prefixEdgesMap.entrySet()){
             Prefix prefix =  entry.getKey();
             MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph = Graphs.copyOf(isisFwdGraph);
@@ -70,138 +206,87 @@ public class IgpDiagnosis {
         return prefixFwdGraphMap;
     }
 
-    // get origin prefixes for dst ip
-    private static List<Prefix> getDstPrefixList(Ip dstIp, List<Prefix> origins){
-        List<Prefix> dstPrefixList = new ArrayList<>();
-        for (Prefix origin : origins){
-            if (origin.containsIp(dstIp)){
-                dstPrefixList.add(origin);
+
+
+    // get physical edges that have not established ISIS neighbor
+    private Set<Pair<String,String>> getL1EdgesNotPeering(Layer1Topology layer1Topology,
+                                                                 ValueGraph<IsisNode, IsisEdgeValue> isisFwdGraph){
+
+        // get device pairs of l1Topology and isis forwarding graph respectively
+        Set<Pair<String,String>> l1DevicePairs = layer1Topology.getGraph().edges().stream()
+                .map(layer1Edge ->
+                        new ImmutablePair<>(layer1Edge.getNode1().getHostname(),layer1Edge.getNode2().getHostname()))
+                .collect(Collectors.toSet());
+        Set<Pair<String,String>> isisDevicePairs = isisFwdGraph.asGraph().edges().stream()
+                .map(isisNodeEndpointPair ->
+                        new ImmutablePair<>(isisNodeEndpointPair.source().getDevName(),isisNodeEndpointPair.target().getDevName()))
+                .collect(Collectors.toSet());
+
+        // find the edges that do not establish ISIS neighbor
+        Set<Pair<String, String>> edgesNotPeering = new HashSet<>(l1DevicePairs);
+        edgesNotPeering.removeAll(isisDevicePairs);
+
+        return edgesNotPeering;
+    }
+
+    // enable ISIS process for nodes that are not enabled, to make sure that can find a repair plan
+    // such as S-B-D, and B does not have any ISIS process
+    private void enableIsisProcess(Layer1Topology layer1Topology,
+                                   MutableValueGraph<IsisNode, IsisEdgeValue> newCommonGraph){
+        Set<String> enabledDevice = newCommonGraph.nodes().stream().map(IsisNode::getDevName).collect(Collectors.toSet());
+        Set<String> allDevice = layer1Topology.getGraph().nodes().stream().map(Layer1Node::getHostname).collect(Collectors.toSet());
+
+        allDevice.removeAll(enabledDevice);
+        for (String device: allDevice){
+            // todo: only add one process now, maybe add multiple processes
+            newCommonGraph.addNode(IsisNode.creatNewIsisNode(device));
+        }
+    }
+
+    //todo: cache
+    private boolean hasProcessesWithSameId(String device1, String device2, Set<IsisNode> isisNodes){
+        Set<Integer> device1IsisIds = new HashSet<>();
+        Set<Integer> device2IsisIds = new HashSet<>();
+
+        for (IsisNode isisNode: isisNodes){
+            if (isisNode.getDevName().equals(device1)){
+                device1IsisIds.add(isisNode.getIsisId());
+            }
+            if (isisNode.getDevName().equals(device2)){
+                device2IsisIds.add(isisNode.getIsisId());
             }
         }
 
-        if (dstPrefixList.size() == 0){
-            System.out.println("dst ip\t"+dstIp+"\thas not any origin prefix\t");
+        return !Collections.disjoint(device1IsisIds,device2IsisIds);
+    }
+
+    // get origin prefixes for dst ip
+    private Prefix getDstPrefix(Ip dstIp, List<Prefix> origins){
+
+        List<Prefix> dstPrefixList = new ArrayList<>();
+        Prefix dstPrefix = null;
+
+        for (Prefix origin : origins){
+            if (origin.containsIp(dstIp)){
+                dstPrefixList.add(origin);
+                if (origin.getPrefixLength() == 32){
+                    dstPrefix = origin;
+                }
+            }
+        }
+
+        if (dstPrefixList.size() == 0 || dstPrefix == null){
+            System.out.println("dst ip\t"+dstIp+"\thas not origin prefix\t");
         }
 
         if (dstPrefixList.size() > 1){
             System.out.println("dst ip has multiple prefixes\t"+dstPrefixList);
         }
 
-        return dstPrefixList;
+        return dstPrefix;
     }
 
-    // judge if any src process can reach dst nodes
-    private static boolean isSrcToPrefixConnected(IBgpNode srcIBgpNode, IBgpNode dstIBgpNode,
-                                                       MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph){
-        List<IsisEdge> disconnections = new ArrayList<>();
-
-        // get src processes
-        List<IsisNode> srcNodes = getSrcNodes(srcIBgpNode.getDevName(), prefixFwdGraph.nodes());
-        if (srcNodes.size() == 0){
-            throw new RuntimeException("Device "+ srcIBgpNode.getDevName() +" does not have any ISIS process");
-        }
-
-        // get dst node of this prefix
-        IsisNode dstNode = getDstNode(dstIBgpNode.getDevName(), prefixFwdGraph.nodes());
-        if (dstNode == null){
-            IsisNode directNode = IsisNode.creatDirectNode(dstNode.getDevName());
-            //todo: choose announce into what process? here dstNode is null
-            disconnections.add(new IsisEdge(dstNode,directNode,null));
-        }
-
-        // test if any src process can reach dst nodes.
-        boolean canReach = false;
-        for (IsisNode srcNode : srcNodes){
-            Set<IsisNode> reachableNodes =  Graphs.reachableNodes(prefixFwdGraph.asGraph(),srcNode);
-            if (reachableNodes.contains(dstNode)){
-                canReach = true;
-            }
-        }
-
-        if (!canReach){
-            List<Set<IsisEdge>> repairPlans = findMinimalRepairs(srcNodes,dstNode,prefixFwdGraph);
-            System.out.println(repairPlans.size());
-        }
-
-        return false;
-    }
-
-    // find minimal repair to connect src and dst by BFS
-    private static List<Set<IsisEdge>> findMinimalRepairs(List<IsisNode> srcNodes, IsisNode dstNode,
-                                       MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph){
-        int maxDepth = 20;
-        List<Set<IsisEdge>> repairPlans = new ArrayList<>();
-        for (IsisNode srcNode : srcNodes){
-            Set<IsisNode> srcReachableNodes =  Graphs.reachableNodes(prefixFwdGraph.asGraph(),srcNode);
-            Set<IsisNode> dstReachableNodes =  reachableNodesToDst(prefixFwdGraph,dstNode);
-
-            Queue<Pair<Set<IsisNode>,Set<IsisEdge>>> taskQueue = new LinkedList<>();
-            Set<IsisEdge> edges= new HashSet<>();
-            taskQueue.add(new ImmutablePair<>(srcReachableNodes,edges));
-
-            // BFS main loop
-            for (int depth = 0; depth < maxDepth && !taskQueue.isEmpty() ; depth++){
-                while (!taskQueue.isEmpty()){
-                    // has found repair plans, break
-                    if (repairPlans.size() !=0){
-                        break;
-                    }
-
-                    Pair<Set<IsisNode>,Set<IsisEdge>> task = taskQueue.poll();
-                    Set<IsisNode> srcComponent = task.getLeft();
-                    Set<IsisEdge> currentEdges = task.getRight();
-                    // find edge to connect src and dst
-                    List<IsisEdge> possibleEdgesOfSrcAndDst = findEdgeBetweenComponents(srcComponent,dstReachableNodes);
-
-                    // if found, record all possible repair plans
-                    if (!possibleEdgesOfSrcAndDst.isEmpty()){
-                        for (IsisEdge possibleEdgeOfSrcAndDst : possibleEdgesOfSrcAndDst){
-                            Set<IsisEdge> repairPlan = new HashSet<>(currentEdges);
-                            repairPlan.add(possibleEdgeOfSrcAndDst);
-                            repairPlans.add(repairPlan);
-                        }
-                    }
-                    // else, connect src component with a left node, then find the repair plan in next iteration
-                    else {
-                        // has found repair plans in other task, do not try deeper search
-                        if (repairPlans.size() != 0){
-                            continue;
-                        }
-                        // connect with a left node and branch
-                        Set<IsisNode> leftNodes = getLeftNodes(prefixFwdGraph,srcReachableNodes,dstReachableNodes);
-                        List<IsisEdge> possibleEdgesOfSrcAndLeft = findEdgeBetweenComponents(srcComponent,leftNodes);
-                        for (IsisEdge possibleEdgeOfSrcAndLeft: possibleEdgesOfSrcAndLeft){
-                            Set<IsisNode> newSrcComponent = new HashSet<>();
-                            Set<IsisNode> leftNodeComponent = Graphs.reachableNodes(prefixFwdGraph.asGraph(),
-                                    possibleEdgeOfSrcAndLeft.getTarget());
-                            newSrcComponent.addAll(leftNodeComponent);
-                            Set<IsisEdge> newEdges = new HashSet<>(currentEdges);
-                            newEdges.add(possibleEdgeOfSrcAndLeft);
-                            taskQueue.add(new ImmutablePair<>(newSrcComponent,newEdges));
-                        }
-                    }
-                }
-            }
-        }
-        return repairPlans;
-    }
-
-
-    // find disconnection
-    private static List<IsisEdge> findEdgeBetweenComponents(Set<IsisNode> srcReachableNodes,Set<IsisNode> dstReachableNodes){
-        List<IsisEdge> possibleEdges = new ArrayList<>();
-        for (IsisNode srcReachableNode: srcReachableNodes){
-            for (IsisNode dstReachableNode: dstReachableNodes){
-                //todo : physical topo
-                if (srcReachableNode.getDevName() == dstReachableNode.getDevName()){
-                    possibleEdges.add(new IsisEdge(srcReachableNode,dstReachableNode,null));
-                }
-            }
-        }
-        return possibleEdges;
-    }
-
-    private static IsisNode getDstNode(String devName, Set<IsisNode> nodes){
+    private IsisNode getDstNode(String devName, Set<IsisNode> nodes){
         IsisNode dstNode = null;
         for (IsisNode node: nodes){
             if (node.getDevName().equals(devName) && node.getIsisId() == IsisNode.DIRECT){
@@ -212,7 +297,7 @@ public class IgpDiagnosis {
         return dstNode;
     }
 
-    private static List<IsisNode> getSrcNodes(String devName, Set<IsisNode> nodes){
+    private List<IsisNode> getSrcNodes(String devName, Set<IsisNode> nodes){
         List<IsisNode> srcNodes = new ArrayList<>();
         for (IsisNode node: nodes){
             if (node.getDevName().equals(devName)){
@@ -222,8 +307,9 @@ public class IgpDiagnosis {
         return srcNodes;
     }
 
-    private static Set<IsisNode> reachableNodesToDst(MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph, IsisNode dstNode){
+    private Set<IsisNode> reachableNodesToDst(MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph, IsisNode dstNode){
         Set<IsisNode> reachableNodes  = new HashSet<>();
+        reachableNodes.add(dstNode);
         Queue<IsisNode> queue = new LinkedList<>();
         queue.add(dstNode);
         while (!queue.isEmpty()){
@@ -240,7 +326,7 @@ public class IgpDiagnosis {
     }
 
     // get nodes which are not connected to dst and src, sorted by the number of nodes it can reach
-    private static Set<IsisNode> getLeftNodes(MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph,
+    private Set<IsisNode> getLeftNodes(MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph,
                                               Set<IsisNode> srcReachableNodes, Set<IsisNode> dstReachableNodes){
 
         Set<IsisNode> leftNodes = new HashSet<>(prefixFwdGraph.nodes());

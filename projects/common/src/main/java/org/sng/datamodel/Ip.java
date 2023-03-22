@@ -1,7 +1,7 @@
 package org.sng.datamodel;
 
 //
-// Copied from batfish
+// Copied from batfish (https://github.com/batfish/batfish)
 //
 
 import com.google.common.base.Preconditions;

@@ -1,4 +1,4 @@
-package org.sng.datamodel.isis;
+package org.sng.datamodel.ibgp;
 
 import org.sng.datamodel.Ip;
 

@@ -8,6 +8,7 @@ public class IsisNode {
 
     public static final int DIRECT = -1;
 
+    public static final int NEW_ISIS_PROCESS = -2;
 
     public IsisNode(String devName, int id, int isisId) {
         _devName = devName;
@@ -17,6 +18,10 @@ public class IsisNode {
 
     public static IsisNode creatDirectNode(String devName){
         return new IsisNode(devName,DIRECT,DIRECT);
+    }
+
+    public static IsisNode creatNewIsisNode(String devName){
+        return new IsisNode(devName,NEW_ISIS_PROCESS,NEW_ISIS_PROCESS);
     }
 
     public String getDevName() {
