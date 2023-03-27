@@ -1,17 +1,18 @@
 package org.sng.main.forwardingtree;
 
+import org.sng.datamodel.Ip;
 import org.sng.datamodel.Prefix;
 
 public class Node {
     private String _name;
-    private Prefix _ip;
+    private Ip _ip;
 
     public Node(String name, String ip) {
         _name = name;
-        _ip = Prefix.parse(ip);
+        _ip = Ip.parse(ip);
     }
 
-    public Node(String name, Prefix ip) {
+    public Node(String name, Ip ip) {
         _name = name;
         _ip = ip;
     }
@@ -20,7 +21,7 @@ public class Node {
         return _name;
     }
 
-    public Prefix getDevIp() {
+    public Ip getDevIp() {
         return _ip;
     }
 
