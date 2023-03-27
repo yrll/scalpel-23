@@ -13,7 +13,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.Optional;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import com.google.gson.annotations.SerializedName;
 
 public class Ip implements Comparable<Ip>, Serializable {
     private static final LoadingCache<Ip, Ip> CACHE = CacheBuilder.newBuilder().softValues().maximumSize(1048576L).build(CacheLoader.from((x) -> {
@@ -27,7 +33,10 @@ public class Ip implements Comparable<Ip>, Serializable {
     public static final Ip FIRST_MULTICAST_IP = parse("224.0.0.0");
     public static final Ip MAX = create(4294967295L);
     public static final Ip ZERO = create(0L);
+
+    @SerializedName("ip")
     private final long _ip;
+
 
     public static boolean getBitAtPosition(Ip ip, int position) {
         return getBitAtPosition(ip.asLong(), position);
@@ -188,4 +197,6 @@ public class Ip implements Comparable<Ip>, Serializable {
     private Object readResolve() throws ObjectStreamException {
         return CACHE.getUnchecked(this);
     }
+
+    
 }
