@@ -22,7 +22,10 @@
             "name": "BgpDiagnosis",
             "request": "launch",
             "mainClass": "org.sng.main.BgpDiagnosis",
-            "projectName": "bgp-diagnosis"
+            "projectName": "bgp-diagnosis",
+            "vmArgs": "-ea"
         }
+
+
     ]
 }

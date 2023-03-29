@@ -40,15 +40,15 @@ public class BgpPeer implements Serializable{
 
     private boolean _ifPeerClient;
 
-    public BgpPeer(String localDevName, String peerDevName, Ip localIp,
-                    Ip peerIp, long localAsNum, String localVpnName) {
-        _localDevName = localDevName;
-        _peerDevName = peerDevName;
-        _localIp = localIp;
-        _peerIp = peerIp;
-        _localAsNum = localAsNum;
-        _localVpnName = localVpnName;
-    }
+    // public BgpPeer(String localDevName, String peerDevName, Ip localIp,
+    //                 Ip peerIp, long localAsNum, String localVpnName) {
+    //     _localDevName = localDevName;
+    //     _peerDevName = peerDevName;
+    //     _localIp = localIp;
+    //     _peerIp = peerIp;
+    //     _localAsNum = localAsNum;
+    //     _localVpnName = localVpnName;
+    // }
 
     public Ip getLocalIp() {
         return _localIp;
@@ -80,6 +80,14 @@ public class BgpPeer implements Serializable{
 
     public String getPeerDevName() {
         return _peerDevName;
+    }
+
+    public boolean isClient() {
+        return _ifPeerClient;
+    }
+
+    public boolean ifPeerBetween(String node1, String node2) {
+        return _localDevName.equals(node1) && _peerDevName.equals(node2);
     }
 
     public BgpPeer(String localDevName, String peerDevName, Ip localIp,

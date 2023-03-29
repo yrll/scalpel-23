@@ -1,6 +1,8 @@
 package org.sng.util;
   
 public class KeyWord {
+    public static String LOGGER_NAME = "bgpDiagnosis";
+
     public static String OPT = "operator";
     public static String VPN_NAME_OR_VPNV4 = "vpnNameOrVpnv4";
     public static String ROUTE = "route";

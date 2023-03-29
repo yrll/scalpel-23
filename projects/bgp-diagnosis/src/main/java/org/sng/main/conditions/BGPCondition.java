@@ -73,6 +73,10 @@ public class BgpCondition {
         return null;
     }
 
+    public void setRedistribute(boolean value) {
+        this._redistribution = value;
+    }
+
 
     public static class Builder {
         private Prefix _network;
