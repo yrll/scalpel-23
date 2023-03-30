@@ -1,23 +1,51 @@
 package org.sng.main;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.FileUtils;
 import org.sng.datamodel.Prefix;
 import org.sng.main.common.BgpTopology;
+import org.sng.main.common.Layer2Topology;
 import org.sng.main.conditions.BgpCondition;
 import org.sng.main.forwardingtree.BgpForwardingTree;
 import org.sng.main.forwardingtree.Generator;
 import org.sng.main.forwardingtree.BgpForwardingTree.TreeType;
-import org.sng.util.KeyWord;
+import org.sng.main.util.KeyWord;
 
 public class BgpDiagnosis {
     private Generator _generator;
 
-
+    public static String cfgRootPath;
     public static String concatFilePath(String rootPath, String sub) {
         return rootPath + "/" + sub;
+    }
+
+    public static Map<String, String> genCfgPathEachNode() {
+        Map<String, String> pathMap = new HashMap<>();
+        File rootFile = new File(cfgRootPath);
+        File[] files = rootFile.listFiles();
+        for (File file : files) {
+            System.out.println(file.getName());
+            pathMap.put(file.getName().split("\\.")[0], file.getAbsolutePath());
+        }
+        return pathMap;
+    }
+
+    public static String fromJsonToString(String filePath) {
+        File file = new File(filePath);
+        String jsonStr = "";
+        try {
+            jsonStr = FileUtils.readFileToString(file,"UTF-8");
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return jsonStr;
     }
 
     public static void main(String[] args) {
@@ -35,12 +63,17 @@ public class BgpDiagnosis {
         String bgpProvRootPath = concatFilePath(projectRootPath, "networks/provenanceInfo/bgp");
         // The path to save BGP condition json files
         String conditionPath = concatFilePath(projectRootPath, "sse_conditions/case" + caseType +".json");
+        // CFG root path
+        BgpDiagnosis.cfgRootPath = concatFilePath(bgpProvRootPath, "case"+caseType);
+
+        String infInfoFilePath = concatFilePath(bgpProvRootPath, concatFilePath("case"+caseType, concatFilePath(KeyWord.ERROR, KeyWord.INTERFACE_INFO_FILE_PATH)));
+        Layer2Topology layer2Topology = Layer2Topology.fromJson(infInfoFilePath);
         
         // error trace: (errorDstDevName, errorDstPrefix) and prov files path
         // String errDstNode = "BNG30";
         // String errDstIp = "179.0.0.117/30";
         String errDstNode = inputData.getErrorDstName(caseType);
-        String errDstIp = inputData.getErrorDstIp(errDstNode);
+        String errDstIp = inputData.getErrorDstIp(caseType);
         String errBgpProvFilePath = concatFilePath(bgpProvRootPath, concatFilePath("case"+caseType, concatFilePath(KeyWord.ERROR, KeyWord.PROV_INFO_FILE_NAME)));
         String errStaticProvFilePath = concatFilePath(bgpProvRootPath, concatFilePath("case"+caseType, concatFilePath(KeyWord.ERROR, KeyWord.RELATED_STATIC_INFO_FILE)));
         // correct trace: (correctDstDevName, correctDstPrefix) and prov files path

@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.sng.datamodel.Prefix;
+import org.sng.main.BgpDiagnosis;
 import org.sng.main.common.StaticRoute;
-import org.sng.util.KeyWord;
+import org.sng.main.util.ConfigTaint;
+import org.sng.main.util.KeyWord;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -32,6 +34,7 @@ public class StaticForwardingTree {
     public StaticForwardingTree serializeStaticTreeFromProvJson(JsonObject jsonObject, String ip) {
         // input "updateInfo" as jsonObject
         // Map<String, Node> nextHopMap = new HashMap<>();
+        Map<String, String> cfgPathMap = BgpDiagnosis.genCfgPathEachNode();
         for (String node : jsonObject.asMap().keySet()) {
             JsonObject allRoutes = jsonObject.asMap().get(node).getAsJsonObject();
             for (String vpnName : allRoutes.asMap().keySet()) {
@@ -47,6 +50,8 @@ public class StaticForwardingTree {
                             _routeMap.put(node, new ArrayList<StaticRoute>());
                         }
                         StaticRoute route = new Gson().fromJson(route_raw.toString(), StaticRoute.class);
+                        // 加上pref值
+                        ConfigTaint.staticRouteFinder(cfgPathMap.get(node), route);
                         _routeMap.get(node).add(route);
                         assert !_nextHopIfaceForwardingMap.containsKey(node);
                         // need rewriting, parse iface and iface_ip

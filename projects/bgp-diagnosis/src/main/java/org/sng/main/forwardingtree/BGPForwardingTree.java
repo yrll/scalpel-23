@@ -27,7 +27,7 @@ import org.sng.main.common.BgpTopology;
 import org.sng.main.common.BgpPeer.BgpPeerType;
 import org.sng.main.conditions.BgpCondition;
 import org.sng.main.conditions.SelectionRoute;
-import org.sng.util.KeyWord;
+import org.sng.main.util.KeyWord;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

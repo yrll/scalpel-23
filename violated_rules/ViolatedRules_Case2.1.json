@@ -1,0 +1,18 @@
+{
+  "dev2ViolateRules": {
+    "CR2": {
+      "ipPrefix": "179.0.0.116/30",
+      "violatedRrClient": [
+        "BNG1"
+      ],
+      "violatedPropNeighbors": [],
+      "violatedAcptNeighbors": [],
+      "prefer": [],
+      "violateIbgpPeer": [],
+      "violateEbgpPeer": [],
+      "violateRedis": null,
+      "originStaticRoute": null,
+      "originDirectRoute": null
+    }
+  }
+}

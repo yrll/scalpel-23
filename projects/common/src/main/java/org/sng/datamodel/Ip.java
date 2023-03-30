@@ -47,6 +47,38 @@ public class Ip implements Comparable<Ip>, Serializable {
         return (bits & (long)(1 << 31 - position)) != 0L;
     }
 
+    public static boolean isIpv4Addr(String addr) {
+        String[] addrArray = addr.split("\\.");
+        if (addrArray.length != 4) {
+            if ((addr.charAt(0) >= 'a' && addr.charAt(0) <= 'z') || addr.charAt(0) >= 'A' && addr.charAt(0) <= 'Z') {
+                String[] tail = addr.split("\\(");
+                if (tail.length == 2) {
+                    String[] longStrParts = tail[1].split("l");
+                    if (longStrParts.length == 2) {
+                        String longStr = longStrParts[0];
+                        return true;
+                    }
+                }
+            }
+            return false;
+        } else {
+            long num = 0L;
+            try {
+                for(int i = 0; i < 4; ++i) {
+                    long segment = Long.parseLong(addrArray[i]);
+                    if (!(0L <= segment && segment <= 255L)) {
+                        return false;
+                    }
+                    num = (num << 8) + segment;
+                }
+
+                return true;
+            } catch (NumberFormatException var7) {
+                throw new IllegalArgumentException("Invalid IPv4 address: " + addr, var7);
+            }
+        }
+    }
+
     private static long ipStrToLong(String addr) {
         String[] addrArray = addr.split("\\.");
         if (addrArray.length != 4) {

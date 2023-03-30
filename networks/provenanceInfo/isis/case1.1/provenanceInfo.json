@@ -6432,7 +6432,7 @@
             "peerType": null,
             "ebgpMaxHop": 1,
             "validTtlHop": 0,
-            "nextHopLocal": false,
+            "nextHopLocal": false, 
             "advertiseCommunity": false,
             "advertiseExtCommunity": false,
             "defaultRouteAdvertise": false,

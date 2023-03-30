@@ -1,0 +1,32 @@
+{
+  "dev2ViolateRules": {
+    "CR2": {
+      "ipPrefix": null,
+      "violatedRrClient": [],
+      "violatedPropNeighbors": [],
+      "violatedAcptNeighbors": [],
+      "prefer": [],
+      "violateIbgpPeer": [],
+      "violateEbgpPeer": [
+        "BR2"
+      ],
+      "originStaticRoute": null,
+      "originDirectRoute": null,
+      "violateRedis": null
+    },
+    "BR4": {
+      "ipPrefix": null,
+      "violatedRrClient": [],
+      "violatedPropNeighbors": [],
+      "violatedAcptNeighbors": [],
+      "prefer": [],
+      "violateIbgpPeer": [],
+      "violateEbgpPeer": [
+        "CR2"
+      ],
+      "originStaticRoute": null,
+      "originDirectRoute": null,
+      "violateRedis": null
+    }
+  }
+}

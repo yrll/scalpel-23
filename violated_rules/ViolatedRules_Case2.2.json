@@ -1,0 +1,69 @@
+{
+  "dev2ViolateRules": {
+    "BNG30": {
+      "ipPrefix": "179.0.0.116/30",
+      "violatedRrClient": [],
+      "violatedPropNeighbors": [
+        {
+          "id": 0,
+          "deviceName": "BNG30",
+          "toDeviceName": "CR1",
+          "fromDeviceName": null,
+          "exRoutePolicy": "testCase2_2",
+          "imRoutePolicy": null,
+          "ipPrefix": "179.0.0.116/30",
+          "nextHopIp": null,
+          "nextHopDevice": "BNG30",
+          "importType": null,
+          "originProtocol": null,
+          "preferredValue": 0,
+          "localPreference": 100,
+          "fromType": "FROMORIGIN",
+          "asPath": [],
+          "origin": "INCOMPLETE",
+          "peerIp": null,
+          "routerId": 0,
+          "med": 0,
+          "clusterList": [],
+          "originalPreference": null,
+          "curVpnName": [
+            "_public_"
+          ]
+        },
+        {
+          "id": 0,
+          "deviceName": "BNG30",
+          "toDeviceName": "CR2",
+          "fromDeviceName": null,
+          "exRoutePolicy": "testCase2_2",
+          "imRoutePolicy": null,
+          "ipPrefix": "179.0.0.116/30",
+          "nextHopIp": null,
+          "nextHopDevice": "BNG30",
+          "importType": null,
+          "originProtocol": null,
+          "preferredValue": 0,
+          "localPreference": 100,
+          "fromType": "FROMORIGIN",
+          "asPath": [],
+          "origin": "INCOMPLETE",
+          "peerIp": null,
+          "routerId": 0,
+          "med": 0,
+          "clusterList": [],
+          "originalPreference": null,
+          "curVpnName": [
+            "_public_"
+          ]
+        }
+      ],
+      "violatedAcptNeighbors": [],
+      "prefer": [],
+      "violateIbgpPeer": [],
+      "violateEbgpPeer": [],
+      "originStaticRoute": null,
+      "originDirectRoute": null,
+      "violateRedis": null
+    }
+  }
+}

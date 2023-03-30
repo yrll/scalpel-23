@@ -18,8 +18,9 @@ import org.sng.datamodel.Ip;
 import org.sng.datamodel.Prefix;
 import org.sng.main.common.BgpPeer;
 import org.sng.main.common.BgpTopology;
+import org.sng.main.common.Layer2Topology;
 import org.sng.main.forwardingtree.BgpForwardingTree.TreeType;
-import org.sng.util.KeyWord;
+import org.sng.main.util.KeyWord;
 
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -43,11 +44,18 @@ public class Generator {
 
     private BgpTopology _bgpTopology;
 
+    private Layer2Topology _layer2Topology;
+
+
 
     public Generator(String nodeName, String prefix, BgpTopology bgpTopology) {
         _dstDevName = nodeName;
         _dstPrefix = Prefix.parse(prefix);
         _bgpTopology = bgpTopology;
+    }
+
+    public void setLayer2Topology(Layer2Topology layer2Topology) {
+        _layer2Topology = layer2Topology;
     }
 
     public BgpForwardingTree getBgpTree() {

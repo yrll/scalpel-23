@@ -21,7 +21,7 @@ import javax.lang.model.element.Element;
 import org.apache.commons.io.FileUtils;
 import org.sng.datamodel.Ip;
 import org.sng.main.forwardingtree.Node;
-import org.sng.util.KeyWord;
+import org.sng.main.util.KeyWord;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableMap;

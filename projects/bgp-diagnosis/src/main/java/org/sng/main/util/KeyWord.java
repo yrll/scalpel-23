@@ -1,4 +1,4 @@
-package org.sng.util;
+package org.sng.main.util;
   
 public class KeyWord {
     public static String LOGGER_NAME = "bgpDiagnosis";
@@ -29,6 +29,7 @@ public class KeyWord {
     public static String PROV_INFO_FILE_NAME = "provenanceInfo.json";
     public static String RELATED_STATIC_INFO_FILE = "relatedStaticAndDirectInfo.json";
     public static String OTHER_IMPORT_BGP_INFO_FILE_NAME = "otherProtocolImportInBgpInfo.json";
+    public static String INTERFACE_INFO_FILE_PATH = "vpnBindingInfo.json";
 
     public static String ERROR = "error";
     public static String CORRECT = "correct";
@@ -39,4 +40,8 @@ public class KeyWord {
     public static String PEER_IP = "peerIp";
     public static String PRINT_LINE = "******************************************";
     public static String PRINT_LINE_HALF = "********************";
+
+    public static String IP_STATIC = "ip route-static";
+    public static String PREFERENCE = "preference";
+    public static String ALL_VPN_BINDING_INFO = "allVpnBindingInfo";
 }

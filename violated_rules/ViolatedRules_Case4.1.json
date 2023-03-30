@@ -1,0 +1,22 @@
+{
+  "dev2ViolateRules": {
+    "BNG30": {
+      "ipPrefix": "179.0.0.116/30",
+      "violatedRrClient": [],
+      "violatedPropNeighbors": [],
+      "violatedAcptNeighbors": [],
+      "prefer": [],
+      "violateIbgpPeer": [],
+      "violateEbgpPeer": [],
+      "originStaticRoute": {
+        "deviceName": "BNG30",
+        "vpnName": "_public_",
+        "addressIp": "179.0.0.116/30",
+        "nextHop": "39.1.1.1/32",
+        "outInf": null
+      },
+      "originDirectRoute": null,
+      "violateRedis": "invalid,testCase4_1"
+    }
+  }
+}
