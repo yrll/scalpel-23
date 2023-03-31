@@ -5,11 +5,7 @@ import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraph;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.sng.datamodel.Ip;
-import org.sng.datamodel.Layer1Node;
-import org.sng.datamodel.Layer1Topology;
-import org.sng.datamodel.Prefix;
-import org.sng.datamodel.ibgp.IBgpNode;
+import org.sng.datamodel.*;
 import org.sng.datamodel.isis.IsisEdge;
 import org.sng.datamodel.isis.IsisEdgeValue;
 import org.sng.datamodel.isis.IsisNode;
@@ -20,62 +16,106 @@ import java.util.stream.Collectors;
 public class IgpDiagnosis {
 
     private final MutableValueGraph<IsisNode,IsisEdgeValue> _newCommonGraph;
+    private final Map<Prefix, Set<String>> _directRouteDevicesMap;
 
-    // ISIS forwarding graph for each prefix
+    /** 针对每个前缀的ISIS图 **/
     private final Map<Prefix,MutableValueGraph<IsisNode, IsisEdgeValue>> _prefixFwdGraphMap;
 
     private final Set<Pair<String,String>> _edgesNotPeering;
-    private final Map<Pair<String,String>,Boolean> _hasProcessWithSameIdMap;
 
-    public IgpDiagnosis(Layer1Topology layer1Topology, ValueGraph<IsisNode,IsisEdgeValue> commonFwdGraph, Map<Prefix, List<IsisEdge>> prefixEdgesMap) {
-        // get physical edge that have not established ISIS neighbor (help finding repair plan)
+    public IgpDiagnosis(Layer1Topology layer1Topology, ValueGraph<IsisNode,IsisEdgeValue> commonFwdGraph,
+                        Map<Prefix, List<IsisEdge>> prefixEdgesMap, Map<Prefix, Set<String>> directRouteDevicesMap) {
+
+        // 发布直连路由的设备
+        _directRouteDevicesMap = directRouteDevicesMap;
+
+        // 获取还没有建立ISIS peer的边（减少搜索空间）
         _edgesNotPeering = getL1EdgesNotPeering(layer1Topology, commonFwdGraph);
-        _hasProcessWithSameIdMap = findProcessesWithSameId(_edgesNotPeering,commonFwdGraph);
 
-        // generate new common graph to make sure that can compute a repair plan
+        // 为没有ISIS进程的节点开启进程，保证能够找到连通方案
         _newCommonGraph = Graphs.copyOf(commonFwdGraph);
         enableIsisProcess(layer1Topology,_newCommonGraph);
 
-        // get forwarding graph for each prefix
+        // 针对前缀计算ISIS图
         _prefixFwdGraphMap = getPrefixFwdGraphMap(_newCommonGraph, prefixEdgesMap);
     }
 
 
-    public void igpDiagnosis(Map<IBgpNode,IBgpNode> peerMap, List<Prefix> origins){
-        //todo: diagnose duplicate subnets (error due to route priority)
-        // diagnose multiple prefixes? (such as /32 and /24)
+    public void igpDiagnosis(ErrorFlow errorFlow){
+        // todo: 多源发节点 + 目的IP多前缀
+        // 获取目的节点
+        String srcDevice = errorFlow.getSrcDevice();
+        Prefix dstPrefix = errorFlow.getPrefix();
+        String dstDevice =  getDstDevice(dstPrefix);
 
-        // diagnose reachability for each iBGP peer
-        for (Map.Entry<IBgpNode,IBgpNode> entry: peerMap.entrySet()){
-            IBgpNode srcIBgpNode = entry.getKey();
-            IBgpNode dstIBgpNode = entry.getValue();
-            Ip dstIp = dstIBgpNode.getIp();
-
-            // get prefix of dst iBGP ip
-            Prefix dstPrefix = getDstPrefix(dstIp,origins);
-
-            // if prefix not imported, creat direct prefix node and corresponding graph
-            if (!_prefixFwdGraphMap.containsKey(dstPrefix)){
-                MutableValueGraph<IsisNode,IsisEdgeValue> dstPrefixGraph = Graphs.copyOf(_newCommonGraph);
-                dstPrefixGraph.addNode(IsisNode.creatDirectNode(dstIBgpNode.getDevName()));
-                _prefixFwdGraphMap.put(dstPrefix,dstPrefixGraph);
-            }
-            MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph = _prefixFwdGraphMap.get(dstPrefix);
-
-            // compute connection between src processes and dst prefix
-            List<IsisNode> srcNodes = getSrcNodes(srcIBgpNode.getDevName(), prefixFwdGraph.nodes());
-            IsisNode dstNode = getDstNode(dstIBgpNode.getDevName(), prefixFwdGraph.nodes());
-            boolean canReach = isSrcToPrefixConnected(srcNodes,dstNode,prefixFwdGraph);
-
-            // find repair plans and diagnose errors
-            int depth = 0;
-            List<Set<IsisEdge>> repairPlans = new ArrayList<>();
-            if (!canReach){
-                repairPlans.addAll(findMinimalDisconnectionRepairs(srcNodes,dstNode,prefixFwdGraph));
-                depth = repairPlans.get(0).size();
-            }
-            System.out.println(dstPrefix+"\t"+canReach+"\t"+depth);
+        // 如果目的前缀没有被发布，加上对应的前缀节点
+        if (!_prefixFwdGraphMap.containsKey(dstPrefix)){
+            MutableValueGraph<IsisNode,IsisEdgeValue> dstPrefixGraph = Graphs.copyOf(_newCommonGraph);
+            dstPrefixGraph.addNode(IsisNode.creatDirectNode(dstDevice));
+            _prefixFwdGraphMap.put(dstPrefix,dstPrefixGraph);
         }
+        MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph = _prefixFwdGraphMap.get(dstPrefix);
+
+        // 获取源节点和目的前缀
+        List<IsisNode> srcNodes = getSrcNodes(srcDevice, prefixFwdGraph.nodes());
+        IsisNode dstNode = getDstNode(dstDevice, prefixFwdGraph.nodes());
+
+        // 判断源节点和目的前缀在ISIS graph上可达（路由可达）
+        boolean routeReachability = isSrcToPrefixConnected(srcNodes,dstNode,prefixFwdGraph);
+
+        // 如果路由可达，诊断转发错误
+        //todo: 基于common graph找最短路径
+
+        // 否则，诊断路由错误
+        List<Set<IsisEdge>> repairs = new ArrayList<>();
+        if (!routeReachability){
+            MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraphWithImportEdge = Graphs.copyOf(prefixFwdGraph);
+            boolean hasRoutePath = isSrcToPrefixConnected(srcNodes,dstNode,prefixFwdGraphWithImportEdge);
+            // 如果前缀没有路径到达源节点，构建路径
+            if(!hasRoutePath){
+                List<IsisEdge> candidateEdges = computeCandidateEdges(_edgesNotPeering,prefixFwdGraphWithImportEdge);
+                repairs.addAll(findMinimalRepairs(srcNodes,dstNode,prefixFwdGraph,candidateEdges));
+            }
+            // 否则，诊断路由导入错误
+            else {
+
+            }
+        }
+
+        // 输出
+        int i = 0;
+        for (Set<IsisEdge> repair : repairs){
+            i++;
+            System.out.println("repair"+i);
+            for (IsisEdge isisEdge: repair){
+                System.out.println(isisEdge.getSource().getDevName()+"-ISIS"+isisEdge.getSource().getIsisId()+"-->"
+                        +isisEdge.getTarget().getDevName()+"-ISIS"+isisEdge.getTarget().getIsisId());
+            }
+        }
+
+    }
+
+    private String getDstDevice(Prefix dstPrefix){
+        Set<String> dstDevices = _directRouteDevicesMap.get(dstPrefix);
+        String dstDevice = null;
+        if (dstDevices.size() == 0){
+            System.out.println("没有设备源发该前缀，选择目的设备");
+            Scanner scan = new Scanner(System.in);
+            dstDevice =  scan.next();
+
+        }
+        else if (dstDevices.size() > 1){
+            System.out.println("多个设备源发该前缀，在下列设备中选择目的设备");
+            for (String devcie: dstDevices){
+                System.out.println(devcie);
+            }
+            Scanner scan = new Scanner(System.in);
+            dstDevice =  scan.next();
+        }
+        else {
+            dstDevice = new ArrayList<>(dstDevices).get(0);
+        }
+        return dstDevice;
     }
 
     private boolean isSrcToPrefixConnected(List<IsisNode> srcNodes, IsisNode dstNode,
@@ -88,8 +128,9 @@ public class IgpDiagnosis {
 
         if (canReach){
             Set<IsisNode> reachableNodes = new HashSet<>();
+            // 从dst找src，因为图的边是路由传播方向
             for (IsisNode srcNode : srcNodes){
-                reachableNodes.addAll(Graphs.reachableNodes(prefixFwdGraph.asGraph(),srcNode));
+                reachableNodes.addAll(reverseReachableNodes(prefixFwdGraph,srcNode));
             }
             if (!reachableNodes.contains(dstNode)){
                 canReach = false;
@@ -98,98 +139,68 @@ public class IgpDiagnosis {
         return canReach;
     }
 
-    // find minimal repair to connect src and dst by BFS
-    private List<Set<IsisEdge>> findMinimalDisconnectionRepairs(List<IsisNode> srcNodes, IsisNode dstNode,
-                                                          MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph){
+    /** BFS构建连通路径 **/
+    private List<Set<IsisEdge>> findMinimalRepairs(List<IsisNode> srcNodes, IsisNode dstNode,
+                                                   MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph,
+                                                   List<IsisEdge> candidateEdges){
         int maxDepth = 10;
-        List<Set<IsisEdge>> repairPlans = new ArrayList<>();
+        List<Set<IsisEdge>> repairs = new ArrayList<>();
+
+        // 求初始状态的连通域
         Set<IsisNode> srcReachableNodes = new HashSet<>();
         for (IsisNode srcNode : srcNodes){
-            srcReachableNodes.addAll(Graphs.reachableNodes(prefixFwdGraph.asGraph(),srcNode));
+            srcReachableNodes.addAll(reverseReachableNodes(prefixFwdGraph,srcNode));
         }
-        Set<IsisNode> dstReachableNodes =  reachableNodesToDst(prefixFwdGraph,dstNode);
 
+        // 从源节点开始查找
         Queue<Pair<Set<IsisNode>,Set<IsisEdge>>> taskQueue = new LinkedList<>();
         Set<IsisEdge> edges= new HashSet<>();
         taskQueue.add(new ImmutablePair<>(srcReachableNodes,edges));
 
-        // BFS main loop
+        // BFS主循环，每次循环选择一个边连接
+        // todo: DFS，启发式选择修复方案
         for (int depth = 0; depth < maxDepth && !taskQueue.isEmpty() ; depth++){
             Queue<Pair<Set<IsisNode>,Set<IsisEdge>>> currentTaskQueue = new LinkedList<>(taskQueue);
             taskQueue.clear();
             while (!currentTaskQueue.isEmpty()){
-                // has found minimal repair plans, break
-                if (repairPlans.size() !=0){
+                // 已经找到修复方案，不再搜索
+                if (repairs.size() !=0){
                     break;
                 }
 
                 Pair<Set<IsisNode>,Set<IsisEdge>> task = currentTaskQueue.poll();
                 Set<IsisNode> srcComponent = task.getLeft();
                 Set<IsisEdge> currentEdges = task.getRight();
-                // find edge to connect src and dst
-                List<IsisEdge> repairEdgesOfSrcAndDst = findRepairEdgeBetweenComponents(srcComponent,dstReachableNodes,prefixFwdGraph);
 
-                // if found, record all possible repair plans
-                if (!repairEdgesOfSrcAndDst.isEmpty()){
-                    for (IsisEdge repairEdgeOfSrcAndDst : repairEdgesOfSrcAndDst){
-                        Set<IsisEdge> repairPlan = new HashSet<>(currentEdges);
-                        repairPlan.add(repairEdgeOfSrcAndDst);
-                        repairPlans.add(repairPlan);
-                    }
-                }
-                // else, connect src component with a left node, then find the repair plan in next iteration
-                else {
-                    // connect with a left node and branch
-                    Set<IsisNode> leftNodes = getLeftNodes(prefixFwdGraph,srcReachableNodes,dstReachableNodes);
-                    List<IsisEdge> repairEdgesOfSrcAndLeft = findRepairEdgeBetweenComponents(srcComponent,leftNodes, prefixFwdGraph);
-                    for (IsisEdge repairEdgeOfSrcAndLeft: repairEdgesOfSrcAndLeft){
-                        Set<IsisNode> leftNodeComponent = Graphs.reachableNodes(prefixFwdGraph.asGraph(),
-                                repairEdgeOfSrcAndLeft.getTarget());
-                        Set<IsisNode> newSrcComponent = new HashSet<>(leftNodeComponent);
+                // 遍历每条候选边
+                for(IsisEdge candidateEdge: candidateEdges){
+                    IsisNode candidateEdgeTail = candidateEdge.getTarget();
+                    IsisNode candidateEdgeHead = candidateEdge.getSource();
+                    // 如果候选边的尾部节点在src的连通域中，加上该边，判断是否能够连通。这里考虑尾部节点是因为图中的方向是路由传播方向
+                    if (srcComponent.contains(candidateEdgeTail)){
+                        Set<IsisNode> headComponent = reverseReachableNodes(prefixFwdGraph,candidateEdgeHead);
+                        Set<IsisNode> newSrcComponent = new HashSet<>(srcComponent);
+                        newSrcComponent.addAll(headComponent);
                         Set<IsisEdge> newEdges = new HashSet<>(currentEdges);
-                        newEdges.add(repairEdgeOfSrcAndLeft);
-                        taskQueue.add(new ImmutablePair<>(newSrcComponent,newEdges));
-                    }
-                }
-            }
-        }
-        return repairPlans;
-    }
-
-
-    // find edge that connects two components (route import or establish ISIS neighbor)
-    private List<IsisEdge> findRepairEdgeBetweenComponents(Set<IsisNode> srcReachableNodes, Set<IsisNode> dstReachableNodes,
-                                                           MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph){
-        List<IsisEdge> repairEdges = new ArrayList<>();
-        for (IsisNode srcReachableNode: srcReachableNodes){
-            for (IsisNode dstReachableNode: dstReachableNodes){
-                // route import between ISIS processes
-                if (srcReachableNode.getDevName().equals(dstReachableNode.getDevName())){
-                    repairEdges.add(new IsisEdge(srcReachableNode,dstReachableNode,null));
-                }
-                // establish ISIS neighbor between devices
-                else {
-                    Pair<String,String> deviceEdge = new ImmutablePair<>(srcReachableNode.getDevName(),dstReachableNode.getDevName());
-                    if (!_edgesNotPeering.contains(deviceEdge)){
-                        continue;
-                    }
-                    // heuristic: if two devices have processes with same ID, only connect them.
-                    if (_hasProcessWithSameIdMap.get(deviceEdge)){
-                        if (srcReachableNode.getIsisId() == dstReachableNode.getIsisId()){
-                            repairEdges.add(new IsisEdge(srcReachableNode,dstReachableNode,null));
+                        newEdges.add(candidateEdge);
+                        // 加上边之后，源节点和目的前缀连通，即找到了连通方案
+                        if (newSrcComponent.contains(dstNode)){
+                            repairs.add(newEdges);
                         }
-                    }
-                    // Otherwise, connect two processes directly
-                    else {
-                        repairEdges.add(new IsisEdge(srcReachableNode,dstReachableNode,null));
+                        // 否则，在下次迭代过程中查找
+                        else {
+                            taskQueue.add(new ImmutablePair<>(newSrcComponent,newEdges));
+                        }
+
                     }
                 }
             }
         }
-        return repairEdges;
+
+        return repairs;
     }
 
-    // complete forwarding graph for each prefix.
+    /** 在ISIS邻居图的基础上，对每个prefix加上对应的路由导入边 **/
     private Map<Prefix,MutableValueGraph<IsisNode, IsisEdgeValue>> getPrefixFwdGraphMap(ValueGraph<IsisNode, IsisEdgeValue> isisFwdGraph,
                                                                       Map<Prefix, List<IsisEdge>> prefixEdgesMap){
         Map<Prefix,MutableValueGraph<IsisNode, IsisEdgeValue>> prefixFwdGraphMap = new HashMap<>();
@@ -203,13 +214,10 @@ public class IgpDiagnosis {
         return prefixFwdGraphMap;
     }
 
-
-
-    // get physical edges that have not established ISIS neighbor (todo: necessary?)
+    /** 获取没有建立ISIS peer的物理连接 **/
     private Set<Pair<String,String>> getL1EdgesNotPeering(Layer1Topology layer1Topology,
                                                                  ValueGraph<IsisNode, IsisEdgeValue> isisFwdGraph){
-
-        // get device pairs of l1Topology and isis forwarding graph respectively
+        // 获取物理拓扑和ISIS图的边
         Set<Pair<String,String>> l1DevicePairs = layer1Topology.getGraph().edges().stream()
                 .map(layer1Edge ->
                         new ImmutablePair<>(layer1Edge.getNode1().getHostname(),layer1Edge.getNode2().getHostname()))
@@ -219,15 +227,15 @@ public class IgpDiagnosis {
                         new ImmutablePair<>(isisNodeEndpointPair.source().getDevName(),isisNodeEndpointPair.target().getDevName()))
                 .collect(Collectors.toSet());
 
-        // find the edges that do not establish ISIS neighbor
+        // 做差集
         Set<Pair<String, String>> edgesNotPeering = new HashSet<>(l1DevicePairs);
         edgesNotPeering.removeAll(isisDevicePairs);
 
         return edgesNotPeering;
     }
 
-    // enable ISIS process for nodes that are not enabled, to make sure that can find a repair plan
-    // such as S-B-D, and B does not have any ISIS process
+
+    /** 为没有ISIS进程的节点开启进程，保证能够找到连通路径。例如S-B-D，但B没有开启ISIS进程 **/
     private void enableIsisProcess(Layer1Topology layer1Topology,
                                    MutableValueGraph<IsisNode, IsisEdgeValue> newCommonGraph){
         Set<String> enabledDevice = newCommonGraph.nodes().stream().map(IsisNode::getDevName).collect(Collectors.toSet());
@@ -235,60 +243,76 @@ public class IgpDiagnosis {
 
         allDevice.removeAll(enabledDevice);
         for (String device: allDevice){
-            // todo: only add one process now, maybe add multiple processes
+            // todo: 现在只考虑添加一个进程
             newCommonGraph.addNode(IsisNode.creatNewIsisNode(device));
         }
     }
 
-    //todo: cache
-    private Map<Pair<String, String>, Boolean> findProcessesWithSameId(Set<Pair<String,String>> _edgesNotPeering,
-                                                                       ValueGraph<IsisNode,IsisEdgeValue> commonFwdGraph){
-        Map<Pair<String, String>, Boolean> hasProcessWithSameIdMap = new HashMap<>();
-        Set<IsisNode> isisNodes = commonFwdGraph.nodes();
-        for (Pair<String,String> edgeNotPeering: _edgesNotPeering){
-            String device1 = edgeNotPeering.getLeft();
-            String device2 = edgeNotPeering.getRight();
-            Set<Integer> device1IsisIds = new HashSet<>();
-            Set<Integer> device2IsisIds = new HashSet<>();
+    /** 基于物理拓扑和进程，计算候选边集合，用于构建路由传播路径 **/
+    private List<IsisEdge> computeCandidateEdges(Set<Pair<String,String>> edgesNotPeering,
+                                                MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraphWithImportEdge){
+        List<IsisEdge> candidateEdges = new ArrayList<>();
 
-            for (IsisNode isisNode: isisNodes){
-                if (isisNode.getDevName().equals(device1)){
-                    device1IsisIds.add(isisNode.getIsisId());
-                }
-                if (isisNode.getDevName().equals(device2)){
-                    device2IsisIds.add(isisNode.getIsisId());
-                }
+        // 先获取每个节点的进程
+        Map<String,List<IsisNode>> deviceProcessesMap = new HashMap<>();
+        for (IsisNode isisNode: prefixFwdGraphWithImportEdge.nodes()){
+            String deviceName = isisNode.getDevName();
+            if (deviceProcessesMap.containsKey(deviceName)){
+                deviceProcessesMap.get(deviceName).add(isisNode);
             }
-            boolean hasProcessWithSameId = !Collections.disjoint(device1IsisIds,device2IsisIds);
-            hasProcessWithSameIdMap.put(edgeNotPeering,hasProcessWithSameId);
-        }
-        return  hasProcessWithSameIdMap;
-    }
-
-    // get origin prefixes for dst ip
-    private Prefix getDstPrefix(Ip dstIp, List<Prefix> origins){
-
-        List<Prefix> dstPrefixList = new ArrayList<>();
-        Prefix dstPrefix = null;
-
-        for (Prefix origin : origins){
-            if (origin.containsIp(dstIp)){
-                dstPrefixList.add(origin);
-                if (origin.getPrefixLength() == 32){
-                    dstPrefix = origin;
-                }
+            else {
+                List<IsisNode> processes = new ArrayList<>();
+                processes.add(isisNode);
+                deviceProcessesMap.put(deviceName,processes);
             }
         }
 
-        if (dstPrefixList.size() == 0 || dstPrefix == null){
-            System.out.println("dst ip\t"+dstIp+"\thas not origin prefix\t");
+        // 为没有建立ISIS邻居的边建立边
+        for (Pair<String,String> edgeNotPeering :  edgesNotPeering){
+            List<IsisEdge> peerEdges  = new ArrayList<>();
+            List<IsisNode> srcProcesses = deviceProcessesMap.get(edgeNotPeering.getLeft());
+            List<IsisNode> dstProcesses = deviceProcessesMap.get(edgeNotPeering.getRight());
+
+            boolean hasSameId = false;
+            for (IsisNode srcProcess: srcProcesses){
+                for (IsisNode dstProcess: dstProcesses){
+                    if (!hasSameId && srcProcess.getIsisId() == dstProcess.getIsisId()){
+                        hasSameId = true;
+                    }
+                    peerEdges.add(new IsisEdge(srcProcess,dstProcess,null));
+                    peerEdges.add(new IsisEdge(dstProcess,srcProcess,null));
+                }
+            }
+            // 启发算法： 如果两个节点有相同ID的进程，只连接相同ID的
+            if(hasSameId){
+                for (int i = peerEdges.size()-1; i>=0 ;i--){
+                    IsisEdge peerEdge = peerEdges.get(i);
+                    if(peerEdge.getSource().getIsisId() != peerEdge.getTarget().getIsisId()){
+                        peerEdges.remove(i);
+                    }
+                }
+            }
+            candidateEdges.addAll(peerEdges);
         }
 
-        if (dstPrefixList.size() > 1){
-            System.out.println("dst ip has multiple prefixes\t"+dstPrefixList);
+        //为每个节点的不同进程建立边
+        List<IsisEdge> importEdges = new ArrayList<>();
+        for(Map.Entry<String,List<IsisNode>> deviceProcesses: deviceProcessesMap.entrySet()){
+            List<IsisNode> processes =  deviceProcesses.getValue();
+            for(int i = 0; i< processes.size() ; i++){
+                for (int j = i + 1; j<processes.size(); j++){
+                    if(!prefixFwdGraphWithImportEdge.hasEdgeConnecting(processes.get(i),processes.get(j))){
+                        importEdges.add(new IsisEdge(processes.get(i),processes.get(j),null));
+                    }
+                    if(!prefixFwdGraphWithImportEdge.hasEdgeConnecting(processes.get(j),processes.get(i))){
+                        importEdges.add(new IsisEdge(processes.get(j),processes.get(i),null));
+                    }
+                }
+            }
         }
+        candidateEdges.addAll(importEdges);
 
-        return dstPrefix;
+        return candidateEdges;
     }
 
     private IsisNode getDstNode(String devName, Set<IsisNode> nodes){
@@ -312,8 +336,8 @@ public class IgpDiagnosis {
         return srcNodes;
     }
 
-    // reverse reachability (BFS)
-    private Set<IsisNode> reachableNodesToDst(MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph, IsisNode dstNode){
+    /** 反向可达节点搜索 (BFS) **/
+     private Set<IsisNode> reverseReachableNodes(MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph, IsisNode dstNode){
         Set<IsisNode> reachableNodes  = new HashSet<>();
         reachableNodes.add(dstNode);
         Queue<IsisNode> queue = new LinkedList<>();
@@ -331,14 +355,30 @@ public class IgpDiagnosis {
         return reachableNodes;
     }
 
-    // get nodes which are not connected to dst and src, sorted by the number of nodes it can reach
-    private Set<IsisNode> getLeftNodes(MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph,
-                                              Set<IsisNode> srcReachableNodes, Set<IsisNode> dstReachableNodes){
+    /** 根据IP获取源前缀 **/
+    private Prefix getDstPrefix(Ip dstIp, List<Prefix> origins){
 
-        Set<IsisNode> leftNodes = new HashSet<>(prefixFwdGraph.nodes());
-        leftNodes.removeAll(srcReachableNodes);
-        leftNodes.removeAll(dstReachableNodes);
-        return leftNodes;
+        List<Prefix> dstPrefixList = new ArrayList<>();
+        Prefix dstPrefix = null;
+
+        for (Prefix origin : origins){
+            if (origin.containsIp(dstIp)){
+                dstPrefixList.add(origin);
+                if (origin.getPrefixLength() == 32){
+                    dstPrefix = origin;
+                }
+            }
+        }
+
+        if (dstPrefixList.size() == 0 || dstPrefix == null){
+            System.out.println("dst ip\t"+dstIp+"\thas not origin prefix\t");
+        }
+
+        if (dstPrefixList.size() > 1){
+            System.out.println("dst ip has multiple prefixes\t"+dstPrefixList);
+        }
+
+        return dstPrefix;
     }
 
 }
