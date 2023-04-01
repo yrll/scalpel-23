@@ -1,0 +1,1 @@
+input device and route-policy name and return the corresponding config lines and line nums.
