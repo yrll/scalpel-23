@@ -1,0 +1,4 @@
+162 163 164 
+route-policy from-csg-as-master permit node 10
+apply cost 100
+apply preferred-value 10

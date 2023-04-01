@@ -1,0 +1,10 @@
+169 170 171 172 174 175 176 179 182 
+route-policy to-csg-as-master permit node 10
+if-match ip-prefix default
+apply ip-address next-hop peer-address
+apply cost 100
+route-policy to-csg-as-master permit node 20
+if-match extcommunity-filter x2
+apply cost 100
+ip ip-prefix default index 10 permit 0.0.0.0 0
+ip extcommunity-filter basic x2 index 10 permit rt 1:1
