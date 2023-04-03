@@ -233,7 +233,20 @@ public class BgpTopology {
         } else {
             return null;
         }
-        
+    }
+
+    // 可以是invalid的
+    public BgpPeer getBgpPeer(String localDev, String peerDev) {
+        if (isValidPeer(localDev, peerDev)) {
+            return getValidPeer(localDev, peerDev);
+        } else {
+            for (BgpPeer bgpPeer : _inconsistentPeers.keySet()) {
+                if (bgpPeer.isLocalDev(localDev)) {
+                    return bgpPeer;
+                }
+            }
+        }
+        return null;
     }
 
     public boolean isConfiguredPeer(String n1, String n2) {
@@ -291,6 +304,7 @@ public class BgpTopology {
         return _configuredPeerMap.get(node1).contains(node2);
     }
 
+    // 判断两个节点在BGP topology上是否可达（可以invalid）
     public boolean ifConnected(String node1, String node2) {
         // generates the connection component using BFS
         Map <String, Boolean> visitedMap = new HashMap<>();

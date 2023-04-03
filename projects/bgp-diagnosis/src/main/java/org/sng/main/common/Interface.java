@@ -38,4 +38,8 @@ public class Interface {
         return (infIpv4HostIpString!=null && infIpv4IpString!=null);
     }
 
+    public String getDevName() {
+        return deviceName;
+    }
+
 }

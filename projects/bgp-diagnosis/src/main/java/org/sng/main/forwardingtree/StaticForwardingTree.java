@@ -7,7 +7,8 @@ import java.util.Map;
 
 import org.sng.datamodel.Prefix;
 import org.sng.main.BgpDiagnosis;
-import org.sng.main.common.StaticRoute;
+import org.sng.main.common.Layer2Topology;
+import org.sng.main.common.LocalRoute;
 import org.sng.main.util.ConfigTaint;
 import org.sng.main.util.KeyWord;
 
@@ -17,24 +18,28 @@ import com.google.gson.JsonObject;
 
 public class StaticForwardingTree {
 
-    private Map<String, String> _nextHopIfaceForwardingMap;
+    private Map<String, String> _nextHopForwardingMap;
 
     private Prefix _dstPrefix;
     private String _dstDevName;
 
-    private Map<String, List<StaticRoute>> _routeMap;
+    private Map<String, List<LocalRoute>> _routeMap;
 
     public StaticForwardingTree(String dstDev, Prefix prefix) {
         _dstDevName = dstDev;
         _dstPrefix = prefix;
-        _nextHopIfaceForwardingMap = new HashMap<>();
+        _nextHopForwardingMap = new HashMap<>();
         _routeMap = new HashMap<>();
     }
+
+    public String getNextHop(String node) {
+        return _nextHopForwardingMap.get(node);
+    }
     
-    public StaticForwardingTree serializeStaticTreeFromProvJson(JsonObject jsonObject, String ip) {
+    public StaticForwardingTree serializeStaticTreeFromProvJson(JsonObject jsonObject, String ip, Layer2Topology layer2Topology) {
         // input "updateInfo" as jsonObject
         // Map<String, Node> nextHopMap = new HashMap<>();
-        Map<String, String> cfgPathMap = BgpDiagnosis.genCfgPathEachNode();
+        Map<String, String> cfgPathMap = BgpDiagnosis.cfgPathMap;
         for (String node : jsonObject.asMap().keySet()) {
             JsonObject allRoutes = jsonObject.asMap().get(node).getAsJsonObject();
             for (String vpnName : allRoutes.asMap().keySet()) {
@@ -47,15 +52,26 @@ public class StaticForwardingTree {
                         // String nextHopIface = route_raw.getAsJsonObject().get(KeyWord.OUT_INFO).getAsJsonObject().get(KeyWord.IFACE_NAME).getAsString();
                         // String nextHopIp = route_raw.getAsJsonObject().get(KeyWord.OUT_INFO).getAsJsonObject().get(KeyWord.IFACE_IP).getAsString();
                         if (!_routeMap.containsKey(node)) {
-                            _routeMap.put(node, new ArrayList<StaticRoute>());
+                            _routeMap.put(node, new ArrayList<LocalRoute>());
                         }
-                        StaticRoute route = new Gson().fromJson(route_raw.toString(), StaticRoute.class);
+                        LocalRoute route = new Gson().fromJson(route_raw.toString(), LocalRoute.class);
+                        route.checkPrefix();
                         // 加上pref值
-                        ConfigTaint.staticRouteFinder(cfgPathMap.get(node), route);
+                        route = ConfigTaint.staticRouteFinder(cfgPathMap.get(node), route);
                         _routeMap.get(node).add(route);
-                        assert !_nextHopIfaceForwardingMap.containsKey(node);
-                        // need rewriting, parse iface and iface_ip
-                        _nextHopIfaceForwardingMap.put(node, route.getOutInfName());
+                        assert !_nextHopForwardingMap.containsKey(node);
+                        // 根据layer2 topo，把端口对应的邻接点名称加入map，如果没有对端设备，nextHop还是用接口名称
+                        if (layer2Topology!=null) {
+                            String nextNode = layer2Topology.getPeerDevNameFromInface(node, route.getInterface());
+                            if (nextNode!=null) {
+                                _nextHopForwardingMap.put(node, nextNode);
+                            } else {
+                                _nextHopForwardingMap.put(node, route.getOutInfName());
+                            }
+                        } else {
+                            _nextHopForwardingMap.put(node, route.getOutInfName());
+                        }
+                        
                     }
                 } 
             }

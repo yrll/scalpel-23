@@ -44,4 +44,7 @@ public class KeyWord {
     public static String IP_STATIC = "ip route-static";
     public static String PREFERENCE = "preference";
     public static String ALL_VPN_BINDING_INFO = "allVpnBindingInfo";
+
+    public static String DEV2_VIOLATE_RULES = "dev2ViolateRules";
+    public static int MISSING_LINE = -1;
 }
