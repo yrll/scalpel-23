@@ -23,6 +23,7 @@ import java.util.Set;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.sng.datamodel.Ip;
 import org.sng.datamodel.Prefix;
+import org.sng.main.common.BgpRoute;
 import org.sng.main.common.BgpTopology;
 import org.sng.main.common.BgpPeer.BgpPeerType;
 import org.sng.main.conditions.BgpCondition;
@@ -55,11 +56,6 @@ public class BgpForwardingTree {
 
 
     private boolean _ifMpls;
-
-    private enum Direction{
-        IN,
-        OUT
-    }
 
     public enum TreeType {
         BGP,

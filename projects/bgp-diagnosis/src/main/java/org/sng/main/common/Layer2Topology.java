@@ -18,19 +18,20 @@ import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 public class Layer2Topology {
+    // 
     private Map<String, List<Layer2Edge>> _edgeMap;
     private Set<Layer2Edge> _edges;
+    // 有些node没有对应edge，比如loopback0，所以单独创建一个node的集合维护所有信息
+    private Set<Layer2Node> _nodes;
 
-    public Layer2Topology(Set<Layer2Edge> edges) {
-        _edges = edges;
-    }
-
-    public Layer2Topology(Set<Layer2Edge> edges, Map<String, List<Layer2Edge>> edgeMap) {
+    public Layer2Topology(Set<Layer2Edge> edges, Map<String, List<Layer2Edge>> edgeMap, Set<Layer2Node> nodes) {
         _edges = edges;
         _edgeMap = edgeMap;
+        _nodes = nodes;
     }
 
     public static Layer2Topology creat(Set<Layer2Node> nodes) {
+        // 首先把node里用String表示的ip地址都转成相应对象实例
         nodes.forEach(n->n.checkInfPrefix());
         Set<Layer2Edge> edges = new HashSet<>();
         Map<String, List<Layer2Edge>> edgeMap = new HashMap<>();
@@ -53,13 +54,14 @@ public class Layer2Topology {
                         edgeMap.put(node.getDevName(), new ArrayList<Layer2Edge>());
                     }
                     edges.add(curEdge);
+                    // edgeMap双向添加
                     edgeMap.get(node.getDevName()).add(curEdge);
                     edgeMap.get(nodeRemain.getDevName()).add(curEdge);
                     iter.remove();
                 }
             }  
         }
-        return new Layer2Topology(edges, edgeMap);
+        return new Layer2Topology(edges, edgeMap, nodes);
     }
 
     public static Layer2Topology fromJson(String filePath) {
@@ -77,5 +79,44 @@ public class Layer2Topology {
             }
         }
         return creat(layer2Nodes);
+    }
+
+    public String getPeerDevNameFromInface(String node, Interface iface) {
+        if (!_edgeMap.containsKey(node)) {
+            return null;
+        }
+        for (Layer2Edge layer2Edge : _edgeMap.get(node)) {
+            // 该edge任一边节点和iface的节点相同就找到了
+            String ip1 = layer2Edge.getInfPrefix().toString();
+            String ip2 = iface.getPrefix().toString();
+            if (layer2Edge.getInfPrefix().equals(iface.getPrefix())) {
+                if (layer2Edge.getNode1Name().equals(node)) {
+                    return layer2Edge.getNode2Name();
+                } else {
+                    return layer2Edge.getNode1Name();
+                }
+            } 
+        }
+        return null;
+    }
+
+    public boolean ifTwoNodesHaveCommonInf(String node1, String node2) {
+        if (!_edgeMap.containsKey(node2)) {
+            // map是双向的，只要有一边不是key就一定找不到common interface
+            return false;
+        }
+        // 选择长度更小的list遍历
+        String targetNode;
+        if (_edgeMap.get(node1).size()<_edgeMap.get(node2).size()) {
+            targetNode = node1;
+        } else {
+            targetNode = node2;
+        }
+        for (Layer2Edge layer2Edge : _edgeMap.get(targetNode)) {
+            if (layer2Edge.getAnotherDevName(targetNode) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 }

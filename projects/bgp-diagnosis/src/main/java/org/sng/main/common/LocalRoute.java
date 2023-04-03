@@ -1,9 +1,12 @@
 package org.sng.main.common;
 
 import com.google.gson.annotations.SerializedName;
+
+import org.sng.datamodel.Ip;
 import org.sng.datamodel.Prefix;
 
-public class StaticRoute {
+// 静态/直连 路由
+public class LocalRoute {
     private transient Prefix ipPrefix;
 
     private String deviceName;
@@ -17,15 +20,34 @@ public class StaticRoute {
     @SerializedName("outInf")
     private Interface outInf;
 
+    private String nextHop;
+
     private int preference;
 
     private int lineNumber;
+
+    public void checkPrefix() {
+        ipPrefix = Prefix.parse(ipString);
+        outInf.checkIp();
+    }
+
+    public boolean ifDirectRoute() {
+        if (nextHop!=null && !nextHop.equals("")) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public Ip getNextHop() {
+        return Prefix.parse(nextHop).getEndIp();
+    }
 
     public String getOutInfName() {
         return outInf.getInfName();
     }
 
-    public StaticRoute(String deviceName, String ipString, String vpnName, Interface outInf) {
+    public LocalRoute(String deviceName, String ipString, String vpnName, Interface outInf) {
         this.deviceName = deviceName;
         this.ipString = ipString;
         this.ipPrefix = Prefix.parse(ipString);
@@ -41,8 +63,15 @@ public class StaticRoute {
     }
 
     public Prefix getPrefix() {
+        if (ipPrefix!=null) {
+            return ipPrefix;
+        }
         ipPrefix = Prefix.parse(ipString);
         return ipPrefix;
+    }
+
+    public String getPrefixString() {
+        return ipString;
     }
 
     public void setPreference(int pref) {
@@ -51,5 +80,9 @@ public class StaticRoute {
 
     public void setLineNum(int num) {
         this.lineNumber = num;
+    }
+
+    public Interface getInterface() {
+        return outInf;
     }
 }

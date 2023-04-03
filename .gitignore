@@ -2,6 +2,7 @@
 target/
 
 .idea/
+.VSCodeCounter/
 *.iml
 pom.xml.tag
 pom.xml.releaseBackup

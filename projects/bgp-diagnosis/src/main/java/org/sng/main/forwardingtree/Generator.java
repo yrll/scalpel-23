@@ -20,6 +20,7 @@ import org.sng.main.common.BgpPeer;
 import org.sng.main.common.BgpTopology;
 import org.sng.main.common.Layer2Topology;
 import org.sng.main.forwardingtree.BgpForwardingTree.TreeType;
+import org.sng.main.localization.RouteForbiddenLocalizer;
 import org.sng.main.util.KeyWord;
 
 import com.google.common.collect.Sets;
@@ -29,7 +30,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import org.apache.commons.io.FileUtils;
-
+/*
+ * maintain the all overlay info (BGP and Static) of the network
+ */
 public class Generator {
 
     private static String UPT_TABLE = "updateTable";
@@ -39,6 +42,7 @@ public class Generator {
     private String _dstDevName;
     private Prefix _dstPrefix;
 
+    // 
     private BgpForwardingTree _oldBgpTree;
     private StaticForwardingTree _oldStaticTree;
 
@@ -54,12 +58,22 @@ public class Generator {
         _bgpTopology = bgpTopology;
     }
 
+    public BgpTopology getBgpTopology() {
+        return _bgpTopology;
+    }
+
     public void setLayer2Topology(Layer2Topology layer2Topology) {
         _layer2Topology = layer2Topology;
     }
 
     public BgpForwardingTree getBgpTree() {
         return _oldBgpTree;
+    }
+
+
+    public int hopNumberToReachIpUsingStatic(String node, Ip ip) {
+        // TODO: implement
+        return 2;
     }
 
     public void genBgpRoutePropTree(String filePath) {
@@ -69,6 +83,7 @@ public class Generator {
 
     public void serializeTreeFromJson(String filePath, TreeType type) {
         File file = new File(filePath);
+        System.out.println(filePath);
         String jsonStr;
         try {
             jsonStr = FileUtils.readFileToString(file,"UTF-8");
@@ -83,7 +98,7 @@ public class Generator {
                 case STATIC: {
                     JsonObject jsonObject = JsonParser.parseString(jsonStr).getAsJsonObject().get(STATIC_INFO).getAsJsonObject();
                     _oldStaticTree = new StaticForwardingTree(_dstDevName, _dstPrefix);
-                    _oldStaticTree.serializeStaticTreeFromProvJson(jsonObject, _dstPrefix.toString());
+                    _oldStaticTree.serializeStaticTreeFromProvJson(jsonObject, _dstPrefix.toString(), _layer2Topology);
                     break;
                 } 
             }
@@ -218,13 +233,27 @@ public class Generator {
         return newPath;
     }
 
+    /*
+     * 这一步只生成BGP Tree里的路由传播和优选的树（实际转发时，域内路径可能会有出入）
+     * 这里的出入源自于域内传播的BGP路由下一跳不一定永远是接收eBGP路由的入节点
+     * 【域内(AS内)可能会通过不止一个IGP域相连，所以反射时下一跳可能会多次改变】
+     * 1）跨IGP域的节点可能改下一跳再传 :o
+     * 2）跨IGP域的节点终止目标路由（明细路由）传播，发送默认路由至上游节点 :(
+     * ---------------------------------------------------------------------------
+     * 现有的错误的tree必须是连通的
+     * TODO: 现有的【根据prov信息生成的】tree不连通？会有这种情况出现么？不会吧
+     * TODO: 这里生成的BGP树是针对可达性要求的（最小生成树算法【如果有reference参考，可以考虑改进选下一个“最小边”的指标】）
+     * 如果有waypoint/bypass要求，需要先改动原有的错误的树（还没实现），但这里要分情况考虑：
+     * 1）如果是要经过/绕开AS内部(intra)某些节点：a) 非边界节点：需要IGP支持，b）边界节点：BGP策略
+     * 2）如果要经过/绕开某些AS(inter)：则此时路由传播和优选的路径就和转发的路径一致（AS-level）
+     * ---------------------------------------------------------------------------
+     * PS: 现在暂时都不考虑ACL这种数据面的策略
+    */ 
+
     public BgpForwardingTree genBgpTree(BgpForwardingTree refTree) {
         // error oldTree 所在的generator调用，oldBGPTree已经在generator里
         // 目标src节点是当前generator里的unreachable nodes
         // 在现有error oldBGPTree上继续生成minTree【针对路由传播的tree: BestRouteFrom】
-        
-        // 现有的错误的tree必须是连通的
-        // TODO: 现有的【根据prov信息生成的】tree不连通？会有这种情况出现么？不会吧
 
         Set<String> reachableNodes = new HashSet<>(_oldBgpTree.getReachableNodes());
         Set<String> unreachableNodes = new HashSet<>(_oldBgpTree.getUnreachableNodes());

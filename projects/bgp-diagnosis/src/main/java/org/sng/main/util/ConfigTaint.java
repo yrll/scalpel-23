@@ -3,15 +3,19 @@ package org.sng.main.util;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.sng.datamodel.Prefix;
 import org.sng.datamodel.Ip;
-import org.sng.main.common.StaticRoute;
+import org.sng.main.BgpDiagnosis;
+import org.sng.main.common.LocalRoute;
 
 public class ConfigTaint {
 
-    public static StaticRoute staticRouteFinder(String filePath, StaticRoute route) {
+    public static LocalRoute staticRouteFinder(String filePath, LocalRoute route) {
         // filePath是cfg文件地址，keyWords是静态路由相关的
+        // 直接在入参的route上了
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(filePath));
@@ -55,4 +59,40 @@ public class ConfigTaint {
         return route;
     }
     
+    public static Map<Integer, String> policyFinder(String node, String policyName) {
+        return new HashMap<Integer, String>();
+    }
+
+    /*
+     * 找到包含所有关键字的全部行
+     */
+    public static Map<Integer, String> taint(String node, String[] keyWords) {
+        Map<Integer, String> lineMap = new HashMap<>();
+        BufferedReader reader;
+        String filePath = BgpDiagnosis.cfgPathMap.get(node);
+        try {
+            reader = new BufferedReader(new FileReader(filePath));
+            String line = reader.readLine();
+            int lineNum = 1;
+            while (line != null) {
+                // System.out.println(line);
+                // read next line
+                boolean ifThisLine = true;
+                for (String word : keyWords) {
+                    if (!line.contains(word)) {
+                        ifThisLine = false;
+                    }
+                }
+                if (ifThisLine) {
+                    lineMap.put(lineNum, line);
+                }
+                line = reader.readLine();
+                lineNum += 1;
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return lineMap;
+    }
 }
