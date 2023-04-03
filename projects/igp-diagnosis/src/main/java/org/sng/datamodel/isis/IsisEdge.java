@@ -1,5 +1,7 @@
 package org.sng.datamodel.isis;
 
+import java.util.Objects;
+
 public class IsisEdge {
 
     private final IsisNode _source;
@@ -27,11 +29,18 @@ public class IsisEdge {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this)
+        if (obj == this) {
             return true;
-        if (obj == null || obj.getClass() != getClass())
+        }
+        if (obj == null || obj.getClass() != getClass()) {
             return false;
+        }
         IsisEdge edge = (IsisEdge) obj;
         return _source.equals(edge._source) && _target.equals(edge._target);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(_source, _target);
     }
 }

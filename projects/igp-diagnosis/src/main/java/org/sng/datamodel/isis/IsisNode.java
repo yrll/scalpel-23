@@ -1,6 +1,8 @@
 package org.sng.datamodel.isis;
 
 
+import java.util.Objects;
+
 public class IsisNode {
     private final String _devName;
     private final int _id;
@@ -38,11 +40,18 @@ public class IsisNode {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this)
+        if (obj == this) {
             return true;
-        if (obj == null || obj.getClass() != getClass())
+        }
+        if (obj == null || obj.getClass() != getClass()) {
             return false;
+        }
         IsisNode node = (IsisNode) obj;
-        return _devName == node._devName && _isisId == node._isisId;
+        return _devName.equals(node._devName) && _isisId == node._isisId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(_devName, _isisId);
     }
 }

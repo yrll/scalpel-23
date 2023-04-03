@@ -17,7 +17,7 @@ import java.util.*;
 
 public class JsonParser {
 
-    // get common ISIS forwarding graph from Json object "isisNodes"
+    /** 从JSON对象"isisNodes"中获取ISIS图 **/
     public static ValueGraph<IsisNode,IsisEdgeValue> parseIsisCommonGraph(JsonObject nodesJson){
         Map<Integer, IsisNode> isisNodeMap = getNodesFromJson(nodesJson);
         List<IsisNode> isisNodeList = new ArrayList<>(isisNodeMap.values());
@@ -27,14 +27,14 @@ public class JsonParser {
         return isisTopology.getGraph();
     }
 
-    // Parse file into String format
+    /** 将文件转换为String **/
     public static JsonObject getJsonObject(String filePath) throws IOException {
         File file = new File(filePath);
         String jsonStr =  FileUtils.readFileToString(file,"UTF-8");
         return com.google.gson.JsonParser.parseString(jsonStr).getAsJsonObject();
     }
 
-    // Parse Json object "isisNodes" into a list of @IsisNodes
+    /** 从JSON对象"isisNodes"获取@IsisNodes信息 **/
     private static Map<Integer, IsisNode> getNodesFromJson(JsonObject nodesJson){
         Map<Integer,IsisNode> isisNodeMap = new HashMap<>();
         for (Map.Entry<String, JsonElement> entry : nodesJson.entrySet()){
@@ -47,23 +47,23 @@ public class JsonParser {
         return isisNodeMap;
     }
 
-    // Parse Json object "isisNodes" into a list of @IsisEdges
+    /** 从JSON对象"isisNodes"获取@IsisEdges信息 **/
     private static List<IsisEdge> getEdgesFromJson(JsonObject nodesJson, Map<Integer, IsisNode> isisNodeMap){
         List<IsisEdge> isisEdgeList = new ArrayList<>();
         for (Map.Entry<String, JsonElement> entry : nodesJson.entrySet()){
 
-            // get source isisNode
+            // 源节点
             int sourceNodeId = Integer.parseInt(entry.getKey());
             IsisNode sourceNode = isisNodeMap.get(sourceNodeId);
             JsonObject succeedingEdges = ((JsonObject) entry.getValue()).getAsJsonObject("succeedingNode2Edge");
 
-            // get targets and links form "succeedingNode2Edge" object
+            // 从JSON对象"succeedingNode2Edge"获取目的节点与边
             for (Map.Entry<String, JsonElement> edgeEntry : succeedingEdges.entrySet()){
-                // get target isisNode
+                // 获取目的节点
                 int targetNodeId = Integer.parseInt(edgeEntry.getKey());
                 IsisNode targetNode = isisNodeMap.get(targetNodeId);
 
-                // get edge properties (cost, physical interfaces) from "equalCostIsisEdges" object
+                // 从JSON对象"equalCostIsisEdges"获取边以及边上的信息
                 JsonObject edgeValue = edgeEntry.getValue().getAsJsonObject();
                 JsonObject elements = edgeValue.asMap().values().stream().findFirst().get().getAsJsonObject();
                 JsonObject edgeProps = elements.get("equalCostIsisEdges").getAsJsonArray().get(0).getAsJsonObject();
@@ -77,14 +77,14 @@ public class JsonParser {
         return isisEdgeList;
     }
 
-    // get prefix import edge from Json object "dstPrefix2ImportNodes"
+    /** 从JSON对象"dstPrefix2ImportNodes"获取每个prefix的路由导入信息 **/
     public static Map<Prefix,List<IsisEdge>> parsePrefixImportEdges(JsonObject prefixImport, Set<IsisNode> isisNodeList){
         Map<Prefix,List<IsisEdge>> prefixEdgesMap = new HashMap<>();
 
         for (Map.Entry<String, JsonElement> entry : prefixImport.entrySet()){
             Prefix prefix = Prefix.parse(entry.getKey());
             List<JsonElement> importList = entry.getValue().getAsJsonArray().asList();
-            List<IsisEdge> isisEdgeList = new ArrayList<>();
+            Set<IsisEdge> isisEdgeSet = new HashSet<>();
             for (JsonElement element: importList){
                 JsonObject importInfo = (JsonObject) element;
                 String devName = importInfo.get("devName").getAsString();
@@ -92,25 +92,24 @@ public class JsonParser {
                 int cost = importInfo.get("cost").getAsInt();
                 String srcProtocol = importInfo.get("srcProtocol").getAsString();
 
-                IsisNode srcNode = getExistingNode(isisNodeList,devName,dstIsisId);
+                IsisNode dstNode = getExistingNode(isisNodeList,devName,dstIsisId);
 
-                // import from Isis process
+                // ISIS进程导入信息
                 if (srcProtocol.equals("ISIS")){
                     int srcIsisId = importInfo.get("srcIsisProc").getAsInt();
-                    IsisNode dstNode = getExistingNode(isisNodeList,devName,srcIsisId);
+                    IsisNode srcNode = getExistingNode(isisNodeList,devName,srcIsisId);
                     IsisEdgeValue isisEdgeValue = new IsisEdgeValue("null","null",cost);
-                    isisEdgeList.add(new IsisEdge(srcNode,dstNode,isisEdgeValue));
+                    isisEdgeSet.add(new IsisEdge(srcNode,dstNode,isisEdgeValue));
                 }
-                // import from other protocol (direct)
-                // todo: clarify all types of protocols
+                // 其他协议导入信息（direct，static）
                 else {
-                    IsisNode dstNode = IsisNode.creatDirectNode(devName);
+                    IsisNode srcNode = IsisNode.creatDirectNode(devName);
                     String srcDevIf = importInfo.get("srcDevIf").getAsString();
                     IsisEdgeValue isisEdgeValue = new IsisEdgeValue("null",srcDevIf,cost);
-                    isisEdgeList.add(new IsisEdge(srcNode,dstNode,isisEdgeValue));
+                    isisEdgeSet.add(new IsisEdge(srcNode,dstNode,isisEdgeValue));
                 }
             }
-            prefixEdgesMap.put(prefix,isisEdgeList);
+            prefixEdgesMap.put(prefix,new ArrayList<>(isisEdgeSet));
         }
         return prefixEdgesMap;
     }
@@ -125,6 +124,34 @@ public class JsonParser {
         }
         assert existNode != null;
         return existNode;
+    }
+
+    /** 从JSON对象"relatedStaticAndDirectInfo"中获取直连路由的源发节点 **/
+    public static Map<Prefix,Set<String>> getDirectRouteOrigins(JsonObject jsonObject){
+        Map<Prefix,Set<String>> prefixDevicesMap = new HashMap<>();
+        // todo: 静态路由的获取与建模
+        JsonObject directRouteInfo = jsonObject.get("directRouteInfo").getAsJsonObject();
+        for (Map.Entry<String, JsonElement> deviceVpnEntry : directRouteInfo.entrySet()) {
+            String device = deviceVpnEntry.getKey();
+            JsonObject vpnList = deviceVpnEntry.getValue().getAsJsonObject();
+            for (Map.Entry<String, JsonElement> vpnPrefixEntry : vpnList.entrySet()) {
+                JsonObject prefixList = vpnPrefixEntry.getValue().getAsJsonObject();
+                // 这层为每个prefix和对应的信息
+                for (Map.Entry<String, JsonElement> prefixInfoEntry : prefixList.entrySet()){
+                    JsonObject prefixInfo = prefixInfoEntry.getValue().getAsJsonArray().get(0).getAsJsonObject();
+                    Prefix prefix = Prefix.parse(prefixInfo.get("ipPrefix").getAsString());
+
+                    if (prefixDevicesMap.containsKey(prefix)) {
+                        prefixDevicesMap.get(prefix).add(device);
+                    } else {
+                        Set<String> deviceSet =  new HashSet<>();
+                        deviceSet.add(device);
+                        prefixDevicesMap.put(prefix,deviceSet);
+                    }
+                }
+            }
+        }
+        return prefixDevicesMap;
     }
 
 

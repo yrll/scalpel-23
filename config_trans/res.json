@@ -1,0 +1,26 @@
+{
+  "rmaps": {
+    "from-csg-as-master": [
+      {
+        "name": "from-csg-as-master",
+        "access": "permit",
+        "lineno": 10,
+        "matches": null,
+        "actions": [
+          {
+            "action": "ActionSetMed",
+            "cfg_lines": "163",
+            "value": 100
+          },
+          {
+            "action": "ActionSetPreferredValue",
+            "cfg_lines": "164",
+            "value": 10
+          }
+        ]
+      }
+    ]
+  },
+  "prefix_map": {},
+  "inv_prefix_map": {}
+}

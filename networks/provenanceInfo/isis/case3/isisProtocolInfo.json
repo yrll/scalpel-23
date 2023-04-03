@@ -1,1 +1,2287 @@
-{"isisNodes":{"0":{"id":0,"isisId":2,"devName":"ASG1","succeedingNode2Edge":{"17":{"100":{"id":8,"equalCostIsisEdges":[{"id":8,"cost":100,"srcDevice":"ASG1","dstDevice":"CSG1-2-1","srcPhyIf":"GigabitEthernet2/0/2","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":100}}}},"1":{"id":1,"isisId":99999,"devName":"ASG1","succeedingNode2Edge":{"32":{"100":{"id":48,"equalCostIsisEdges":[{"id":48,"cost":100,"srcDevice":"ASG1","dstDevice":"P-RR1","srcPhyIf":"GigabitEthernet3/0/1","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":100}},"5":{"100":{"id":20,"equalCostIsisEdges":[{"id":20,"cost":100,"srcDevice":"ASG1","dstDevice":"ASG2","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}}}},"2":{"id":2,"isisId":1,"devName":"ASG1","succeedingNode2Edge":{"12":{"100":{"id":40,"equalCostIsisEdges":[{"id":40,"cost":100,"srcDevice":"ASG1","dstDevice":"CSG1-1-1","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":100}}}},"3":{"id":3,"isisId":1,"devName":"ASG2","succeedingNode2Edge":{}},"4":{"id":4,"isisId":2,"devName":"ASG2","succeedingNode2Edge":{"21":{"100":{"id":12,"equalCostIsisEdges":[{"id":12,"cost":100,"srcDevice":"ASG2","dstDevice":"CSG1-2-5","srcPhyIf":"GigabitEthernet2/0/2","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":100}}}},"5":{"id":5,"isisId":99999,"devName":"ASG2","succeedingNode2Edge":{"33":{"100":{"id":44,"equalCostIsisEdges":[{"id":44,"cost":100,"srcDevice":"ASG2","dstDevice":"P-RR2","srcPhyIf":"GigabitEthernet3/0/1","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":100}},"1":{"100":{"id":21,"equalCostIsisEdges":[{"id":21,"cost":100,"srcDevice":"ASG2","dstDevice":"ASG1","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}}}},"6":{"id":6,"isisId":1,"devName":"ASG3","succeedingNode2Edge":{"22":{"100":{"id":46,"equalCostIsisEdges":[{"id":46,"cost":100,"srcDevice":"ASG3","dstDevice":"CSG2-1-1","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":100}}}},"7":{"id":7,"isisId":2,"devName":"ASG3","succeedingNode2Edge":{"27":{"100":{"id":54,"equalCostIsisEdges":[{"id":54,"cost":100,"srcDevice":"ASG3","dstDevice":"CSG2-2-1","srcPhyIf":"GigabitEthernet2/0/2","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":100}}}},"8":{"id":8,"isisId":99999,"devName":"ASG3","succeedingNode2Edge":{"32":{"100":{"id":22,"equalCostIsisEdges":[{"id":22,"cost":100,"srcDevice":"ASG3","dstDevice":"P-RR1","srcPhyIf":"GigabitEthernet3/0/1","dstPhyIf":"GigabitEthernet2/0/2"}],"cost":100}},"11":{"100":{"id":18,"equalCostIsisEdges":[{"id":18,"cost":100,"srcDevice":"ASG3","dstDevice":"ASG4","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}}}},"9":{"id":9,"isisId":1,"devName":"ASG4","succeedingNode2Edge":{"26":{"100":{"id":36,"equalCostIsisEdges":[{"id":36,"cost":100,"srcDevice":"ASG4","dstDevice":"CSG2-1-5","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":100}}}},"10":{"id":10,"isisId":2,"devName":"ASG4","succeedingNode2Edge":{"31":{"100":{"id":4,"equalCostIsisEdges":[{"id":4,"cost":100,"srcDevice":"ASG4","dstDevice":"CSG2-2-5","srcPhyIf":"GigabitEthernet2/0/2","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":100}}}},"11":{"id":11,"isisId":99999,"devName":"ASG4","succeedingNode2Edge":{"33":{"100":{"id":42,"equalCostIsisEdges":[{"id":42,"cost":100,"srcDevice":"ASG4","dstDevice":"P-RR2","srcPhyIf":"GigabitEthernet3/0/1","dstPhyIf":"GigabitEthernet2/0/2"}],"cost":100}},"8":{"100":{"id":19,"equalCostIsisEdges":[{"id":19,"cost":100,"srcDevice":"ASG4","dstDevice":"ASG3","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}}}},"12":{"id":12,"isisId":1,"devName":"CSG1-1-1","succeedingNode2Edge":{"2":{"100":{"id":41,"equalCostIsisEdges":[{"id":41,"cost":100,"srcDevice":"CSG1-1-1","dstDevice":"ASG1","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":100}},"13":{"100":{"id":64,"equalCostIsisEdges":[{"id":64,"cost":100,"srcDevice":"CSG1-1-1","dstDevice":"CSG1-1-2","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}}}},"13":{"id":13,"isisId":1,"devName":"CSG1-1-2","succeedingNode2Edge":{"12":{"100":{"id":65,"equalCostIsisEdges":[{"id":65,"cost":100,"srcDevice":"CSG1-1-2","dstDevice":"CSG1-1-1","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}},"14":{"100":{"id":60,"equalCostIsisEdges":[{"id":60,"cost":100,"srcDevice":"CSG1-1-2","dstDevice":"CSG1-1-3","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}}}},"14":{"id":14,"isisId":1,"devName":"CSG1-1-3","succeedingNode2Edge":{"13":{"100":{"id":61,"equalCostIsisEdges":[{"id":61,"cost":100,"srcDevice":"CSG1-1-3","dstDevice":"CSG1-1-2","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}},"15":{"100":{"id":56,"equalCostIsisEdges":[{"id":56,"cost":100,"srcDevice":"CSG1-1-3","dstDevice":"CSG1-1-4","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}}}},"15":{"id":15,"isisId":1,"devName":"CSG1-1-4","succeedingNode2Edge":{"16":{"100":{"id":52,"equalCostIsisEdges":[{"id":52,"cost":100,"srcDevice":"CSG1-1-4","dstDevice":"CSG1-1-5","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}},"14":{"100":{"id":57,"equalCostIsisEdges":[{"id":57,"cost":100,"srcDevice":"CSG1-1-4","dstDevice":"CSG1-1-3","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}}}},"16":{"id":16,"isisId":1,"devName":"CSG1-1-5","succeedingNode2Edge":{"15":{"100":{"id":53,"equalCostIsisEdges":[{"id":53,"cost":100,"srcDevice":"CSG1-1-5","dstDevice":"CSG1-1-4","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}}}},"17":{"id":17,"isisId":2,"devName":"CSG1-2-1","succeedingNode2Edge":{"0":{"100":{"id":9,"equalCostIsisEdges":[{"id":9,"cost":100,"srcDevice":"CSG1-2-1","dstDevice":"ASG1","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet2/0/2"}],"cost":100}},"18":{"100":{"id":70,"equalCostIsisEdges":[{"id":70,"cost":100,"srcDevice":"CSG1-2-1","dstDevice":"CSG1-2-2","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}}}},"18":{"id":18,"isisId":2,"devName":"CSG1-2-2","succeedingNode2Edge":{"17":{"100":{"id":71,"equalCostIsisEdges":[{"id":71,"cost":100,"srcDevice":"CSG1-2-2","dstDevice":"CSG1-2-1","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}},"19":{"100":{"id":0,"equalCostIsisEdges":[{"id":0,"cost":100,"srcDevice":"CSG1-2-2","dstDevice":"CSG1-2-3","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}}}},"19":{"id":19,"isisId":2,"devName":"CSG1-2-3","succeedingNode2Edge":{"18":{"100":{"id":1,"equalCostIsisEdges":[{"id":1,"cost":100,"srcDevice":"CSG1-2-3","dstDevice":"CSG1-2-2","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}},"20":{"100":{"id":28,"equalCostIsisEdges":[{"id":28,"cost":100,"srcDevice":"CSG1-2-3","dstDevice":"CSG1-2-4","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}}}},"20":{"id":20,"isisId":2,"devName":"CSG1-2-4","succeedingNode2Edge":{"19":{"100":{"id":29,"equalCostIsisEdges":[{"id":29,"cost":100,"srcDevice":"CSG1-2-4","dstDevice":"CSG1-2-3","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}},"21":{"100":{"id":32,"equalCostIsisEdges":[{"id":32,"cost":100,"srcDevice":"CSG1-2-4","dstDevice":"CSG1-2-5","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}}}},"21":{"id":21,"isisId":2,"devName":"CSG1-2-5","succeedingNode2Edge":{"20":{"100":{"id":33,"equalCostIsisEdges":[{"id":33,"cost":100,"srcDevice":"CSG1-2-5","dstDevice":"CSG1-2-4","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}},"4":{"100":{"id":13,"equalCostIsisEdges":[{"id":13,"cost":100,"srcDevice":"CSG1-2-5","dstDevice":"ASG2","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet2/0/2"}],"cost":100}}}},"22":{"id":22,"isisId":1,"devName":"CSG2-1-1","succeedingNode2Edge":{"6":{"100":{"id":47,"equalCostIsisEdges":[{"id":47,"cost":100,"srcDevice":"CSG2-1-1","dstDevice":"ASG3","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":100}},"23":{"100":{"id":38,"equalCostIsisEdges":[{"id":38,"cost":100,"srcDevice":"CSG2-1-1","dstDevice":"CSG2-1-2","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}}}},"23":{"id":23,"isisId":1,"devName":"CSG2-1-2","succeedingNode2Edge":{"22":{"100":{"id":39,"equalCostIsisEdges":[{"id":39,"cost":100,"srcDevice":"CSG2-1-2","dstDevice":"CSG2-1-1","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}},"24":{"100":{"id":58,"equalCostIsisEdges":[{"id":58,"cost":100,"srcDevice":"CSG2-1-2","dstDevice":"CSG2-1-3","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}}}},"24":{"id":24,"isisId":1,"devName":"CSG2-1-3","succeedingNode2Edge":{"23":{"100":{"id":59,"equalCostIsisEdges":[{"id":59,"cost":100,"srcDevice":"CSG2-1-3","dstDevice":"CSG2-1-2","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}},"25":{"100":{"id":62,"equalCostIsisEdges":[{"id":62,"cost":100,"srcDevice":"CSG2-1-3","dstDevice":"CSG2-1-4","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}}}},"25":{"id":25,"isisId":1,"devName":"CSG2-1-4","succeedingNode2Edge":{"24":{"100":{"id":63,"equalCostIsisEdges":[{"id":63,"cost":100,"srcDevice":"CSG2-1-4","dstDevice":"CSG2-1-3","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}},"26":{"100":{"id":50,"equalCostIsisEdges":[{"id":50,"cost":100,"srcDevice":"CSG2-1-4","dstDevice":"CSG2-1-5","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}}}},"26":{"id":26,"isisId":1,"devName":"CSG2-1-5","succeedingNode2Edge":{"25":{"100":{"id":51,"equalCostIsisEdges":[{"id":51,"cost":100,"srcDevice":"CSG2-1-5","dstDevice":"CSG2-1-4","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}},"9":{"100":{"id":37,"equalCostIsisEdges":[{"id":37,"cost":100,"srcDevice":"CSG2-1-5","dstDevice":"ASG4","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":100}}}},"27":{"id":27,"isisId":2,"devName":"CSG2-2-1","succeedingNode2Edge":{"7":{"100":{"id":55,"equalCostIsisEdges":[{"id":55,"cost":100,"srcDevice":"CSG2-2-1","dstDevice":"ASG3","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet2/0/2"}],"cost":100}},"28":{"100":{"id":68,"equalCostIsisEdges":[{"id":68,"cost":100,"srcDevice":"CSG2-2-1","dstDevice":"CSG2-2-2","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}}}},"28":{"id":28,"isisId":2,"devName":"CSG2-2-2","succeedingNode2Edge":{"27":{"100":{"id":69,"equalCostIsisEdges":[{"id":69,"cost":100,"srcDevice":"CSG2-2-2","dstDevice":"CSG2-2-1","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}},"29":{"100":{"id":16,"equalCostIsisEdges":[{"id":16,"cost":100,"srcDevice":"CSG2-2-2","dstDevice":"CSG2-2-3","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}}}},"29":{"id":29,"isisId":2,"devName":"CSG2-2-3","succeedingNode2Edge":{"28":{"100":{"id":17,"equalCostIsisEdges":[{"id":17,"cost":100,"srcDevice":"CSG2-2-3","dstDevice":"CSG2-2-2","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}},"30":{"100":{"id":6,"equalCostIsisEdges":[{"id":6,"cost":100,"srcDevice":"CSG2-2-3","dstDevice":"CSG2-2-4","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}}}},"30":{"id":30,"isisId":2,"devName":"CSG2-2-4","succeedingNode2Edge":{"29":{"100":{"id":7,"equalCostIsisEdges":[{"id":7,"cost":100,"srcDevice":"CSG2-2-4","dstDevice":"CSG2-2-3","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}},"31":{"100":{"id":26,"equalCostIsisEdges":[{"id":26,"cost":100,"srcDevice":"CSG2-2-4","dstDevice":"CSG2-2-5","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/2"}],"cost":100}}}},"31":{"id":31,"isisId":2,"devName":"CSG2-2-5","succeedingNode2Edge":{"10":{"100":{"id":5,"equalCostIsisEdges":[{"id":5,"cost":100,"srcDevice":"CSG2-2-5","dstDevice":"ASG4","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet2/0/2"}],"cost":100}},"30":{"100":{"id":27,"equalCostIsisEdges":[{"id":27,"cost":100,"srcDevice":"CSG2-2-5","dstDevice":"CSG2-2-4","srcPhyIf":"GigabitEthernet1/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":100}}}},"32":{"id":32,"isisId":99999,"devName":"P-RR1","succeedingNode2Edge":{"1":{"100":{"id":49,"equalCostIsisEdges":[{"id":49,"cost":100,"srcDevice":"P-RR1","dstDevice":"ASG1","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet3/0/1"}],"cost":100}},"33":{"150":{"id":24,"equalCostIsisEdges":[{"id":24,"cost":150,"srcDevice":"P-RR1","dstDevice":"P-RR2","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":150}},"35":{"50":{"id":10,"equalCostIsisEdges":[{"id":10,"cost":50,"srcDevice":"P-RR1","dstDevice":"RSG1","srcPhyIf":"GigabitEthernet3/0/1","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":50}},"39":{"50":{"id":34,"equalCostIsisEdges":[{"id":34,"cost":50,"srcDevice":"P-RR1","dstDevice":"RSG3","srcPhyIf":"GigabitEthernet3/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":50}},"8":{"100":{"id":23,"equalCostIsisEdges":[{"id":23,"cost":100,"srcDevice":"P-RR1","dstDevice":"ASG3","srcPhyIf":"GigabitEthernet2/0/2","dstPhyIf":"GigabitEthernet3/0/1"}],"cost":100}}}},"33":{"id":33,"isisId":99999,"devName":"P-RR2","succeedingNode2Edge":{"32":{"150":{"id":25,"equalCostIsisEdges":[{"id":25,"cost":150,"srcDevice":"P-RR2","dstDevice":"P-RR1","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":150}},"5":{"100":{"id":45,"equalCostIsisEdges":[{"id":45,"cost":100,"srcDevice":"P-RR2","dstDevice":"ASG2","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet3/0/1"}],"cost":100}},"37":{"50":{"id":2,"equalCostIsisEdges":[{"id":2,"cost":50,"srcDevice":"P-RR2","dstDevice":"RSG2","srcPhyIf":"GigabitEthernet3/0/1","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":50}},"41":{"50":{"id":30,"equalCostIsisEdges":[{"id":30,"cost":50,"srcDevice":"P-RR2","dstDevice":"RSG4","srcPhyIf":"GigabitEthernet3/0/2","dstPhyIf":"GigabitEthernet1/0/1"}],"cost":50}},"11":{"100":{"id":43,"equalCostIsisEdges":[{"id":43,"cost":100,"srcDevice":"P-RR2","dstDevice":"ASG4","srcPhyIf":"GigabitEthernet2/0/2","dstPhyIf":"GigabitEthernet3/0/1"}],"cost":100}}}},"34":{"id":34,"isisId":98888,"devName":"RSG1","succeedingNode2Edge":{}},"35":{"id":35,"isisId":99999,"devName":"RSG1","succeedingNode2Edge":{"32":{"50":{"id":11,"equalCostIsisEdges":[{"id":11,"cost":50,"srcDevice":"RSG1","dstDevice":"P-RR1","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet3/0/1"}],"cost":50}},"37":{"180":{"id":14,"equalCostIsisEdges":[{"id":14,"cost":180,"srcDevice":"RSG1","dstDevice":"RSG2","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":180}}}},"36":{"id":36,"isisId":98888,"devName":"RSG2","succeedingNode2Edge":{}},"37":{"id":37,"isisId":99999,"devName":"RSG2","succeedingNode2Edge":{"33":{"50":{"id":3,"equalCostIsisEdges":[{"id":3,"cost":50,"srcDevice":"RSG2","dstDevice":"P-RR2","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet3/0/1"}],"cost":50}},"35":{"180":{"id":15,"equalCostIsisEdges":[{"id":15,"cost":180,"srcDevice":"RSG2","dstDevice":"RSG1","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":180}}}},"38":{"id":38,"isisId":98888,"devName":"RSG3","succeedingNode2Edge":{}},"39":{"id":39,"isisId":99999,"devName":"RSG3","succeedingNode2Edge":{"32":{"50":{"id":35,"equalCostIsisEdges":[{"id":35,"cost":50,"srcDevice":"RSG3","dstDevice":"P-RR1","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet3/0/2"}],"cost":50}},"41":{"180":{"id":66,"equalCostIsisEdges":[{"id":66,"cost":180,"srcDevice":"RSG3","dstDevice":"RSG4","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":180}}}},"40":{"id":40,"isisId":98888,"devName":"RSG4","succeedingNode2Edge":{}},"41":{"id":41,"isisId":99999,"devName":"RSG4","succeedingNode2Edge":{"33":{"50":{"id":31,"equalCostIsisEdges":[{"id":31,"cost":50,"srcDevice":"RSG4","dstDevice":"P-RR2","srcPhyIf":"GigabitEthernet1/0/1","dstPhyIf":"GigabitEthernet3/0/2"}],"cost":50}},"39":{"180":{"id":67,"equalCostIsisEdges":[{"id":67,"cost":180,"srcDevice":"RSG4","dstDevice":"RSG3","srcPhyIf":"GigabitEthernet2/0/1","dstPhyIf":"GigabitEthernet2/0/1"}],"cost":180}}}}},"dstPrefix2ImportNodes":{"70.0.0.12/32":[{"id":125,"devName":"CSG1-2-2","dstIsisProc":2,"prefix":"70.0.0.12/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":159,"devName":"CSG1-2-2","dstIsisProc":2,"prefix":"70.0.0.12/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.10/32":[{"id":149,"devName":"CSG1-1-5","dstIsisProc":1,"prefix":"70.0.0.10/32","cost":100,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":151,"devName":"CSG1-2-5","dstIsisProc":2,"prefix":"70.0.0.10/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack1"},{"id":153,"devName":"CSG1-2-5","dstIsisProc":2,"prefix":"70.0.0.10/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack1"},{"id":155,"devName":"CSG1-1-5","dstIsisProc":1,"prefix":"70.0.0.10/32","cost":100,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.14/32":[{"id":163,"devName":"CSG1-2-4","dstIsisProc":2,"prefix":"70.0.0.14/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":119,"devName":"CSG1-2-4","dstIsisProc":2,"prefix":"70.0.0.14/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.16/32":[{"id":211,"devName":"CSG2-1-1","dstIsisProc":1,"prefix":"70.0.0.16/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":171,"devName":"CSG2-1-1","dstIsisProc":1,"prefix":"70.0.0.16/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.18/32":[{"id":177,"devName":"CSG2-1-3","dstIsisProc":1,"prefix":"70.0.0.18/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"110.0.0.8/32":[{"id":64,"devName":"ASG1","dstIsisProc":1,"prefix":"110.0.0.8/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null},{"id":66,"devName":"ASG1","dstIsisProc":99999,"prefix":"110.0.0.8/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":67,"devName":"ASG1","dstIsisProc":2,"prefix":"110.0.0.8/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null},{"id":68,"devName":"ASG1","dstIsisProc":1,"prefix":"110.0.0.8/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null},{"id":62,"devName":"ASG1","dstIsisProc":99999,"prefix":"110.0.0.8/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":63,"devName":"ASG1","dstIsisProc":2,"prefix":"110.0.0.8/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null}],"110.0.0.6/32":[{"id":56,"devName":"P-RR1","dstIsisProc":99999,"prefix":"110.0.0.6/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":44,"devName":"P-RR1","dstIsisProc":99999,"prefix":"110.0.0.6/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"110.0.0.4/32":[{"id":105,"devName":"RSG3","dstIsisProc":99999,"prefix":"110.0.0.4/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":107,"devName":"RSG3","dstIsisProc":99999,"prefix":"110.0.0.4/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.8/32":[{"id":139,"devName":"CSG1-1-3","dstIsisProc":1,"prefix":"70.0.0.8/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":141,"devName":"CSG1-1-3","dstIsisProc":1,"prefix":"70.0.0.8/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"110.0.0.10/32":[{"id":80,"devName":"ASG3","dstIsisProc":2,"prefix":"110.0.0.10/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null},{"id":82,"devName":"ASG3","dstIsisProc":99999,"prefix":"110.0.0.10/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":83,"devName":"ASG3","dstIsisProc":1,"prefix":"110.0.0.10/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null},{"id":84,"devName":"ASG3","dstIsisProc":2,"prefix":"110.0.0.10/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null},{"id":78,"devName":"ASG3","dstIsisProc":99999,"prefix":"110.0.0.10/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":79,"devName":"ASG3","dstIsisProc":1,"prefix":"110.0.0.10/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null}],"70.0.0.21/32":[{"id":187,"devName":"CSG2-2-1","dstIsisProc":2,"prefix":"70.0.0.21/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":189,"devName":"CSG2-2-1","dstIsisProc":2,"prefix":"70.0.0.21/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.19/32":[{"id":179,"devName":"CSG2-1-4","dstIsisProc":1,"prefix":"70.0.0.19/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":168,"devName":"CSG2-1-4","dstIsisProc":1,"prefix":"70.0.0.19/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.25/32":[{"id":207,"devName":"CSG2-2-5","dstIsisProc":2,"prefix":"70.0.0.25/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.23/32":[{"id":197,"devName":"CSG2-2-3","dstIsisProc":2,"prefix":"70.0.0.23/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":199,"devName":"CSG2-2-3","dstIsisProc":2,"prefix":"70.0.0.23/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.6/32":[{"id":113,"devName":"CSG1-2-1","dstIsisProc":2,"prefix":"70.0.0.6/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack1"},{"id":129,"devName":"CSG1-2-1","dstIsisProc":2,"prefix":"70.0.0.6/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack1"},{"id":131,"devName":"CSG1-1-1","dstIsisProc":1,"prefix":"70.0.0.6/32","cost":100,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":110,"devName":"CSG1-1-1","dstIsisProc":1,"prefix":"70.0.0.6/32","cost":100,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.11/32":[{"id":157,"devName":"CSG1-2-1","dstIsisProc":2,"prefix":"70.0.0.11/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":127,"devName":"CSG1-2-1","dstIsisProc":2,"prefix":"70.0.0.11/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"110.0.0.1/32":[{"id":97,"devName":"RSG1","dstIsisProc":99999,"prefix":"110.0.0.1/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":95,"devName":"RSG1","dstIsisProc":99999,"prefix":"110.0.0.1/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"110.0.0.3/32":[{"id":100,"devName":"RSG2","dstIsisProc":99999,"prefix":"110.0.0.3/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":102,"devName":"RSG2","dstIsisProc":99999,"prefix":"110.0.0.3/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.13/32":[{"id":161,"devName":"CSG1-2-3","dstIsisProc":2,"prefix":"70.0.0.13/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":122,"devName":"CSG1-2-3","dstIsisProc":2,"prefix":"70.0.0.13/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.15/32":[{"id":116,"devName":"CSG1-2-5","dstIsisProc":2,"prefix":"70.0.0.15/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":165,"devName":"CSG1-2-5","dstIsisProc":2,"prefix":"70.0.0.15/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.17/32":[{"id":213,"devName":"CSG2-1-2","dstIsisProc":1,"prefix":"70.0.0.17/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":174,"devName":"CSG2-1-2","dstIsisProc":1,"prefix":"70.0.0.17/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"110.0.0.7/32":[{"id":51,"devName":"P-RR2","dstIsisProc":99999,"prefix":"110.0.0.7/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":60,"devName":"P-RR2","dstIsisProc":99999,"prefix":"110.0.0.7/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"110.0.0.5/32":[{"id":54,"devName":"RSG4","dstIsisProc":99999,"prefix":"110.0.0.5/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":58,"devName":"RSG4","dstIsisProc":99999,"prefix":"110.0.0.5/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.9/32":[{"id":144,"devName":"CSG1-1-4","dstIsisProc":1,"prefix":"70.0.0.9/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":146,"devName":"CSG1-1-4","dstIsisProc":1,"prefix":"70.0.0.9/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"110.0.0.11/32":[{"id":86,"devName":"ASG4","dstIsisProc":99999,"prefix":"110.0.0.11/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":87,"devName":"ASG4","dstIsisProc":1,"prefix":"110.0.0.11/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null},{"id":88,"devName":"ASG4","dstIsisProc":2,"prefix":"110.0.0.11/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null},{"id":90,"devName":"ASG4","dstIsisProc":99999,"prefix":"110.0.0.11/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":91,"devName":"ASG4","dstIsisProc":1,"prefix":"110.0.0.11/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null},{"id":92,"devName":"ASG4","dstIsisProc":2,"prefix":"110.0.0.11/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null}],"70.0.0.20/32":[{"id":182,"devName":"CSG2-1-5","dstIsisProc":1,"prefix":"70.0.0.20/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":184,"devName":"CSG2-1-5","dstIsisProc":1,"prefix":"70.0.0.20/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"110.0.0.9/32":[{"id":70,"devName":"ASG2","dstIsisProc":99999,"prefix":"110.0.0.9/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":71,"devName":"ASG2","dstIsisProc":2,"prefix":"110.0.0.9/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null},{"id":72,"devName":"ASG2","dstIsisProc":1,"prefix":"110.0.0.9/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null},{"id":74,"devName":"ASG2","dstIsisProc":99999,"prefix":"110.0.0.9/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":75,"devName":"ASG2","dstIsisProc":2,"prefix":"110.0.0.9/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null},{"id":76,"devName":"ASG2","dstIsisProc":1,"prefix":"110.0.0.9/32","cost":0,"srcProtocol":"ISIS","srcIsisProc":99999,"srcDevIf":null}],"70.0.0.22/32":[{"id":192,"devName":"CSG2-2-2","dstIsisProc":2,"prefix":"70.0.0.22/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":194,"devName":"CSG2-2-2","dstIsisProc":2,"prefix":"70.0.0.22/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.24/32":[{"id":202,"devName":"CSG2-2-4","dstIsisProc":2,"prefix":"70.0.0.24/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":204,"devName":"CSG2-2-4","dstIsisProc":2,"prefix":"70.0.0.24/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}],"70.0.0.7/32":[{"id":134,"devName":"CSG1-1-2","dstIsisProc":1,"prefix":"70.0.0.7/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"},{"id":136,"devName":"CSG1-1-2","dstIsisProc":1,"prefix":"70.0.0.7/32","cost":0,"srcProtocol":"DIRECT","srcIsisProc":null,"srcDevIf":"LoopBack0"}]}}
+{
+	"isisNodes": {
+		"0": {
+			"id": 0,
+			"isisId": 2,
+			"devName": "ASG1",
+			"succeedingNode2Edge": {
+				"17": {
+					"100": {
+						"id": 8,
+						"equalCostIsisEdges": [
+							{
+								"id": 8,
+								"cost": 100,
+								"srcDevice": "ASG1",
+								"dstDevice": "CSG1-2-1",
+								"srcPhyIf": "GigabitEthernet2/0/2",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"1": {
+			"id": 1,
+			"isisId": 99999,
+			"devName": "ASG1",
+			"succeedingNode2Edge": {
+				"32": {
+					"100": {
+						"id": 48,
+						"equalCostIsisEdges": [
+							{
+								"id": 48,
+								"cost": 100,
+								"srcDevice": "ASG1",
+								"dstDevice": "P-RR1",
+								"srcPhyIf": "GigabitEthernet3/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"5": {
+					"100": {
+						"id": 20,
+						"equalCostIsisEdges": [
+							{
+								"id": 20,
+								"cost": 100,
+								"srcDevice": "ASG1",
+								"dstDevice": "ASG2",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"2": {
+			"id": 2,
+			"isisId": 1,
+			"devName": "ASG1",
+			"succeedingNode2Edge": {
+				"12": {
+					"100": {
+						"id": 40,
+						"equalCostIsisEdges": [
+							{
+								"id": 40,
+								"cost": 100,
+								"srcDevice": "ASG1",
+								"dstDevice": "CSG1-1-1",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"3": {
+			"id": 3,
+			"isisId": 1,
+			"devName": "ASG2",
+			"succeedingNode2Edge": {}
+		},
+		"4": {
+			"id": 4,
+			"isisId": 2,
+			"devName": "ASG2",
+			"succeedingNode2Edge": {
+				"21": {
+					"100": {
+						"id": 12,
+						"equalCostIsisEdges": [
+							{
+								"id": 12,
+								"cost": 100,
+								"srcDevice": "ASG2",
+								"dstDevice": "CSG1-2-5",
+								"srcPhyIf": "GigabitEthernet2/0/2",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"5": {
+			"id": 5,
+			"isisId": 99999,
+			"devName": "ASG2",
+			"succeedingNode2Edge": {
+				"33": {
+					"100": {
+						"id": 44,
+						"equalCostIsisEdges": [
+							{
+								"id": 44,
+								"cost": 100,
+								"srcDevice": "ASG2",
+								"dstDevice": "P-RR2",
+								"srcPhyIf": "GigabitEthernet3/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"1": {
+					"100": {
+						"id": 21,
+						"equalCostIsisEdges": [
+							{
+								"id": 21,
+								"cost": 100,
+								"srcDevice": "ASG2",
+								"dstDevice": "ASG1",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"6": {
+			"id": 6,
+			"isisId": 1,
+			"devName": "ASG3",
+			"succeedingNode2Edge": {
+				"22": {
+					"100": {
+						"id": 46,
+						"equalCostIsisEdges": [
+							{
+								"id": 46,
+								"cost": 100,
+								"srcDevice": "ASG3",
+								"dstDevice": "CSG2-1-1",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"7": {
+			"id": 7,
+			"isisId": 2,
+			"devName": "ASG3",
+			"succeedingNode2Edge": {
+				"27": {
+					"100": {
+						"id": 54,
+						"equalCostIsisEdges": [
+							{
+								"id": 54,
+								"cost": 100,
+								"srcDevice": "ASG3",
+								"dstDevice": "CSG2-2-1",
+								"srcPhyIf": "GigabitEthernet2/0/2",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"8": {
+			"id": 8,
+			"isisId": 99999,
+			"devName": "ASG3",
+			"succeedingNode2Edge": {
+				"32": {
+					"100": {
+						"id": 22,
+						"equalCostIsisEdges": [
+							{
+								"id": 22,
+								"cost": 100,
+								"srcDevice": "ASG3",
+								"dstDevice": "P-RR1",
+								"srcPhyIf": "GigabitEthernet3/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/2"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"11": {
+					"100": {
+						"id": 18,
+						"equalCostIsisEdges": [
+							{
+								"id": 18,
+								"cost": 100,
+								"srcDevice": "ASG3",
+								"dstDevice": "ASG4",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"9": {
+			"id": 9,
+			"isisId": 1,
+			"devName": "ASG4",
+			"succeedingNode2Edge": {
+				"26": {
+					"100": {
+						"id": 36,
+						"equalCostIsisEdges": [
+							{
+								"id": 36,
+								"cost": 100,
+								"srcDevice": "ASG4",
+								"dstDevice": "CSG2-1-5",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"10": {
+			"id": 10,
+			"isisId": 2,
+			"devName": "ASG4",
+			"succeedingNode2Edge": {
+				"31": {
+					"100": {
+						"id": 4,
+						"equalCostIsisEdges": [
+							{
+								"id": 4,
+								"cost": 100,
+								"srcDevice": "ASG4",
+								"dstDevice": "CSG2-2-5",
+								"srcPhyIf": "GigabitEthernet2/0/2",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"11": {
+			"id": 11,
+			"isisId": 99999,
+			"devName": "ASG4",
+			"succeedingNode2Edge": {
+				"33": {
+					"100": {
+						"id": 42,
+						"equalCostIsisEdges": [
+							{
+								"id": 42,
+								"cost": 100,
+								"srcDevice": "ASG4",
+								"dstDevice": "P-RR2",
+								"srcPhyIf": "GigabitEthernet3/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/2"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"8": {
+					"100": {
+						"id": 19,
+						"equalCostIsisEdges": [
+							{
+								"id": 19,
+								"cost": 100,
+								"srcDevice": "ASG4",
+								"dstDevice": "ASG3",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"12": {
+			"id": 12,
+			"isisId": 1,
+			"devName": "CSG1-1-1",
+			"succeedingNode2Edge": {
+				"2": {
+					"100": {
+						"id": 41,
+						"equalCostIsisEdges": [
+							{
+								"id": 41,
+								"cost": 100,
+								"srcDevice": "CSG1-1-1",
+								"dstDevice": "ASG1",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"13": {
+					"100": {
+						"id": 64,
+						"equalCostIsisEdges": [
+							{
+								"id": 64,
+								"cost": 100,
+								"srcDevice": "CSG1-1-1",
+								"dstDevice": "CSG1-1-2",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"13": {
+			"id": 13,
+			"isisId": 1,
+			"devName": "CSG1-1-2",
+			"succeedingNode2Edge": {
+				"12": {
+					"100": {
+						"id": 65,
+						"equalCostIsisEdges": [
+							{
+								"id": 65,
+								"cost": 100,
+								"srcDevice": "CSG1-1-2",
+								"dstDevice": "CSG1-1-1",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"14": {
+					"100": {
+						"id": 60,
+						"equalCostIsisEdges": [
+							{
+								"id": 60,
+								"cost": 100,
+								"srcDevice": "CSG1-1-2",
+								"dstDevice": "CSG1-1-3",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"14": {
+			"id": 14,
+			"isisId": 1,
+			"devName": "CSG1-1-3",
+			"succeedingNode2Edge": {
+				"13": {
+					"100": {
+						"id": 61,
+						"equalCostIsisEdges": [
+							{
+								"id": 61,
+								"cost": 100,
+								"srcDevice": "CSG1-1-3",
+								"dstDevice": "CSG1-1-2",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"15": {
+					"100": {
+						"id": 56,
+						"equalCostIsisEdges": [
+							{
+								"id": 56,
+								"cost": 100,
+								"srcDevice": "CSG1-1-3",
+								"dstDevice": "CSG1-1-4",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"15": {
+			"id": 15,
+			"isisId": 1,
+			"devName": "CSG1-1-4",
+			"succeedingNode2Edge": {
+				"16": {
+					"100": {
+						"id": 52,
+						"equalCostIsisEdges": [
+							{
+								"id": 52,
+								"cost": 100,
+								"srcDevice": "CSG1-1-4",
+								"dstDevice": "CSG1-1-5",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"14": {
+					"100": {
+						"id": 57,
+						"equalCostIsisEdges": [
+							{
+								"id": 57,
+								"cost": 100,
+								"srcDevice": "CSG1-1-4",
+								"dstDevice": "CSG1-1-3",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"16": {
+			"id": 16,
+			"isisId": 1,
+			"devName": "CSG1-1-5",
+			"succeedingNode2Edge": {
+				"15": {
+					"100": {
+						"id": 53,
+						"equalCostIsisEdges": [
+							{
+								"id": 53,
+								"cost": 100,
+								"srcDevice": "CSG1-1-5",
+								"dstDevice": "CSG1-1-4",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"17": {
+			"id": 17,
+			"isisId": 2,
+			"devName": "CSG1-2-1",
+			"succeedingNode2Edge": {
+				"0": {
+					"100": {
+						"id": 9,
+						"equalCostIsisEdges": [
+							{
+								"id": 9,
+								"cost": 100,
+								"srcDevice": "CSG1-2-1",
+								"dstDevice": "ASG1",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/2"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"18": {
+					"100": {
+						"id": 70,
+						"equalCostIsisEdges": [
+							{
+								"id": 70,
+								"cost": 100,
+								"srcDevice": "CSG1-2-1",
+								"dstDevice": "CSG1-2-2",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"18": {
+			"id": 18,
+			"isisId": 2,
+			"devName": "CSG1-2-2",
+			"succeedingNode2Edge": {
+				"17": {
+					"100": {
+						"id": 71,
+						"equalCostIsisEdges": [
+							{
+								"id": 71,
+								"cost": 100,
+								"srcDevice": "CSG1-2-2",
+								"dstDevice": "CSG1-2-1",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"19": {
+					"100": {
+						"id": 0,
+						"equalCostIsisEdges": [
+							{
+								"id": 0,
+								"cost": 100,
+								"srcDevice": "CSG1-2-2",
+								"dstDevice": "CSG1-2-3",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"19": {
+			"id": 19,
+			"isisId": 2,
+			"devName": "CSG1-2-3",
+			"succeedingNode2Edge": {
+				"18": {
+					"100": {
+						"id": 1,
+						"equalCostIsisEdges": [
+							{
+								"id": 1,
+								"cost": 100,
+								"srcDevice": "CSG1-2-3",
+								"dstDevice": "CSG1-2-2",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"20": {
+					"100": {
+						"id": 28,
+						"equalCostIsisEdges": [
+							{
+								"id": 28,
+								"cost": 100,
+								"srcDevice": "CSG1-2-3",
+								"dstDevice": "CSG1-2-4",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"20": {
+			"id": 20,
+			"isisId": 2,
+			"devName": "CSG1-2-4",
+			"succeedingNode2Edge": {
+				"19": {
+					"100": {
+						"id": 29,
+						"equalCostIsisEdges": [
+							{
+								"id": 29,
+								"cost": 100,
+								"srcDevice": "CSG1-2-4",
+								"dstDevice": "CSG1-2-3",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"21": {
+					"100": {
+						"id": 32,
+						"equalCostIsisEdges": [
+							{
+								"id": 32,
+								"cost": 100,
+								"srcDevice": "CSG1-2-4",
+								"dstDevice": "CSG1-2-5",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"21": {
+			"id": 21,
+			"isisId": 2,
+			"devName": "CSG1-2-5",
+			"succeedingNode2Edge": {
+				"20": {
+					"100": {
+						"id": 33,
+						"equalCostIsisEdges": [
+							{
+								"id": 33,
+								"cost": 100,
+								"srcDevice": "CSG1-2-5",
+								"dstDevice": "CSG1-2-4",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"4": {
+					"100": {
+						"id": 13,
+						"equalCostIsisEdges": [
+							{
+								"id": 13,
+								"cost": 100,
+								"srcDevice": "CSG1-2-5",
+								"dstDevice": "ASG2",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"22": {
+			"id": 22,
+			"isisId": 1,
+			"devName": "CSG2-1-1",
+			"succeedingNode2Edge": {
+				"6": {
+					"100": {
+						"id": 47,
+						"equalCostIsisEdges": [
+							{
+								"id": 47,
+								"cost": 100,
+								"srcDevice": "CSG2-1-1",
+								"dstDevice": "ASG3",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"23": {
+					"100": {
+						"id": 38,
+						"equalCostIsisEdges": [
+							{
+								"id": 38,
+								"cost": 100,
+								"srcDevice": "CSG2-1-1",
+								"dstDevice": "CSG2-1-2",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"23": {
+			"id": 23,
+			"isisId": 1,
+			"devName": "CSG2-1-2",
+			"succeedingNode2Edge": {
+				"22": {
+					"100": {
+						"id": 39,
+						"equalCostIsisEdges": [
+							{
+								"id": 39,
+								"cost": 100,
+								"srcDevice": "CSG2-1-2",
+								"dstDevice": "CSG2-1-1",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"24": {
+					"100": {
+						"id": 58,
+						"equalCostIsisEdges": [
+							{
+								"id": 58,
+								"cost": 100,
+								"srcDevice": "CSG2-1-2",
+								"dstDevice": "CSG2-1-3",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"24": {
+			"id": 24,
+			"isisId": 1,
+			"devName": "CSG2-1-3",
+			"succeedingNode2Edge": {
+				"23": {
+					"100": {
+						"id": 59,
+						"equalCostIsisEdges": [
+							{
+								"id": 59,
+								"cost": 100,
+								"srcDevice": "CSG2-1-3",
+								"dstDevice": "CSG2-1-2",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"25": {
+					"100": {
+						"id": 62,
+						"equalCostIsisEdges": [
+							{
+								"id": 62,
+								"cost": 100,
+								"srcDevice": "CSG2-1-3",
+								"dstDevice": "CSG2-1-4",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"25": {
+			"id": 25,
+			"isisId": 1,
+			"devName": "CSG2-1-4",
+			"succeedingNode2Edge": {
+				"24": {
+					"100": {
+						"id": 63,
+						"equalCostIsisEdges": [
+							{
+								"id": 63,
+								"cost": 100,
+								"srcDevice": "CSG2-1-4",
+								"dstDevice": "CSG2-1-3",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"26": {
+					"100": {
+						"id": 50,
+						"equalCostIsisEdges": [
+							{
+								"id": 50,
+								"cost": 100,
+								"srcDevice": "CSG2-1-4",
+								"dstDevice": "CSG2-1-5",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"26": {
+			"id": 26,
+			"isisId": 1,
+			"devName": "CSG2-1-5",
+			"succeedingNode2Edge": {
+				"25": {
+					"100": {
+						"id": 51,
+						"equalCostIsisEdges": [
+							{
+								"id": 51,
+								"cost": 100,
+								"srcDevice": "CSG2-1-5",
+								"dstDevice": "CSG2-1-4",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"9": {
+					"100": {
+						"id": 37,
+						"equalCostIsisEdges": [
+							{
+								"id": 37,
+								"cost": 100,
+								"srcDevice": "CSG2-1-5",
+								"dstDevice": "ASG4",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"27": {
+			"id": 27,
+			"isisId": 2,
+			"devName": "CSG2-2-1",
+			"succeedingNode2Edge": {
+				"7": {
+					"100": {
+						"id": 55,
+						"equalCostIsisEdges": [
+							{
+								"id": 55,
+								"cost": 100,
+								"srcDevice": "CSG2-2-1",
+								"dstDevice": "ASG3",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/2"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"28": {
+					"100": {
+						"id": 68,
+						"equalCostIsisEdges": [
+							{
+								"id": 68,
+								"cost": 100,
+								"srcDevice": "CSG2-2-1",
+								"dstDevice": "CSG2-2-2",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"28": {
+			"id": 28,
+			"isisId": 2,
+			"devName": "CSG2-2-2",
+			"succeedingNode2Edge": {
+				"27": {
+					"100": {
+						"id": 69,
+						"equalCostIsisEdges": [
+							{
+								"id": 69,
+								"cost": 100,
+								"srcDevice": "CSG2-2-2",
+								"dstDevice": "CSG2-2-1",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"29": {
+					"100": {
+						"id": 16,
+						"equalCostIsisEdges": [
+							{
+								"id": 16,
+								"cost": 100,
+								"srcDevice": "CSG2-2-2",
+								"dstDevice": "CSG2-2-3",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"29": {
+			"id": 29,
+			"isisId": 2,
+			"devName": "CSG2-2-3",
+			"succeedingNode2Edge": {
+				"28": {
+					"100": {
+						"id": 17,
+						"equalCostIsisEdges": [
+							{
+								"id": 17,
+								"cost": 100,
+								"srcDevice": "CSG2-2-3",
+								"dstDevice": "CSG2-2-2",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"30": {
+					"100": {
+						"id": 6,
+						"equalCostIsisEdges": [
+							{
+								"id": 6,
+								"cost": 100,
+								"srcDevice": "CSG2-2-3",
+								"dstDevice": "CSG2-2-4",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"30": {
+			"id": 30,
+			"isisId": 2,
+			"devName": "CSG2-2-4",
+			"succeedingNode2Edge": {
+				"29": {
+					"100": {
+						"id": 7,
+						"equalCostIsisEdges": [
+							{
+								"id": 7,
+								"cost": 100,
+								"srcDevice": "CSG2-2-4",
+								"dstDevice": "CSG2-2-3",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"31": {
+					"100": {
+						"id": 26,
+						"equalCostIsisEdges": [
+							{
+								"id": 26,
+								"cost": 100,
+								"srcDevice": "CSG2-2-4",
+								"dstDevice": "CSG2-2-5",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/2"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"31": {
+			"id": 31,
+			"isisId": 2,
+			"devName": "CSG2-2-5",
+			"succeedingNode2Edge": {
+				"10": {
+					"100": {
+						"id": 5,
+						"equalCostIsisEdges": [
+							{
+								"id": 5,
+								"cost": 100,
+								"srcDevice": "CSG2-2-5",
+								"dstDevice": "ASG4",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/2"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"30": {
+					"100": {
+						"id": 27,
+						"equalCostIsisEdges": [
+							{
+								"id": 27,
+								"cost": 100,
+								"srcDevice": "CSG2-2-5",
+								"dstDevice": "CSG2-2-4",
+								"srcPhyIf": "GigabitEthernet1/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"32": {
+			"id": 32,
+			"isisId": 99999,
+			"devName": "P-RR1",
+			"succeedingNode2Edge": {
+				"1": {
+					"100": {
+						"id": 49,
+						"equalCostIsisEdges": [
+							{
+								"id": 49,
+								"cost": 100,
+								"srcDevice": "P-RR1",
+								"dstDevice": "ASG1",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet3/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"33": {
+					"150": {
+						"id": 24,
+						"equalCostIsisEdges": [
+							{
+								"id": 24,
+								"cost": 150,
+								"srcDevice": "P-RR1",
+								"dstDevice": "P-RR2",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 150
+					}
+				},
+				"35": {
+					"50": {
+						"id": 10,
+						"equalCostIsisEdges": [
+							{
+								"id": 10,
+								"cost": 50,
+								"srcDevice": "P-RR1",
+								"dstDevice": "RSG1",
+								"srcPhyIf": "GigabitEthernet3/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 50
+					}
+				},
+				"39": {
+					"50": {
+						"id": 34,
+						"equalCostIsisEdges": [
+							{
+								"id": 34,
+								"cost": 50,
+								"srcDevice": "P-RR1",
+								"dstDevice": "RSG3",
+								"srcPhyIf": "GigabitEthernet3/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 50
+					}
+				},
+				"8": {
+					"100": {
+						"id": 23,
+						"equalCostIsisEdges": [
+							{
+								"id": 23,
+								"cost": 100,
+								"srcDevice": "P-RR1",
+								"dstDevice": "ASG3",
+								"srcPhyIf": "GigabitEthernet2/0/2",
+								"dstPhyIf": "GigabitEthernet3/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"33": {
+			"id": 33,
+			"isisId": 99999,
+			"devName": "P-RR2",
+			"succeedingNode2Edge": {
+				"32": {
+					"150": {
+						"id": 25,
+						"equalCostIsisEdges": [
+							{
+								"id": 25,
+								"cost": 150,
+								"srcDevice": "P-RR2",
+								"dstDevice": "P-RR1",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 150
+					}
+				},
+				"5": {
+					"100": {
+						"id": 45,
+						"equalCostIsisEdges": [
+							{
+								"id": 45,
+								"cost": 100,
+								"srcDevice": "P-RR2",
+								"dstDevice": "ASG2",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet3/0/1"
+							}
+						],
+						"cost": 100
+					}
+				},
+				"37": {
+					"50": {
+						"id": 2,
+						"equalCostIsisEdges": [
+							{
+								"id": 2,
+								"cost": 50,
+								"srcDevice": "P-RR2",
+								"dstDevice": "RSG2",
+								"srcPhyIf": "GigabitEthernet3/0/1",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 50
+					}
+				},
+				"41": {
+					"50": {
+						"id": 30,
+						"equalCostIsisEdges": [
+							{
+								"id": 30,
+								"cost": 50,
+								"srcDevice": "P-RR2",
+								"dstDevice": "RSG4",
+								"srcPhyIf": "GigabitEthernet3/0/2",
+								"dstPhyIf": "GigabitEthernet1/0/1"
+							}
+						],
+						"cost": 50
+					}
+				},
+				"11": {
+					"100": {
+						"id": 43,
+						"equalCostIsisEdges": [
+							{
+								"id": 43,
+								"cost": 100,
+								"srcDevice": "P-RR2",
+								"dstDevice": "ASG4",
+								"srcPhyIf": "GigabitEthernet2/0/2",
+								"dstPhyIf": "GigabitEthernet3/0/1"
+							}
+						],
+						"cost": 100
+					}
+				}
+			}
+		},
+		"34": {
+			"id": 34,
+			"isisId": 98888,
+			"devName": "RSG1",
+			"succeedingNode2Edge": {}
+		},
+		"35": {
+			"id": 35,
+			"isisId": 99999,
+			"devName": "RSG1",
+			"succeedingNode2Edge": {
+				"32": {
+					"50": {
+						"id": 11,
+						"equalCostIsisEdges": [
+							{
+								"id": 11,
+								"cost": 50,
+								"srcDevice": "RSG1",
+								"dstDevice": "P-RR1",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet3/0/1"
+							}
+						],
+						"cost": 50
+					}
+				},
+				"37": {
+					"180": {
+						"id": 14,
+						"equalCostIsisEdges": [
+							{
+								"id": 14,
+								"cost": 180,
+								"srcDevice": "RSG1",
+								"dstDevice": "RSG2",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 180
+					}
+				}
+			}
+		},
+		"36": {
+			"id": 36,
+			"isisId": 98888,
+			"devName": "RSG2",
+			"succeedingNode2Edge": {}
+		},
+		"37": {
+			"id": 37,
+			"isisId": 99999,
+			"devName": "RSG2",
+			"succeedingNode2Edge": {
+				"33": {
+					"50": {
+						"id": 3,
+						"equalCostIsisEdges": [
+							{
+								"id": 3,
+								"cost": 50,
+								"srcDevice": "RSG2",
+								"dstDevice": "P-RR2",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet3/0/1"
+							}
+						],
+						"cost": 50
+					}
+				},
+				"35": {
+					"180": {
+						"id": 15,
+						"equalCostIsisEdges": [
+							{
+								"id": 15,
+								"cost": 180,
+								"srcDevice": "RSG2",
+								"dstDevice": "RSG1",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 180
+					}
+				}
+			}
+		},
+		"38": {
+			"id": 38,
+			"isisId": 98888,
+			"devName": "RSG3",
+			"succeedingNode2Edge": {}
+		},
+		"39": {
+			"id": 39,
+			"isisId": 99999,
+			"devName": "RSG3",
+			"succeedingNode2Edge": {
+				"32": {
+					"50": {
+						"id": 35,
+						"equalCostIsisEdges": [
+							{
+								"id": 35,
+								"cost": 50,
+								"srcDevice": "RSG3",
+								"dstDevice": "P-RR1",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet3/0/2"
+							}
+						],
+						"cost": 50
+					}
+				},
+				"41": {
+					"180": {
+						"id": 66,
+						"equalCostIsisEdges": [
+							{
+								"id": 66,
+								"cost": 180,
+								"srcDevice": "RSG3",
+								"dstDevice": "RSG4",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 180
+					}
+				}
+			}
+		},
+		"40": {
+			"id": 40,
+			"isisId": 98888,
+			"devName": "RSG4",
+			"succeedingNode2Edge": {}
+		},
+		"41": {
+			"id": 41,
+			"isisId": 99999,
+			"devName": "RSG4",
+			"succeedingNode2Edge": {
+				"33": {
+					"50": {
+						"id": 31,
+						"equalCostIsisEdges": [
+							{
+								"id": 31,
+								"cost": 50,
+								"srcDevice": "RSG4",
+								"dstDevice": "P-RR2",
+								"srcPhyIf": "GigabitEthernet1/0/1",
+								"dstPhyIf": "GigabitEthernet3/0/2"
+							}
+						],
+						"cost": 50
+					}
+				},
+				"39": {
+					"180": {
+						"id": 67,
+						"equalCostIsisEdges": [
+							{
+								"id": 67,
+								"cost": 180,
+								"srcDevice": "RSG4",
+								"dstDevice": "RSG3",
+								"srcPhyIf": "GigabitEthernet2/0/1",
+								"dstPhyIf": "GigabitEthernet2/0/1"
+							}
+						],
+						"cost": 180
+					}
+				}
+			}
+		}
+	},
+	"dstPrefix2ImportNodes": {
+		"70.0.0.12/32": [
+			{
+				"id": 125,
+				"devName": "CSG1-2-2",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.12/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 159,
+				"devName": "CSG1-2-2",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.12/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.10/32": [
+			{
+				"id": 149,
+				"devName": "CSG1-1-5",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.10/32",
+				"cost": 100,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 151,
+				"devName": "CSG1-2-5",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.10/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack1"
+			},
+			{
+				"id": 153,
+				"devName": "CSG1-2-5",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.10/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack1"
+			},
+			{
+				"id": 155,
+				"devName": "CSG1-1-5",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.10/32",
+				"cost": 100,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.14/32": [
+			{
+				"id": 163,
+				"devName": "CSG1-2-4",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.14/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 119,
+				"devName": "CSG1-2-4",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.14/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.16/32": [
+			{
+				"id": 211,
+				"devName": "CSG2-1-1",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.16/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 171,
+				"devName": "CSG2-1-1",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.16/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.18/32": [
+			{
+				"id": 177,
+				"devName": "CSG2-1-3",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.18/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"110.0.0.8/32": [
+			{
+				"id": 64,
+				"devName": "ASG1",
+				"dstIsisProc": 1,
+				"prefix": "110.0.0.8/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			},
+			{
+				"id": 66,
+				"devName": "ASG1",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.8/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 67,
+				"devName": "ASG1",
+				"dstIsisProc": 2,
+				"prefix": "110.0.0.8/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			},
+			{
+				"id": 68,
+				"devName": "ASG1",
+				"dstIsisProc": 1,
+				"prefix": "110.0.0.8/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			},
+			{
+				"id": 62,
+				"devName": "ASG1",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.8/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 63,
+				"devName": "ASG1",
+				"dstIsisProc": 2,
+				"prefix": "110.0.0.8/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			}
+		],
+		"110.0.0.6/32": [
+			{
+				"id": 56,
+				"devName": "P-RR1",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.6/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 44,
+				"devName": "P-RR1",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.6/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"110.0.0.4/32": [
+			{
+				"id": 105,
+				"devName": "RSG3",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.4/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 107,
+				"devName": "RSG3",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.4/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.8/32": [
+			{
+				"id": 139,
+				"devName": "CSG1-1-3",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.8/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 141,
+				"devName": "CSG1-1-3",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.8/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"110.0.0.10/32": [
+			{
+				"id": 80,
+				"devName": "ASG3",
+				"dstIsisProc": 2,
+				"prefix": "110.0.0.10/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			},
+			{
+				"id": 82,
+				"devName": "ASG3",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.10/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 83,
+				"devName": "ASG3",
+				"dstIsisProc": 1,
+				"prefix": "110.0.0.10/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			},
+			{
+				"id": 84,
+				"devName": "ASG3",
+				"dstIsisProc": 2,
+				"prefix": "110.0.0.10/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			},
+			{
+				"id": 78,
+				"devName": "ASG3",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.10/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 79,
+				"devName": "ASG3",
+				"dstIsisProc": 1,
+				"prefix": "110.0.0.10/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			}
+		],
+		"70.0.0.21/32": [
+			{
+				"id": 187,
+				"devName": "CSG2-2-1",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.21/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 189,
+				"devName": "CSG2-2-1",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.21/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.19/32": [
+			{
+				"id": 179,
+				"devName": "CSG2-1-4",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.19/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 168,
+				"devName": "CSG2-1-4",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.19/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.25/32": [
+			{
+				"id": 207,
+				"devName": "CSG2-2-5",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.25/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.23/32": [
+			{
+				"id": 197,
+				"devName": "CSG2-2-3",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.23/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 199,
+				"devName": "CSG2-2-3",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.23/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.6/32": [
+			{
+				"id": 113,
+				"devName": "CSG1-2-1",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.6/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack1"
+			},
+			{
+				"id": 129,
+				"devName": "CSG1-2-1",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.6/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack1"
+			},
+			{
+				"id": 131,
+				"devName": "CSG1-1-1",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.6/32",
+				"cost": 100,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 110,
+				"devName": "CSG1-1-1",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.6/32",
+				"cost": 100,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.11/32": [
+			{
+				"id": 157,
+				"devName": "CSG1-2-1",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.11/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 127,
+				"devName": "CSG1-2-1",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.11/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"110.0.0.1/32": [
+			{
+				"id": 97,
+				"devName": "RSG1",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.1/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 95,
+				"devName": "RSG1",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.1/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"110.0.0.3/32": [
+			{
+				"id": 100,
+				"devName": "RSG2",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.3/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 102,
+				"devName": "RSG2",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.3/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.13/32": [
+			{
+				"id": 161,
+				"devName": "CSG1-2-3",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.13/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 122,
+				"devName": "CSG1-2-3",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.13/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.15/32": [
+			{
+				"id": 116,
+				"devName": "CSG1-2-5",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.15/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 165,
+				"devName": "CSG1-2-5",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.15/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.17/32": [
+			{
+				"id": 213,
+				"devName": "CSG2-1-2",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.17/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 174,
+				"devName": "CSG2-1-2",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.17/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"110.0.0.7/32": [
+			{
+				"id": 51,
+				"devName": "P-RR2",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.7/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 60,
+				"devName": "P-RR2",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.7/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"110.0.0.5/32": [
+			{
+				"id": 54,
+				"devName": "RSG4",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.5/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 58,
+				"devName": "RSG4",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.5/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.9/32": [
+			{
+				"id": 144,
+				"devName": "CSG1-1-4",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.9/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 146,
+				"devName": "CSG1-1-4",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.9/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"110.0.0.11/32": [
+			{
+				"id": 86,
+				"devName": "ASG4",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.11/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 87,
+				"devName": "ASG4",
+				"dstIsisProc": 1,
+				"prefix": "110.0.0.11/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			},
+			{
+				"id": 88,
+				"devName": "ASG4",
+				"dstIsisProc": 2,
+				"prefix": "110.0.0.11/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			},
+			{
+				"id": 90,
+				"devName": "ASG4",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.11/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 91,
+				"devName": "ASG4",
+				"dstIsisProc": 1,
+				"prefix": "110.0.0.11/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			},
+			{
+				"id": 92,
+				"devName": "ASG4",
+				"dstIsisProc": 2,
+				"prefix": "110.0.0.11/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			}
+		],
+		"70.0.0.20/32": [
+			{
+				"id": 182,
+				"devName": "CSG2-1-5",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.20/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 184,
+				"devName": "CSG2-1-5",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.20/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"110.0.0.9/32": [
+			{
+				"id": 70,
+				"devName": "ASG2",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.9/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 71,
+				"devName": "ASG2",
+				"dstIsisProc": 2,
+				"prefix": "110.0.0.9/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			},
+			{
+				"id": 72,
+				"devName": "ASG2",
+				"dstIsisProc": 1,
+				"prefix": "110.0.0.9/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			},
+			{
+				"id": 74,
+				"devName": "ASG2",
+				"dstIsisProc": 99999,
+				"prefix": "110.0.0.9/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 75,
+				"devName": "ASG2",
+				"dstIsisProc": 2,
+				"prefix": "110.0.0.9/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			},
+			{
+				"id": 76,
+				"devName": "ASG2",
+				"dstIsisProc": 1,
+				"prefix": "110.0.0.9/32",
+				"cost": 0,
+				"srcProtocol": "ISIS",
+				"srcIsisProc": 99999,
+				"srcDevIf": null
+			}
+		],
+		"70.0.0.22/32": [
+			{
+				"id": 192,
+				"devName": "CSG2-2-2",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.22/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 194,
+				"devName": "CSG2-2-2",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.22/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.24/32": [
+			{
+				"id": 202,
+				"devName": "CSG2-2-4",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.24/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 204,
+				"devName": "CSG2-2-4",
+				"dstIsisProc": 2,
+				"prefix": "70.0.0.24/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		],
+		"70.0.0.7/32": [
+			{
+				"id": 134,
+				"devName": "CSG1-1-2",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.7/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			},
+			{
+				"id": 136,
+				"devName": "CSG1-1-2",
+				"dstIsisProc": 1,
+				"prefix": "70.0.0.7/32",
+				"cost": 0,
+				"srcProtocol": "DIRECT",
+				"srcIsisProc": null,
+				"srcDevIf": "LoopBack0"
+			}
+		]
+	}
+}
