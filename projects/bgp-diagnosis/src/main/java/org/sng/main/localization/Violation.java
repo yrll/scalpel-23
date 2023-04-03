@@ -28,6 +28,7 @@ public class Violation {
     LocalRoute originStaticRoute;
     LocalRoute originDirectRoute;
     // DirectRoute originDirectRoute;
+    int missingLineCounter;
 
     // 描述redis失败的原因的字符串，用逗号分隔多个原因
     String violateRedis;
@@ -39,40 +40,45 @@ public class Violation {
         return true;
     }
 
+    public int getMissingLine() {
+        missingLineCounter -= 1;
+        return missingLineCounter;
+    }
+
     public Map<Integer, String> localize(String curDevName, Generator generator) {
 
         List<Localizer> results = new ArrayList<>();
 
         if (ifListValid(violatedRrClient)) {
-            results.add(new ReflectClientLocalizer(curDevName, violatedRrClient));
+            results.add(new ReflectClientLocalizer(curDevName, violatedRrClient, this));
         }
 
         if (ifListValid(violatedAcptNeighbors)) {
             violatedAcptNeighbors.forEach(n->{
-                results.add(new RouteForbiddenLocalizer(curDevName, n, Direction.IN));
+                results.add(new RouteForbiddenLocalizer(curDevName, n, Direction.IN, this));
             });
         }
 
         if (ifListValid(violatedPropNeighbors)) {
             violatedPropNeighbors.forEach(n->{
-                results.add(new RouteForbiddenLocalizer(curDevName, n, Direction.OUT));
+                results.add(new RouteForbiddenLocalizer(curDevName, n, Direction.OUT, this));
             });
         }
 
         if (ifListValid(violateEbgpPeer)) {
             violateEbgpPeer.forEach(n->{
-                results.add(new PeerLocalizer(curDevName, n, generator));
+                results.add(new PeerLocalizer(curDevName, n, generator, this));
             });
         }
 
         if (ifListValid(violateIbgpPeer)) {
             violateIbgpPeer.forEach(n->{
-                results.add(new PeerLocalizer(curDevName, n, generator));
+                results.add(new PeerLocalizer(curDevName, n, generator, this));
             });
         }
 
         if (violateRedis!=null || !violateRedis.equals("")) {
-            results.add(new RedistributionLocalizer(curDevName, violateRedis, originStaticRoute));
+            results.add(new RedistributionLocalizer(curDevName, violateRedis, originStaticRoute, this));
         }
 
         Map<Integer, String> lineMap = new HashMap<>();

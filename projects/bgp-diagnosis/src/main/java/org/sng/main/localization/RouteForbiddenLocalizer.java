@@ -18,19 +18,21 @@ public class RouteForbiddenLocalizer implements Localizer {
     String policyName;
     // 路由对应vpn的名称 （当时为什么要加这个字段来着？：因为上一条注释）
     String vpnName;
+    private Violation violation;
 
     public enum Direction{
         IN,
         OUT
     }
 
-    public RouteForbiddenLocalizer(String node, String policyName, String vpnName) {
+    public RouteForbiddenLocalizer(String node, String policyName, String vpnName, Violation violation) {
         this.node = node;
         this.policyName = policyName;
         this.vpnName = vpnName;
+        this.violation = violation;
     }
 
-    public RouteForbiddenLocalizer(String node, BgpRoute fordidRoute, Direction direction) {
+    public RouteForbiddenLocalizer(String node, BgpRoute fordidRoute, Direction direction, Violation violation) {
         this.node = node;
         // 如果是因为export被deny的，在export那端会有记录
         switch (direction) {
@@ -40,6 +42,7 @@ public class RouteForbiddenLocalizer implements Localizer {
         }
         
         this.vpnName = fordidRoute.getLatestVpnName();
+        this.violation = violation;
     }
 
     @Override

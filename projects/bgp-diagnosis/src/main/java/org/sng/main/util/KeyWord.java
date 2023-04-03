@@ -46,5 +46,5 @@ public class KeyWord {
     public static String ALL_VPN_BINDING_INFO = "allVpnBindingInfo";
 
     public static String DEV2_VIOLATE_RULES = "dev2ViolateRules";
-    public static int MISSING_LINE = -1;
+    // public static int MISSING_LINE = -1;
 }

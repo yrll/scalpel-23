@@ -23,6 +23,7 @@ public class RedistributionLocalizer implements Localizer{
     private String[] causeKeyWords;
     private Interface inf;
     private static String splitSymbol = ",";
+    private Violation violation;
 
     public enum RedisErrorType{
         NO_REDISTRIBUTE_COMMOND,
@@ -49,17 +50,19 @@ public class RedistributionLocalizer implements Localizer{
         return null;
     }
 
-    public RedistributionLocalizer(String node, String causeKeyWord, LocalRoute route) {
+    public RedistributionLocalizer(String node, String causeKeyWord, LocalRoute route, Violation violation) {
         this.node = node;
         this.targetRoute = route;
         this.causeKeyWords = causeKeyWord.split(splitSymbol);
         this.inf = route.getInterface();
+        this.violation = violation;
     }
 
-    public RedistributionLocalizer(String node, String causeKeyWord, Interface iface) {
+    public RedistributionLocalizer(String node, String causeKeyWord, Interface iface, Violation violation) {
         this.node = node;
         this.inf = iface;
         this.causeKeyWords = causeKeyWord.split(splitSymbol);
+        this.violation = violation;
     }
 
     public List<RedisErrorType> getErrorTypes() {
@@ -80,7 +83,7 @@ public class RedistributionLocalizer implements Localizer{
             switch (n) {
                 case NO_REDISTRIBUTE_COMMOND: {
                     String netCommond = "network " + targetRoute.getPrefix().getStartIp() + " " + targetRoute.getPrefix().getPrefixLength();
-                    lines.put(KeyWord.MISSING_LINE, netCommond);
+                    lines.put(violation.getMissingLine(), netCommond);
                 }
                 case POLICY: lines.putAll(ConfigTaint.policyFinder(node, getPolicyName()));
                 case ROUTE_INVALID: {
