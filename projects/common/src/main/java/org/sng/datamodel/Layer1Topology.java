@@ -45,6 +45,7 @@ public class Layer1Topology {
         return ImmutableSortedSet.copyOf(this._graph.edges());
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -52,7 +53,7 @@ public class Layer1Topology {
             return !(obj instanceof Layer1Topology) ? false : this._graph.equals(((Layer1Topology)obj)._graph);
         }
     }
-
+    @Override
     public int hashCode() {
         return this._graph.hashCode();
     }

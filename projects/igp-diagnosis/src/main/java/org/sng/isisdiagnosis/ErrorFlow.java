@@ -1,5 +1,7 @@
-package org.sng.datamodel;
+package org.sng.isisdiagnosis;
 
+
+import org.sng.datamodel.Prefix;
 
 public class ErrorFlow {
     // todo:对于指定路径的错误，还需要加上原路径和指定路径这个输入
