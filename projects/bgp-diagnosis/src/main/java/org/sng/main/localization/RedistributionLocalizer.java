@@ -85,11 +85,12 @@ public class RedistributionLocalizer implements Localizer{
                     String netCommond = "network " + targetRoute.getPrefix().getStartIp() + " " + targetRoute.getPrefix().getPrefixLength();
                     lines.put(violation.getMissingLine(), netCommond);
                 }
-                case POLICY: lines.putAll(ConfigTaint.policyFinder(node, getPolicyName()));
+                case POLICY: lines.putAll(ConfigTaint.policyLinesFinder(node, getPolicyName()));
                 case ROUTE_INVALID: {
                     String[] routeKeyWords = {"route-static", targetRoute.getPrefix().getStartIp().toString(), 
                                                 String.valueOf(targetRoute.getPrefix().getPrefixLength())};
-                    lines.putAll(ConfigTaint.taint(node, routeKeyWords));
+
+                    lines.putAll(ConfigTaint.staticRouteLinesFinder(node, targetRoute.getPrefix()));
                 }
             }
         });

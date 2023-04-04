@@ -22,8 +22,7 @@ public class ReflectClientLocalizer implements Localizer {
         Map<Integer, String> lines = new HashMap<>();
         // 行号为-1表示没有缺失该行
         clientDevs.forEach(n->lines.put(violation.getMissingLine(), "peer " + n + " reflect-client"));
-
-        throw new UnsupportedOperationException("Unimplemented method 'getErrorConfigLines'");
+        return lines;
     }
     
 }

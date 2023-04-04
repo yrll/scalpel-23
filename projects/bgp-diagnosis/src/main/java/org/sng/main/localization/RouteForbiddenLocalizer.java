@@ -1,9 +1,11 @@
 package org.sng.main.localization;
 
+import java.io.ObjectInputFilter.Config;
 import java.util.List;
 import java.util.Map;
 
 import org.sng.main.common.BgpRoute;
+import org.sng.main.util.ConfigTaint;
 
 /*
  * Localize "violatedPropNeighbors"/"violatedAcptNeighbors" errors
@@ -36,8 +38,14 @@ public class RouteForbiddenLocalizer implements Localizer {
         this.node = node;
         // 如果是因为export被deny的，在export那端会有记录
         switch (direction) {
-            case IN: this.policyName = fordidRoute.getImportPolicyName(); 
-            case OUT: this.policyName = fordidRoute.getExportPolicyName(); 
+            case IN: {
+                this.policyName = fordidRoute.getImportPolicyName();
+                break;
+            } 
+            case OUT: {
+                this.policyName = fordidRoute.getExportPolicyName(); 
+                break;
+            }
             default: this.policyName = fordidRoute.getImportPolicyName(); 
         }
         
@@ -49,7 +57,7 @@ public class RouteForbiddenLocalizer implements Localizer {
     public Map<Integer, String> getErrorConfigLines() {
         // TODO Auto-generated method stub
         // 调涵洋的接口
-        throw new UnsupportedOperationException("Unimplemented method 'getErrorConfigLines'");
+        return ConfigTaint.policyLinesFinder(node, policyName);
     }
     
 }

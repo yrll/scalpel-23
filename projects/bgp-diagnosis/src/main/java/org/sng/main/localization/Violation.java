@@ -77,7 +77,7 @@ public class Violation {
             });
         }
 
-        if (violateRedis!=null || !violateRedis.equals("")) {
+        if (violateRedis!=null && !violateRedis.equals("")) {
             results.add(new RedistributionLocalizer(curDevName, violateRedis, originStaticRoute, this));
         }
 

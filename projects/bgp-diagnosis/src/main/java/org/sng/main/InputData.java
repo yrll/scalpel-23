@@ -1,6 +1,7 @@
 package org.sng.main;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,9 @@ public class InputData {
     }
 
     public static String projectRootPath = System.getProperty("user.dir");
-    private static String[] caseTypeList = {"1.1", "1.2", "1.3", "2.1", "2.2", "2.3", "3.1", "4.1"};
+
+    private static List<String> BgpListType1 = new ArrayList<>(Arrays.asList("1.1", "1.2", "1.3", "2.1", "2.2", "4.1"));
+    private static List<String> BgpListType2 = new ArrayList<>(Arrays.asList("2.3", "3.1", "4.1"));
     
     private static Map<String, String> errBgpDstNameMap = new HashMap<>();
     private static Map<String, String> errBgpDstIpMap = new HashMap<>();
@@ -48,37 +51,23 @@ public class InputData {
     private static String errIsisDstName1 = "CSG1-2-1";
     private static String errIsisDstIp1 = "192.0.0.20/30";
     public InputData() {
-        errBgpDstNameMap.put("1.1", errBgpDstName1);
-        errBgpDstNameMap.put("1.2", errBgpDstName1);
-        errBgpDstNameMap.put("1.3", errBgpDstName1);
-        errBgpDstNameMap.put("2.1", errBgpDstName1);
-        errBgpDstNameMap.put("4.1", errBgpDstName1);
-        errBgpDstIpMap.put("1.1", errBgpDstIp1);
-        errBgpDstIpMap.put("1.2", errBgpDstIp1);
-        errBgpDstIpMap.put("1.3", errBgpDstIp1);
-        errBgpDstIpMap.put("2.1", errBgpDstIp1);
-        errBgpDstIpMap.put("4.1", errBgpDstIp1);
-
-        errBgpDstNameMap.put("2.3", errBgpDstName2);
-        errBgpDstNameMap.put("3.1", errBgpDstName2);
-        errBgpDstIpMap.put("2.3", errBgpDstIp2);
-        errBgpDstIpMap.put("3.1", errBgpDstIp2);
-
-        corBgpDstNameMap.put("1.1", corBgpDstName1);
-        corBgpDstNameMap.put("1.2", corBgpDstName1);
-        corBgpDstNameMap.put("1.3", corBgpDstName1);
-        corBgpDstNameMap.put("2.1", corBgpDstName1);
-        corBgpDstNameMap.put("4.1", corBgpDstName1);
-        corBgpDstIpMap.put("1.1", corBgpDstIp1);
-        corBgpDstIpMap.put("1.2", corBgpDstIp1);
-        corBgpDstIpMap.put("1.3", corBgpDstIp1);
-        corBgpDstIpMap.put("2.1", corBgpDstIp1);
-        corBgpDstIpMap.put("4.1", corBgpDstIp1);
-
-        corBgpDstNameMap.put("2.3", corBgpDstName2);
-        corBgpDstNameMap.put("3.1", corBgpDstName2);
-        corBgpDstIpMap.put("2.3", corBgpDstIp2);
-        corBgpDstIpMap.put("3.1", corBgpDstIp2);
+        BgpListType1.forEach(t->{
+            errBgpDstNameMap.put(t, errBgpDstName1);
+            errBgpDstIpMap.put(t, errBgpDstIp1);
+        });
+        BgpListType2.forEach(t->{
+            errBgpDstNameMap.put(t, errBgpDstName2);
+            errBgpDstIpMap.put(t, errBgpDstIp2);
+        });
+        
+        BgpListType1.forEach(t->{
+            corBgpDstNameMap.put(t, corBgpDstName1);
+            corBgpDstIpMap.put(t, corBgpDstIp1);
+        });
+        BgpListType2.forEach(t->{
+            corBgpDstNameMap.put(t, corBgpDstName2);
+            corBgpDstIpMap.put(t, corBgpDstIp2);
+        });
     }
 
     public String getConditionFilePath(String keyString, ErrorType type) {
@@ -101,6 +90,17 @@ public class InputData {
             String finalPath = concatFilePath(isisProvRootPath, "case"+keyString);
             return finalPath;
         }
+    }
+
+    public String getViolateRulePath(String keyString, ErrorType type) {
+        if (type.equals(ErrorType.BGP)) {
+            String relativePath = projectRootPath + "/violated_rules/bgp";
+            return concatFilePath(relativePath, "ViolatedRules_Case" + keyString +".json");
+        } else {
+            String relativePath = projectRootPath + "/violated_rules/isis";
+            return concatFilePath(relativePath, "ViolatedRules_Case" + keyString +".json");
+        }
+
     }
 
 

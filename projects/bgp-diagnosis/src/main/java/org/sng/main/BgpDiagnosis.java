@@ -28,7 +28,7 @@ public class BgpDiagnosis {
     private Generator _generator;
 
     public static String cfgRootPath;
-    public static Map<String, String> cfgPathMap = genCfgPathEachNode();
+    public static Map<String, String> cfgPathMap;
     
 
     public static Map<String, String> genCfgPathEachNode() {
@@ -59,7 +59,7 @@ public class BgpDiagnosis {
         Logger logger = Logger.getLogger(KeyWord.LOGGER_NAME);
         logger.setLevel(Level.WARNING);
 
-        String caseType = "3.1";
+        String caseType = "2.3";
         InputData.ErrorType type = ErrorType.BGP;
         InputData inputData = new InputData();
 
@@ -107,17 +107,21 @@ public class BgpDiagnosis {
         BgpForwardingTree reqTree = errGenerator.genBgpTree(corGenerator.getBgpTree());
         reqTree.serializeBgpCondition(conditionPath, reqTree.genBgpConditions(bgpTopology));
         
-        Map<String, BgpCondition> conds = BgpCondition.deserialize(conditionPath);
+        // Map<String, BgpCondition> conds = BgpCondition.deserialize(conditionPath);
+        String violatedRulePath = inputData.getViolateRulePath(caseType, type);
+        getErrorLinesEachNode(violatedRulePath, errGenerator);
+
         System.out.println("pause");
 
     }
 
-    public Map<String, Map<Integer, String>> getErrorLinesEachNode(String filePath, Generator generator) {
+    public static Map<String, Map<Integer, String>> getErrorLinesEachNode(String filePath, Generator generator) {
         Map<String, Map<Integer, String>> errMap = new HashMap<>();
         // 输入是violated condition文件的路径
         String jsonStr = fromJsonToString(filePath);
-        String jsonObject = JsonParser.parseString(jsonStr).getAsJsonObject().get(KeyWord.DEV2_VIOLATE_RULES).getAsString();
-        Map<String, Violation> violations = new Gson().fromJson(jsonStr, new TypeToken<Map<String, Violation>>() {}.getType());
+        System.out.println(jsonStr);
+        String jsonObject = JsonParser.parseString(jsonStr).getAsJsonObject().get(KeyWord.DEV2_VIOLATE_RULES).toString();
+        Map<String, Violation> violations = new Gson().fromJson(jsonObject, new TypeToken<Map<String, Violation>>() {}.getType());
         violations.forEach((node, vio)->{
             errMap.put(node, vio.localize(node, generator));
         });
