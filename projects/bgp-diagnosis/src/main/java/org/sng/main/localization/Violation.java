@@ -2,8 +2,10 @@ package org.sng.main.localization;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.sng.main.BgpDiagnosis;
@@ -23,8 +25,8 @@ public class Violation {
     List<BgpRoute> violatedPropNeighbors;
     List<BgpRoute> violatedAcptNeighbors;
     // prefer 的表示？
-    List<String> violateIbgpPeer;
-    List<String> violateEbgpPeer;
+    Set<String> violateIbgpPeer;
+    Set<String> violateEbgpPeer;
     LocalRoute originStaticRoute;
     LocalRoute originDirectRoute;
     // DirectRoute originDirectRoute;
@@ -33,7 +35,28 @@ public class Violation {
     // 描述redis失败的原因的字符串，用逗号分隔多个原因
     String violateRedis;
 
+    public void addViolateEbgpPeer(String node) {
+        if (violateEbgpPeer==null) {
+            violateEbgpPeer = new HashSet<String>();
+        }
+        violateEbgpPeer.add(node);
+    }
+
+    public void addViolateIbgpPeer(String node) {
+        if (violateIbgpPeer==null) {
+            violateIbgpPeer = new HashSet<String>();
+        }
+        violateIbgpPeer.add(node);
+    }
+
     public static <T> boolean ifListValid(List<T> aimList) {
+        if (aimList==null || aimList.size()<1) {
+            return false;
+        } 
+        return true;
+    }
+
+    public static <T> boolean ifSetValid(Set<T> aimList) {
         if (aimList==null || aimList.size()<1) {
             return false;
         } 
@@ -43,6 +66,14 @@ public class Violation {
     public int getMissingLine() {
         missingLineCounter -= 1;
         return missingLineCounter;
+    }
+
+    public Set<String> getViolateEbgpPeers() {
+        return violateEbgpPeer;
+    }
+
+    public Set<String> getViolateIbgpPeers() {
+        return violateIbgpPeer;
     }
 
     public Map<Integer, String> localize(String curDevName, Generator generator) {
@@ -65,13 +96,13 @@ public class Violation {
             });
         }
 
-        if (ifListValid(violateEbgpPeer)) {
+        if (ifSetValid(violateEbgpPeer)) {
             violateEbgpPeer.forEach(n->{
                 results.add(new PeerLocalizer(curDevName, n, generator, this));
             });
         }
 
-        if (ifListValid(violateIbgpPeer)) {
+        if (ifSetValid(violateIbgpPeer)) {
             violateIbgpPeer.forEach(n->{
                 results.add(new PeerLocalizer(curDevName, n, generator, this));
             });

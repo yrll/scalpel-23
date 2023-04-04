@@ -18,6 +18,7 @@ import org.sng.datamodel.Ip;
 import org.sng.datamodel.Prefix;
 import org.sng.main.common.BgpPeer;
 import org.sng.main.common.BgpTopology;
+import org.sng.main.common.Interface;
 import org.sng.main.common.Layer2Topology;
 import org.sng.main.forwardingtree.BgpForwardingTree.TreeType;
 import org.sng.main.localization.RouteForbiddenLocalizer;
@@ -119,7 +120,6 @@ public class Generator {
     public void setStaticForwardingTree(StaticForwardingTree tree) {
         _oldStaticTree = tree;
     }
-
 
     // public BgpForwardingTree getNewBGPForwardingTree (BgpForwardingTree referenceTree, Table<String, String, BgpPeer> peerTable) {
     //     BgpForwardingTree newBgpRouteFromTree = new BgpForwardingTree(_dstDevName, _dstPrefix);
@@ -233,6 +233,17 @@ public class Generator {
         return newPath;
     }
 
+    // 输入是spec中要求可达的节点，如果某个节点X在AS i中，则需要将AS i中其他iBGP节点也加入需要可达的nodes集合
+    private Set<String> processReachNodes(Set<String> nodes) {
+        Set<String> reachNodes = new HashSet<>(nodes);
+        nodes.forEach(n->{
+            reachNodes.addAll(_bgpTopology.getAllNodesInSameAs(n));
+        });
+        // 总是移除dst节点
+        reachNodes.remove(_dstDevName);
+        return reachNodes;
+    }
+
     /*
      * 这一步只生成BGP Tree里的路由传播和优选的树（实际转发时，域内路径可能会有出入）
      * 这里的出入源自于域内传播的BGP路由下一跳不一定永远是接收eBGP路由的入节点
@@ -241,7 +252,7 @@ public class Generator {
      * 2）跨IGP域的节点终止目标路由（明细路由）传播，发送默认路由至上游节点 :(
      * ---------------------------------------------------------------------------
      * 现有的错误的tree必须是连通的
-     * TODO: 现有的【根据prov信息生成的】tree不连通？会有这种情况出现么？不会吧
+     * TODO: 现有的【根据prov信息生成的】tree不连通？会有这种情况出现么？不会吧？有的话是什么情况呢
      * TODO: 这里生成的BGP树是针对可达性要求的（最小生成树算法【如果有reference参考，可以考虑改进选下一个“最小边”的指标】）
      * 如果有waypoint/bypass要求，需要先改动原有的错误的树（还没实现），但这里要分情况考虑：
      * 1）如果是要经过/绕开AS内部(intra)某些节点：a) 非边界节点：需要IGP支持，b）边界节点：BGP策略
@@ -250,13 +261,14 @@ public class Generator {
      * PS: 现在暂时都不考虑ACL这种数据面的策略
     */ 
 
-    public BgpForwardingTree genBgpTree(BgpForwardingTree refTree) {
+    public BgpForwardingTree genBgpTree(Set<String> reqReachNodes, Set<Interface> failedInfaces, BgpForwardingTree refTree) {
         // error oldTree 所在的generator调用，oldBGPTree已经在generator里
         // 目标src节点是当前generator里的unreachable nodes
         // 在现有error oldBGPTree上继续生成minTree【针对路由传播的tree: BestRouteFrom】
 
         Set<String> reachableNodes = new HashSet<>(_oldBgpTree.getReachableNodes());
-        Set<String> unreachableNodes = new HashSet<>(_oldBgpTree.getUnreachableNodes());
+        reqReachNodes.removeAll(reachableNodes);
+        Set<String> unreachableNodes = processReachNodes(reqReachNodes);
 
         Map<String, Integer> distanceMap = new HashMap<>();
         Map<String, String> primNearestNodeMap = new HashMap<>(_oldBgpTree.getBestRouteFromMap());
@@ -269,7 +281,8 @@ public class Generator {
         String curNode = _oldBgpTree.chooseFirstNodeHasUnreachablePeer(_bgpTopology); // 选一个已reach的开始
         while (unreachableNodes.size()>0) {
             for (String peer: _bgpTopology.getConfiguredPeers(curNode)) {
-                if (reachableNodes.contains(peer)) {
+                if (reachableNodes.contains(peer) || !unreachableNodes.contains(peer)) {
+                    // 更新disMap时只考虑spec要求的节点集合
                     continue;
                 }
                 if (distanceMap.get(curNode) + 1 < distanceMap.get(peer)) {

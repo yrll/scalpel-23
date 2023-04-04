@@ -19,9 +19,9 @@
         },
         {
             "type": "java",
-            "name": "BgpDiagnosis",
+            "name": "Main",
             "request": "launch",
-            "mainClass": "org.sng.main.BgpDiagnosis",
+            "mainClass": "org.sng.main.Main",
             "projectName": "bgp-diagnosis",
             "vmArgs": "-ea"
         }

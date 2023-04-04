@@ -145,6 +145,7 @@ public class PeerLocalizer implements Localizer{
     }
 
     @Override
+    // 只查自身localNode可改的错
     public Map<Integer, String> getErrorConfigLines() {
         Map<Integer, String> lines = new HashMap<>();
         List<PeerErrorType> errorTypes = getErrorTypes();
@@ -155,22 +156,22 @@ public class PeerLocalizer implements Localizer{
                     lines.putAll(ConfigTaint.taint(localNode, keyWords));
                     break;
                 }
-                case PEER_AS_NUMBER_INCONSISTENT_REMOTE: {
-                    String[] keyWords = {"peer", remotePeer.getPeerIp().toString(), String.valueOf(remotePeer.getPeerAsNum())};
-                    lines.putAll(ConfigTaint.taint(remoteNode, keyWords));
-                    break;
-                }
+                // case PEER_AS_NUMBER_INCONSISTENT_REMOTE: {
+                //     String[] keyWords = {"peer", remotePeer.getPeerIp().toString(), String.valueOf(remotePeer.getPeerAsNum())};
+                //     lines.putAll(ConfigTaint.taint(remoteNode, keyWords));
+                //     break;
+                // }
                 case PEER_CONNECT_INTERFACE_LOCAL: {
                     // 这个错误默认缺失对应语句
                     String line = "peer " + localPeer.getPeerIp().toString() + " connect-interface " + localPeer.getLocalIp().toString();
                     lines.put(violation.getMissingLine(), line);
                     break;
                 }
-                case PEER_CONNECT_INTERFACE_REMOTE: {
-                    String line = "peer " + remotePeer.getPeerIp().toString() + " connect-interface " + remotePeer.getLocalIp().toString();
-                    lines.put(violation.getMissingLine(), line);
-                    break;
-                }
+                // case PEER_CONNECT_INTERFACE_REMOTE: {
+                //     String line = "peer " + remotePeer.getPeerIp().toString() + " connect-interface " + remotePeer.getLocalIp().toString();
+                //     lines.put(violation.getMissingLine(), line);
+                //     break;
+                // }
                 case PEER_IGNORE_LOCAL: {
                     // 这个错误默认多写了
                 }
@@ -183,12 +184,12 @@ public class PeerLocalizer implements Localizer{
                     lines.putAll(ConfigTaint.taint(localNode, keyWords));
                     break;
                 }
-                case PEER_IP_INCONSISTENT_REMOTE: 
-                case PEER_IP_REACH_REMOTE: {
-                    String[] keyWords = {"peer", remotePeer.getPeerIp().toString()};
-                    lines.putAll(ConfigTaint.taint(remoteNode, keyWords));
-                    break;
-                }
+                // case PEER_IP_INCONSISTENT_REMOTE: 
+                // case PEER_IP_REACH_REMOTE: {
+                //     String[] keyWords = {"peer", remotePeer.getPeerIp().toString()};
+                //     lines.putAll(ConfigTaint.taint(remoteNode, keyWords));
+                //     break;
+                // }
 
                 case PEER_NOT_CONFIGURED_LOCAL: {
                     String line1 = "peer " + localPeer.getPeerIp().toString() + " enable";
@@ -197,13 +198,13 @@ public class PeerLocalizer implements Localizer{
                     lines.put(violation.getMissingLine(), line2);
                     break;
                 }
-                case PEER_NOT_CONFIGURED_REMOTE: {
-                    String line1 = "peer " + remotePeer.getPeerIp().toString() + " enable";
-                    lines.put(violation.getMissingLine(), line1);
-                    String line2 = "peer " + remotePeer.getPeerIp().toString() + " connect-interface " + remotePeer.getLocalIp().toString();
-                    lines.put(violation.getMissingLine(), line2);
-                    break;
-                }
+                // case PEER_NOT_CONFIGURED_REMOTE: {
+                //     String line1 = "peer " + remotePeer.getPeerIp().toString() + " enable";
+                //     lines.put(violation.getMissingLine(), line1);
+                //     String line2 = "peer " + remotePeer.getPeerIp().toString() + " connect-interface " + remotePeer.getLocalIp().toString();
+                //     lines.put(violation.getMissingLine(), line2);
+                //     break;
+                // }
                 case EBGP_MAX_HOP_LOCAL: {
                     int realHop = generator.hopNumberToReachIpUsingStatic(localNode, localPeer.getPeerIp());
                     String line = "peer " + localPeer.getPeerIp().toString() + " ebgp-max-hop " + String.valueOf(realHop);
@@ -212,24 +213,24 @@ public class PeerLocalizer implements Localizer{
                     lines.put(violation.getMissingLine(), line);
                     break;
                 }
-                case EBGP_MAX_HOP_REMOTE: {
-                    int realHop = generator.hopNumberToReachIpUsingStatic(remoteNode, remotePeer.getPeerIp());
-                    String line = "peer " + remotePeer.getPeerIp().toString() + " ebgp-max-hop " + String.valueOf(realHop);
-                    String[] keyWords = {"peer", remotePeer.getPeerIp().toString(), "ebgp-max-hop"};
-                    lines.putAll(ConfigTaint.taint(remoteNode, keyWords));
-                    lines.put(violation.getMissingLine(), line);
-                    break;
-                }
+                // case EBGP_MAX_HOP_REMOTE: {
+                //     int realHop = generator.hopNumberToReachIpUsingStatic(remoteNode, remotePeer.getPeerIp());
+                //     String line = "peer " + remotePeer.getPeerIp().toString() + " ebgp-max-hop " + String.valueOf(realHop);
+                //     String[] keyWords = {"peer", remotePeer.getPeerIp().toString(), "ebgp-max-hop"};
+                //     lines.putAll(ConfigTaint.taint(remoteNode, keyWords));
+                //     lines.put(violation.getMissingLine(), line);
+                //     break;
+                // }
                 case UNKOWN_LOCAL: {
                     String[] keyWords = {"peer", localPeer.getPeerIp().toString()};
                     lines.putAll(ConfigTaint.taint(localNode, keyWords));
                     break;
                 }
-                case UNKOWN_REMOTE: {
-                    String[] keyWords = {"peer", remotePeer.getPeerIp().toString()};
-                    lines.putAll(ConfigTaint.taint(remoteNode, keyWords));
-                    break;
-                }
+                // case UNKOWN_REMOTE: {
+                //     String[] keyWords = {"peer", remotePeer.getPeerIp().toString()};
+                //     lines.putAll(ConfigTaint.taint(remoteNode, keyWords));
+                //     break;
+                // }
             }
         }
         return lines;

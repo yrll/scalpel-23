@@ -67,6 +67,10 @@ public class Layer2Topology {
     public static Layer2Topology fromJson(String filePath) {
         Set<Layer2Node> layer2Nodes = new HashSet<>();
         String rawJsonStr = BgpDiagnosis.fromJsonToString(filePath);
+        // file为空时 返回空拓扑
+        if (rawJsonStr==null || rawJsonStr.equals("")) {
+            return Layer2Topology.creat(layer2Nodes);
+        }
         JsonObject jsonObject = JsonParser.parseString(rawJsonStr).getAsJsonObject().get(KeyWord.ALL_VPN_BINDING_INFO).getAsJsonObject();
         
         for (String nodeName: jsonObject.asMap().keySet()) {

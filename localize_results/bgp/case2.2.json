@@ -1,0 +1,7 @@
+{
+  "BNG30": {
+    "98": "route-policy testCase2_2 deny node 10",
+    "99": "if-match ip-prefix testCase2_2",
+    "101": "ip ip-prefix testCase2_2 index 10 permit 179.0.0.117 30"
+  }
+}

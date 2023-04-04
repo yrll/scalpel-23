@@ -20,6 +20,7 @@ import javax.lang.model.element.Element;
 
 import org.apache.commons.io.FileUtils;
 import org.sng.datamodel.Ip;
+import org.sng.main.BgpDiagnosis;
 import org.sng.main.forwardingtree.Node;
 import org.sng.main.util.KeyWord;
 
@@ -63,6 +64,21 @@ public class BgpTopology {
         _peerTable = HashBasedTable.create();
         _inconsistentPeers = new HashMap<>();
         _configuredPeerMap =  new HashMap<>();
+    }
+
+    public Set<String> getAllNodesInSameAs(String node) {
+        long asNumber = getAsNumber(node);
+        if (_peers==null || _peers.size()<1) {
+            return null;
+        } else {
+            Set<String> nodes = new HashSet<>();
+            _peers.forEach(p->{
+                if (p.getLocalAsNum()==asNumber) {
+                    nodes.add(p.getLocalDevName());
+                }
+            });
+            return nodes;
+        }
     }
 
     // 获取node（输入1）的所有type类型的，且在nodes（输入2）中的peer，无论peer的配置是否有效
@@ -143,78 +159,77 @@ public class BgpTopology {
 
         System.out.println("Deserialize peer info...");
 
-        File file = new File(filePath);
-        String jsonStr;
+        String jsonStr = BgpDiagnosis.fromJsonToString(filePath);
+        
+        // peer文件为空
+        if (jsonStr==null || jsonStr.equals("")) {
+            return;
+        }
+
         // 检测peer的单边配置
         List<String> tmpPeerNameMap = new ArrayList<>();
 
-        try {
-            jsonStr = FileUtils.readFileToString(file,"UTF-8");
+        JsonObject jsonObject = JsonParser.parseString(jsonStr).getAsJsonObject();
+        for (JsonElement allObject : jsonObject.asMap().values()) {
+            System.out.println("PEER_SIZE: " + allObject.getAsJsonArray().size());
 
-            JsonObject jsonObject = JsonParser.parseString(jsonStr).getAsJsonObject();
-            for (JsonElement allObject : jsonObject.asMap().values()) {
-                System.out.println("PEER_SIZE: " + allObject.getAsJsonArray().size());
+            for (JsonElement object : allObject.getAsJsonArray()) {
+                // deserialize each peer
+                BgpPeer bgpPeer = BgpPeer.deserialize(object.getAsJsonObject());
+                String localDevName = bgpPeer.getLocalDevName();
+                String peerDevName = bgpPeer.getPeerDevName();
 
-                for (JsonElement object : allObject.getAsJsonArray()) {
-                    // deserialize each peer
-                    BgpPeer bgpPeer = BgpPeer.deserialize(object.getAsJsonObject());
-                    String localDevName = bgpPeer.getLocalDevName();
-                    String peerDevName = bgpPeer.getPeerDevName();
-
-                    // 存node - ip - asNumber 映射
-                    if (!_allNodes.containsKey(localDevName)) {
-                        // 以配置里本机的ip为主，作为本机的peer ip
-                        // 如果配置里完全没配bgp协议，或者协议里没配peer，则不会加入allNodes
-                        _allNodes.put(localDevName, bgpPeer.getLocalIp());
-                        _asNumMap.put(localDevName, bgpPeer.getLocalAsNum());
-                    }
-                    
-                    // c处理valid和invalid的peer
-                    if (_peerTable.contains(peerDevName, localDevName)) {
-                        // unilateral peer configuration detection
-                        tmpPeerNameMap.remove(peerDevName+"|"+localDevName);
-                        if (!_peerTable.get(peerDevName, localDevName).isConsistent(bgpPeer)) {
-                            // 保存不一致的BgpPeer pair
-                            _inconsistentPeers.put(_peerTable.get(peerDevName, localDevName), bgpPeer);
-                            // 确保peerTable里的所有表项对应的peer配置都是valid的
-                            _peerTable.remove(peerDevName, localDevName);
-                        } else {
-                            _peerTable.put(localDevName, peerDevName, bgpPeer);
-                        }
-                    } else {
-                        printPeerInfo(bgpPeer);
-                        _peerTable.put(localDevName, peerDevName, bgpPeer);
-                        // unilateral peer configuration detection
-                        tmpPeerNameMap.add(localDevName+"|"+peerDevName);
-                    }
-                    _peers.add(bgpPeer);
-
-                    // 存每个节点已配的peer，这里单向的配置按照双向的处理
-                    //（所以除非两边都没配我们才认为就是不连通的）
-                    if (!_configuredPeerMap.containsKey(localDevName)) {
-                        _configuredPeerMap.put(localDevName, new HashSet<>());
-                    }
-                    if (!_configuredPeerMap.containsKey(peerDevName)) {
-                        _configuredPeerMap.put(peerDevName, new HashSet<>());
-                    } 
-                    _configuredPeerMap.get(localDevName).add(peerDevName);
-                    _configuredPeerMap.get(peerDevName).add(localDevName);
-
+                // 存node - ip - asNumber 映射
+                if (!_allNodes.containsKey(localDevName)) {
+                    // 以配置里本机的ip为主，作为本机的peer ip
+                    // 如果配置里完全没配bgp协议，或者协议里没配peer，则不会加入allNodes
+                    _allNodes.put(localDevName, bgpPeer.getLocalIp());
+                    _asNumMap.put(localDevName, bgpPeer.getLocalAsNum());
                 }
-                // unilateral 配置处理
-                for (String pair : tmpPeerNameMap) {
-                    String[] peer = pair.split("|");
-                    if (_peerTable.contains(peer[0], peer[1])) {
-                        BgpPeer bgpPeer = _peerTable.remove(peer[0], peer[1]);
-                        _inconsistentPeers.put(bgpPeer, null);
+                
+                // c处理valid和invalid的peer
+                if (_peerTable.contains(peerDevName, localDevName)) {
+                    // unilateral peer configuration detection
+                    tmpPeerNameMap.remove(peerDevName+"|"+localDevName);
+                    if (!_peerTable.get(peerDevName, localDevName).isConsistent(bgpPeer)) {
+                        // 保存不一致的BgpPeer pair
+                        _inconsistentPeers.put(_peerTable.get(peerDevName, localDevName), bgpPeer);
+                        // 确保peerTable里的所有表项对应的peer配置都是valid的
+                        _peerTable.remove(peerDevName, localDevName);
+                    } else {
+                        _peerTable.put(localDevName, peerDevName, bgpPeer);
                     }
+                } else {
+                    printPeerInfo(bgpPeer);
+                    _peerTable.put(localDevName, peerDevName, bgpPeer);
+                    // unilateral peer configuration detection
+                    tmpPeerNameMap.add(localDevName+"|"+peerDevName);
+                }
+                _peers.add(bgpPeer);
+
+                // 存每个节点已配的peer，这里单向的配置按照双向的处理
+                //（所以除非两边都没配我们才认为就是不连通的）
+                if (!_configuredPeerMap.containsKey(localDevName)) {
+                    _configuredPeerMap.put(localDevName, new HashSet<>());
+                }
+                if (!_configuredPeerMap.containsKey(peerDevName)) {
+                    _configuredPeerMap.put(peerDevName, new HashSet<>());
+                } 
+                _configuredPeerMap.get(localDevName).add(peerDevName);
+                _configuredPeerMap.get(peerDevName).add(localDevName);
+
+            }
+            // unilateral 配置处理
+            for (String pair : tmpPeerNameMap) {
+                String[] peer = pair.split("|");
+                if (_peerTable.contains(peer[0], peer[1])) {
+                    BgpPeer bgpPeer = _peerTable.remove(peer[0], peer[1]);
+                    _inconsistentPeers.put(bgpPeer, null);
                 }
             }
-            System.out.println("VALID PEER PAIR SIZE: "+ _peerTable.size());
-     
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+        System.out.println("VALID PEER PAIR SIZE: "+ _peerTable.size());
+     
     }
 
     private void printPeerInfo(BgpPeer peer) {

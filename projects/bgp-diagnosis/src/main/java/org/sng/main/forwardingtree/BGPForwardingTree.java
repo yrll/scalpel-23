@@ -207,7 +207,8 @@ public class BgpForwardingTree {
                 for (JsonElement route_raw : nodeRoutes.get(ip).getAsJsonArray()) {
                     // 保持index最小的route作为bestRoute【prov文件里并不是所有route的index都是从0开始】
                     int index = Integer.valueOf(route_raw.getAsJsonObject().get(KeyWord.INDEX).getAsString());
-                    if (index > routeIndex) {
+                    if (index >= routeIndex) {
+                        // 以遇到的第一个index最高的为准
                         continue;
                     }
                     routeIndex = index;
@@ -217,10 +218,14 @@ public class BgpForwardingTree {
                     String nextHopIp = route.get(KeyWord.NEXT_HOP_IP).getAsString();
                     String peerIp = route.get(KeyWord.PEER_IP).getAsString();
                     String peerDevName = bgpTopology.getNodeNameFromIp(Prefix.parse(peerIp).getEndIp());
-
-                    assert !_nextHopForwardingMap.containsKey(node);
+                    
+                    if (_nextHopForwardingMap.containsKey(node)) {
+                        assert _nextHopForwardingMap.get(node).equals(nextHopDev);
+                    }
                     _nextHopForwardingMap.put(node, nextHopDev);
-                    assert !_bestRouteFromMap.containsKey(node);
+                    if (_bestRouteFromMap.containsKey(node)) {
+                        assert _bestRouteFromMap.get(node).equals(peerDevName);
+                    }
                     _bestRouteFromMap.put(node, peerDevName);
 
                     System.out.println("Best route from: " + node + "-->" + peerDevName);
