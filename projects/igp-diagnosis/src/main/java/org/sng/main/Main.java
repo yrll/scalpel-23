@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class Main {
-    static String baseDirectory = "networks/provenanceInfo/isis/case1.4/";
+    static String baseDirectory = "networks/provenanceInfo/isis/case3/";
 
     public static void main(String[] args) throws IOException {
 
@@ -29,9 +29,9 @@ public class Main {
         // 设置错误流
         List<ErrorFlow> errorFlowList = new ArrayList<>();
         errorFlowList.add(new ErrorFlow("CSG1-1-1", Prefix.parse("70.0.0.11/32")));
-//        errorFlowList.add(new ErrorFlow("CSG1-2-1", Prefix.parse("70.0.0.6/32")));
-//        errorFlowList.add(new ErrorFlow("CSG1-1-1", Prefix.parse("110.0.0.8/32")));
-//        errorFlowList.add(new ErrorFlow("ASG1", Prefix.parse("70.0.0.6/32")));
+        errorFlowList.add(new ErrorFlow("CSG1-2-1", Prefix.parse("70.0.0.6/32")));
+        errorFlowList.add(new ErrorFlow("CSG1-1-1", Prefix.parse("110.0.0.8/32")));
+        errorFlowList.add(new ErrorFlow("ASG1", Prefix.parse("70.0.0.6/32")));
 
         // ISIS 诊断
         for (ErrorFlow errorFlow: errorFlowList){
@@ -63,7 +63,7 @@ public class Main {
         JsonObject isisInfoJsonObject = JsonParser.getJsonObject(isisInfoFilePath);
         ValueGraph<IsisNode, IsisEdgeValue> commonFwdGraph = JsonParser.parseIsisCommonGraph(isisInfoJsonObject.get("isisNodes").getAsJsonObject());
         Map<Prefix, List<IsisEdge>> prefixEdgesMap = JsonParser.
-                parsePrefixImportEdges(isisInfoJsonObject.get("dstPrefix2ImportNodes").getAsJsonObject(), commonFwdGraph.nodes());
+                parsePrefixImportEdges(isisInfoJsonObject.get("dstPrefix2ImportNodes").getAsJsonObject(), commonFwdGraph.nodes(),configurations);
 
         return new IsisDiagnosis(layer1Topology,configurations,commonFwdGraph,prefixEdgesMap,directRouteDevicesMap);
 

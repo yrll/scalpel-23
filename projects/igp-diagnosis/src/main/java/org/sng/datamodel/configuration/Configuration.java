@@ -1,14 +1,14 @@
 package org.sng.datamodel.configuration;
 
-import java.util.List;
+import java.util.Map;
 
 public class Configuration {
     private final String _sysName;
-    private final List<Interface> _interfaces;
-    private final List<IsisConfiguration> _isisConfigurations;
+    private final Map<String,Interface> _interfaces;
+    private final Map<Integer,IsisConfiguration> _isisConfigurations;
 
 
-    public Configuration(String sysName, List<Interface> interfaces, List<IsisConfiguration> isisConfigurations) {
+    public Configuration(String sysName, Map<String,Interface> interfaces, Map<Integer,IsisConfiguration> isisConfigurations) {
         _sysName = sysName;
         _interfaces = interfaces;
         _isisConfigurations = isisConfigurations;
@@ -18,11 +18,11 @@ public class Configuration {
         return _sysName;
     }
 
-    public List<Interface> getInterfaces() {
+    public Map<String,Interface> getInterfaces() {
         return _interfaces;
     }
 
-    public List<IsisConfiguration> getIsisConfigurations() {
+    public Map<Integer,IsisConfiguration> getIsisConfigurations() {
         return _isisConfigurations;
     }
 }
