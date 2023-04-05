@@ -1,5 +1,6 @@
 {
   "BNG30": {
+    "90": "import-route static route-policy testCase4_1",
     "97": "route-policy testCase4_1 deny node 10",
     "98": "if-match ip-prefix testCase4_1",
     "100": "ip ip-prefix testCase4_1 index 10 permit 179.0.0.117 30",

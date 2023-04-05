@@ -51,7 +51,31 @@ public class Generator {
 
     private Layer2Topology _layer2Topology;
 
+    public enum ProtocolPreference {
+        IBGP("ibgp", 255),
+        EBGP("ebgp", 255),
+        MBGP("mbgp", 255),
+        STATIC("static", 60),
+        DIRECT("direct", 0);
 
+      
+        private final String _name;
+      
+        private final int _preference;
+      
+        ProtocolPreference(String originType, int preference) {
+          _name = originType;
+          _preference = preference;
+        }
+
+        public String getProtocol() {
+          return _name;
+        }
+      
+        public int getPreference() {
+          return _preference;
+        }
+      }
 
     public Generator(String nodeName, String prefix, BgpTopology bgpTopology) {
         _dstDevName = nodeName;
@@ -61,6 +85,14 @@ public class Generator {
 
     public BgpTopology getBgpTopology() {
         return _bgpTopology;
+    }
+
+    public StaticForwardingTree getStaticTree() {
+        return _oldStaticTree;
+    }
+
+    public String getDstDevName() {
+        return _dstDevName;
     }
 
     public void setLayer2Topology(Layer2Topology layer2Topology) {
@@ -120,87 +152,6 @@ public class Generator {
     public void setStaticForwardingTree(StaticForwardingTree tree) {
         _oldStaticTree = tree;
     }
-
-    // public BgpForwardingTree getNewBGPForwardingTree (BgpForwardingTree referenceTree, Table<String, String, BgpPeer> peerTable) {
-    //     BgpForwardingTree newBgpRouteFromTree = new BgpForwardingTree(_dstDevName, _dstPrefix);
-    //     newBgpRouteFromTree.copyBestRouteFromMap(_oldBgpTree.getBestRouteFromMap());
-    //     Set<String> 
-    //     Set<String> reachableNodes = Sets.difference(_bgpTopology.getAllNodes().keySet(), _unreachNodes);
-
-    //     List<String> unassignedNodes = new ArrayList<>(_unreachNodes);
-
-    //     for (String node : _unreachNodes) {
-    //         if (node.equals(_dstDevName)) {
-    //             // skip the dstNode
-    //             continue;
-    //         }
-    //         boolean ifAddRefPath = false;
-    //         for (String middle : reachableNodes) {
-    //             // subPath1: src--middle
-    //             List<String> refPath = referenceTree.getBestRouteFromPath(node, middle);
-    //             // subPath2: middle--dst
-    //             List<String> remainPath = _oldBgpTree.getBestRouteFromPath(middle, _dstDevName);
-    //             if (refPath!=null && refPath.size()>1) {
-    //                 if (!ifTwoPathOverlap(refPath, remainPath.subList(1, remainPath.size()))) {
-    //                     newBgpRouteFromTree.addBestRouteFromPath(refPath);
-    //                     ifAddRefPath = true;
-    //                 }
-    //             }
-    //         }
-    //         // if (!ifAddRefPath && reachableNodes.size()>0) {
-    //         //     // wrong
-    //         //     newBgpRouteFromTree.addBestRouteFromPath(getPath(node, _dstDevName, peerTable).get(0));
-    //         // }
-
-    //         List<String> refPath = referenceTree.getBestRouteFromPath(node, referenceTree.getDstDevName());
-    //         if (refPath==null) {
-    //             continue;
-    //         }
-    //         for (int i=refPath.size()-1; i>=0; i-=1) {
-    //             String divergeNode = refPath.get(i);
-    //             if (peerTable.contains(divergeNode, _dstDevName) || peerTable.contains(_dstDevName, divergeNode)) {
-    //                 List<String> newPath = copyPath(refPath, 0, i+1);
-    //                 newPath.add(_dstDevName);
-    //                 boolean flag = newBgpRouteFromTree.addBestRouteFromPath(newPath);
-    //                 printStringList(newPath, "req-path", ",");
-    //                 unassignedNodes.remove(node);
-    //                 assert flag;
-    //             }
-    //         }
-    
-    //     }
-    //     for (String leftedNode : unassignedNodes) {
-    //         // usually the leftedNode is dstNode in the ref-tree
-    //         if (leftedNode.equals(_dstDevName)) {
-    //             continue;
-    //         }
-
-    //         Pattern pattern = Pattern.compile("([A-Z]+).*");
-    //         Matcher matcher = pattern.matcher(leftedNode);
-
-    //         for (String node : _bgpTopology.getAllNodes().keySet()) {
-    //             // simlilar node
-    //             if (matcher.find() && node.contains(matcher.group(1))) {
-    //                 // get the path in req-tree as a reference
-    //                 List<String> refPath = newBgpRouteFromTree.getBestRouteFromPath(node, newBgpRouteFromTree.getDstDevName());
-    //                 for(int i=0; i<refPath.size()-1; i+=1) {
-    //                     String divergeNode = refPath.get(i);
-    //                     if (peerTable.contains(divergeNode, leftedNode) || peerTable.contains(leftedNode, divergeNode)) {
-    //                         List<String> newPath = copyPath(refPath, i, refPath.size());
-    //                         newPath.add(0, leftedNode);;
-    //                         boolean flag = newBgpRouteFromTree.addBestRouteFromPath(newPath);
-    //                         printStringList(newPath, "req-path", ",");
-    //                         unassignedNodes.remove(leftedNode);
-    //                         assert flag;
-    //                     }
-    //                 }
-    //             }
-    //         }
-
-    //     }
-    //     printStringList(unassignedNodes, "still unreachable nodes", ",");
-    //     return newBgpRouteFromTree;
-    // }
 
     private <T> boolean ifTwoPathOverlap (List<T> p1, List<T> p2) {
         for (T node : p1) {
@@ -309,5 +260,9 @@ public class Generator {
         return _oldBgpTree;
     }
 
-
+    public boolean ifStaticConsistWithBgp(String node) {
+        String bgpNextHop = _oldBgpTree.getBestNextHop(node);
+        String staticNextHop = _oldStaticTree.getNextHop(node);
+        return bgpNextHop.equals(staticNextHop) || staticNextHop.equals("") || staticNextHop==null;
+    }
 }

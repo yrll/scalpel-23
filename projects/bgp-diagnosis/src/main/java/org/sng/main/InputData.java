@@ -37,7 +37,6 @@ public class InputData {
     private static Map<String, String> errBgpDstIpMap = new HashMap<>();
     private static Map<String, String> corBgpDstNameMap = new HashMap<>();
     private static Map<String, String> corBgpDstIpMap = new HashMap<>();
-
     private static Map<String, String> errIsisDstNameMap = new HashMap<>();
     private static Map<String, String> errIsisDstIpMap = new HashMap<>();
 
@@ -93,6 +92,11 @@ public class InputData {
 
     public String getResultFilePath(String keyString, ErrorType type) {
         String relativePath = concatFilePath(relativeLocalizeResultRootPath, concatFilePath(type.name(), "case" + keyString +".json"));
+        return concatFilePath(projectRootPath, relativePath);
+    }
+
+    public String getPreResultFilePath(String keyString, ErrorType type) {
+        String relativePath = concatFilePath(relativeLocalizeResultRootPath, concatFilePath(type.name(), "(pre)case" + keyString +".json"));
         return concatFilePath(projectRootPath, relativePath);
     }
 

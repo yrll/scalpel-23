@@ -153,7 +153,7 @@ public class PeerLocalizer implements Localizer{
             switch (err) {
                 case PEER_AS_NUMBER_INCONSISTENT_LOCAL: {
                     String[] keyWords = {"peer", localPeer.getPeerIp().toString(), String.valueOf(localPeer.getPeerAsNum())};
-                    lines.putAll(ConfigTaint.taint(localNode, keyWords));
+                    lines.putAll(ConfigTaint.peerTaint(localNode, keyWords));
                     break;
                 }
                 // case PEER_AS_NUMBER_INCONSISTENT_REMOTE: {
@@ -209,7 +209,7 @@ public class PeerLocalizer implements Localizer{
                     int realHop = generator.hopNumberToReachIpUsingStatic(localNode, localPeer.getPeerIp());
                     String line = "peer " + localPeer.getPeerIp().toString() + " ebgp-max-hop " + String.valueOf(realHop);
                     String[] keyWords = {"peer", localPeer.getPeerIp().toString(), "ebgp-max-hop"};
-                    lines.putAll(ConfigTaint.taint(localNode, keyWords));
+                    lines.putAll(ConfigTaint.peerTaint(localNode, keyWords));
                     lines.put(violation.getMissingLine(), line);
                     break;
                 }
@@ -223,7 +223,7 @@ public class PeerLocalizer implements Localizer{
                 // }
                 case UNKOWN_LOCAL: {
                     String[] keyWords = {"peer", localPeer.getPeerIp().toString()};
-                    lines.putAll(ConfigTaint.taint(localNode, keyWords));
+                    lines.putAll(ConfigTaint.peerTaint(localNode, keyWords));
                     break;
                 }
                 // case UNKOWN_REMOTE: {

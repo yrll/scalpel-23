@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 import org.sng.main.BgpDiagnosis;
 import org.sng.main.common.BgpRoute;
-import org.sng.main.common.LocalRoute;
+import org.sng.main.common.StaticRoute;
 import org.sng.main.forwardingtree.Generator;
 import org.sng.main.localization.RouteForbiddenLocalizer.Direction;
 
@@ -27,8 +27,8 @@ public class Violation {
     // prefer 的表示？
     Set<String> violateIbgpPeer;
     Set<String> violateEbgpPeer;
-    LocalRoute originStaticRoute;
-    LocalRoute originDirectRoute;
+    StaticRoute originStaticRoute;
+    StaticRoute originDirectRoute;
     // DirectRoute originDirectRoute;
     int missingLineCounter;
 
@@ -81,18 +81,18 @@ public class Violation {
         List<Localizer> results = new ArrayList<>();
 
         if (ifListValid(violatedRrClient)) {
-            results.add(new ReflectClientLocalizer(curDevName, violatedRrClient, this));
+            results.add(new ReflectClientLocalizer(curDevName, violatedRrClient, this, generator.getBgpTopology()));
         }
 
         if (ifListValid(violatedAcptNeighbors)) {
             violatedAcptNeighbors.forEach(n->{
-                results.add(new RouteForbiddenLocalizer(curDevName, n, Direction.IN, this));
+                results.add(new RouteForbiddenLocalizer(curDevName, n, Direction.IN, this, generator.getBgpTopology()));
             });
         }
 
         if (ifListValid(violatedPropNeighbors)) {
             violatedPropNeighbors.forEach(n->{
-                results.add(new RouteForbiddenLocalizer(curDevName, n, Direction.OUT, this));
+                results.add(new RouteForbiddenLocalizer(curDevName, n, Direction.OUT, this, generator.getBgpTopology()));
             });
         }
 
@@ -109,7 +109,7 @@ public class Violation {
         }
 
         if (violateRedis!=null && !violateRedis.equals("")) {
-            results.add(new RedistributionLocalizer(curDevName, violateRedis, originStaticRoute, this));
+            results.add(new RedistributionLocalizer(curDevName, violateRedis, originStaticRoute, this, generator.getBgpTopology()));
         }
 
         Map<Integer, String> lineMap = new HashMap<>();

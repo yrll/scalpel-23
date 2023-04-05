@@ -5,8 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.sng.main.common.BgpTopology;
 import org.sng.main.common.Interface;
-import org.sng.main.common.LocalRoute;
+import org.sng.main.common.StaticRoute;
 import org.sng.main.util.ConfigTaint;
 import org.sng.main.util.KeyWord;
 
@@ -19,11 +20,12 @@ import org.sng.main.util.KeyWord;
  */
 public class RedistributionLocalizer implements Localizer{
     private String node;
-    private LocalRoute targetRoute;
+    private StaticRoute targetRoute;
     private String[] causeKeyWords;
     private Interface inf;
     private static String splitSymbol = ",";
     private Violation violation;
+    private BgpTopology bgpTopology;
 
     public enum RedisErrorType{
         NO_REDISTRIBUTE_COMMOND,
@@ -50,7 +52,7 @@ public class RedistributionLocalizer implements Localizer{
         return null;
     }
 
-    public RedistributionLocalizer(String node, String causeKeyWord, LocalRoute route, Violation violation) {
+    public RedistributionLocalizer(String node, String causeKeyWord, StaticRoute route, Violation violation, BgpTopology bgpTopology) {
         this.node = node;
         this.targetRoute = route;
         this.causeKeyWords = causeKeyWord.split(splitSymbol);
@@ -87,7 +89,9 @@ public class RedistributionLocalizer implements Localizer{
                     break;
                 }
                 case POLICY: {
-                    // 先找到调用ref policy的那一行
+                    // TODO 先找到调用ref policy的那一行
+                    String[] keWords = {"import", getPolicyName()};
+                    lines.putAll(ConfigTaint.taintWithForbidWord(node, keWords, "peer"));
                     lines.putAll(ConfigTaint.policyLinesFinder(node, getPolicyName()));
                     break;
                 }

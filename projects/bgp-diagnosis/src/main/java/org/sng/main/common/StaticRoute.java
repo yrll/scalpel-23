@@ -4,9 +4,10 @@ import com.google.gson.annotations.SerializedName;
 
 import org.sng.datamodel.Ip;
 import org.sng.datamodel.Prefix;
+import org.sng.main.forwardingtree.Generator.ProtocolPreference;
 
 // 静态/直连 路由
-public class LocalRoute {
+public class StaticRoute {
     private transient Prefix ipPrefix;
 
     private String deviceName;
@@ -22,7 +23,7 @@ public class LocalRoute {
 
     private String nextHop;
 
-    private int preference;
+    private int preference = ProtocolPreference.STATIC.getPreference();
 
     private int lineNumber;
 
@@ -39,6 +40,10 @@ public class LocalRoute {
         }
     }
 
+    public int getPref() {
+        return preference;
+    }
+
     public Ip getNextHop() {
         return Prefix.parse(nextHop).getEndIp();
     }
@@ -47,7 +52,7 @@ public class LocalRoute {
         return outInf.getInfName();
     }
 
-    public LocalRoute(String deviceName, String ipString, String vpnName, Interface outInf) {
+    public StaticRoute(String deviceName, String ipString, String vpnName, Interface outInf) {
         this.deviceName = deviceName;
         this.ipString = ipString;
         this.ipPrefix = Prefix.parse(ipString);

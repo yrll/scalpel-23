@@ -48,7 +48,7 @@ public class BgpTopology {
     // The valid peer Info table
     Table<String, String, BgpPeer> _peerTable;
     // The router-id map for routers
-    Map<String, Ip> _allNodes;
+    public static Map<String, Ip> _allNodes;
     // The as-number map for routers 
     Map<String, Long> _asNumMap;
     // store the inconsistent peer pair which violates the validation metrics above
@@ -79,6 +79,11 @@ public class BgpTopology {
             });
             return nodes;
         }
+    }
+
+    // TODO: 节点到终点的所有简单路径的节点集合
+    public Set<String> getAllNodesInSimplePaths(String node) {
+        return getAllNodesInSameAs(node);
     }
 
     // 获取node（输入1）的所有type类型的，且在nodes（输入2）中的peer，无论peer的配置是否有效

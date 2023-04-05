@@ -11,23 +11,24 @@ import java.util.Map;
 import org.sng.datamodel.Prefix;
 import org.sng.datamodel.Ip;
 import org.sng.main.BgpDiagnosis;
-import org.sng.main.common.LocalRoute;
+import org.sng.main.common.StaticRoute;
 
 public class ConfigTaint {
 
-    public static LocalRoute staticRouteFinder(String filePath, LocalRoute route) {
+    public static StaticRoute staticRouteFinder(String filePath, StaticRoute route) {
         // filePath是cfg文件地址，keyWords是静态路由相关的
         // 直接在入参的route上了
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(filePath));
-            String line = reader.readLine();
+            String line = reader.readLine().strip();
             String targetLine = "";
             int lineNum = 1;
             while (line != null) {
                 // System.out.println(line);
                 // read next line
                 // ifThisLine = true;
+                line = line.strip();
                 if (line.startsWith(KeyWord.IP_STATIC)) {
                     // 查询当前static route的前缀ip+mask是否和传入的route一致
                     String[] words = line.split(" ");
@@ -69,12 +70,13 @@ public class ConfigTaint {
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(filePath));
-            String line = reader.readLine();
+            String line = reader.readLine().strip();
             int lineNum = 1;
             while (line != null) {
                 // System.out.println(line);
                 // read next line
                 // ifThisLine = true;
+                line = line.strip();
                 if (line.startsWith(KeyWord.IP_STATIC)) {
                     if (ifLineContaintsPrefix(line, prefix)) {
                         lineMap.put(lineNum, line);
@@ -160,7 +162,7 @@ public class ConfigTaint {
                 }
             }
         }
-        return null;
+        return new LinkedHashMap<Integer, String>();
     }
 
     public static boolean ifLineContaintsPrefix(String line, Prefix prefix) {
@@ -195,7 +197,7 @@ public class ConfigTaint {
 
         try {
             reader = new BufferedReader(new FileReader(filePath));
-            String line = reader.readLine();
+            String line = reader.readLine().strip();
             int lineNum = 1;
             while (line != null) {
                 // System.out.println(line);
@@ -207,7 +209,7 @@ public class ConfigTaint {
                     }
                 }
                 if (ifThisLine) {
-                    lineMap.put(lineNum, line);
+                    lineMap.put(lineNum, line.strip());
                 }
                 line = reader.readLine();
                 lineNum += 1;
@@ -219,7 +221,89 @@ public class ConfigTaint {
         return lineMap;
     }
 
-    // public static Map<Integer, String> 
+    public static Map<Integer, String> taintWithForbidWord(String node, String[] keyWords, String forbidWord) {
+        Map<Integer, String> lineMap = new HashMap<>();
+        BufferedReader reader;
+        String filePath = BgpDiagnosis.cfgPathMap.get(node);
+
+        try {
+            reader = new BufferedReader(new FileReader(filePath));
+            String line = reader.readLine().strip();
+            int lineNum = 1;
+            while (line != null) {
+                // System.out.println(line);
+                // read next line
+                boolean ifThisLine = false;
+                String[] lineWords = line.split(" ");
+                if (ifLineContaintsAllWords(line, keyWords) && !line.contains(forbidWord)) {
+                    ifThisLine = true;
+                } 
+                
+                if (ifThisLine) {
+                    lineMap.put(lineNum, line.strip());
+                }
+                line = reader.readLine();
+                lineNum += 1;
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return lineMap;
+    }
+
+
+    public static Map<Integer, String> peerTaint(String node, String[] keyWords) {
+        Map<Integer, String> lineMap = new HashMap<>();
+        // 检查关键词前两位是否是peer和ip地址, 固定index 0是peer关键字, index 1是peer ip
+        if (keyWords.length<2 || !keyWords[0].equals("peer") || !Ip.isIpv4Addr(keyWords[1])) {
+            return lineMap;
+        }
+
+        BufferedReader reader;
+        String filePath = BgpDiagnosis.cfgPathMap.get(node);
+
+        try {
+            reader = new BufferedReader(new FileReader(filePath));
+            String line = reader.readLine().strip();
+            int lineNum = 1;
+            while (line != null) {
+                // System.out.println(line);
+                // read next line
+                line = line.strip();
+                boolean ifThisLine = true;
+                if (line.contains(keyWords[0]) && line.contains(keyWords[1])) {
+                    if (ifLineContaintsAllWords(line, keyWords)) {
+                        lineMap.put(lineNum, line);
+                    } else if (line.contains("group")) {
+                        // 获取group的名称
+                        String[] lineWords = line.split(" ");
+                        String groupName = lineWords[lineWords.length-1];
+                        String[] groupTargetWords = keyWords;
+                        groupTargetWords[1] = groupName;
+                        Map<Integer, String> groupLines = taint(node, groupTargetWords);
+                        lineMap.putAll(groupLines);
+                    }
+                }
+                
+                line = reader.readLine();
+                lineNum += 1;
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return lineMap;
+    }
+
+    public static boolean ifLineContaintsAllWords(String line, String[] words) {
+        for (String string : words) {
+            if (!line.contains(string)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 
 }

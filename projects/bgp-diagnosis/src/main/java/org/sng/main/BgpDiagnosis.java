@@ -26,6 +26,7 @@ import org.sng.main.forwardingtree.BgpForwardingTree;
 import org.sng.main.forwardingtree.Generator;
 import org.sng.main.forwardingtree.BgpForwardingTree.TreeType;
 import org.sng.main.localization.Violation;
+import org.sng.main.util.ConfigTaint;
 import org.sng.main.util.KeyWord;
 
 import com.google.gson.Gson;
@@ -103,13 +104,55 @@ public class BgpDiagnosis {
 
     public BgpForwardingTree diagnose(Set<String> reachNodes, Set<Interface> failedInfaces, boolean ifSave) {
         // use the correct traffic as a reference to generate the policy-compliant "Forwarding Tree"
-        BgpForwardingTree reqTree = errGenerator.genBgpTree(reachNodes, failedInfaces, corGenerator.getBgpTree());
-        if (ifSave) {
-            String conditionPath = inputData.getConditionFilePath(caseType, errorType);
-            serializeToFile(conditionPath, reqTree.genBgpConditions(errGenerator.getBgpTopology()));
+        String conditionPath = inputData.getConditionFilePath(caseType, errorType);
+        BgpForwardingTree reqTree = errGenerator.getBgpTree();
+        Set<String> reachNodesBackup = new HashSet<>(reachNodes);
+        if (isOldBgpTreeCorrect(reachNodes)) {
+            // STEP1: 分析是否错在BGP上（是否现有静态路由可以修正）
+            serializeToFile(conditionPath, new HashMap<>());
+        } else {
+            // STEP2: 生成BGP的路由转发树
+            reqTree = errGenerator.genBgpTree(reachNodes, failedInfaces, corGenerator.getBgpTree());
+            if (ifSave) {
+                serializeToFile(conditionPath, reqTree.genBgpConditions(errGenerator.getBgpTopology()));
+            }
         }
+        // 如果原始BGP Tree上node路由可达，这里reachNodes会被删完，所以输入拷贝的那份
+        localizeStaticInconsistent(reachNodesBackup, ifSave);
         return reqTree;
     }
+
+    public Map<String, Map<Integer, String>> localizeStaticInconsistent(Set<String> reachNodes, boolean ifSave) {
+        Map<String, Map<Integer, String>> lineMap = new HashMap<>();
+        Set<String> checkedNodes = new HashSet<>();
+
+        for (String node : reachNodes) {
+            if (checkedNodes.contains(node) || node.equals(errGenerator.getDstDevName())) {
+                continue;
+            }
+            Set<String> nodesInSameAS = errGenerator.getBgpTopology().getAllNodesInSameAs(node);
+            for (String nodeInSameAS : nodesInSameAS) {
+                if (nodeInSameAS.equals(errGenerator.getDstDevName())) {
+                    continue;
+                }
+                if (errGenerator.getStaticTree().getNextHop(nodeInSameAS)!=null) {
+                    String staticNextHop = errGenerator.getStaticTree().getNextHop(nodeInSameAS);
+                    String bgpNextHop = errGenerator.getBgpTree().getBestNextHop(nodeInSameAS);
+                    if (bgpNextHop!=null && !staticNextHop.equals(bgpNextHop)) {
+                        lineMap.put(nodeInSameAS, ConfigTaint.staticRouteLinesFinder(nodeInSameAS, errGenerator.getStaticTree().getBestRoute(nodeInSameAS).getPrefix()));
+                    }
+                }
+                checkedNodes.add(nodeInSameAS);
+            }
+        }
+        if (ifSave) {
+            if (lineMap.size()>0) {
+                serializeToFile(inputData.getPreResultFilePath(caseType, errorType), lineMap);
+            } 
+        }
+        return lineMap;
+    }
+
 
     public Map<String, Map<Integer, String>> localize(boolean ifSave) {
         String violatedRulePath = inputData.getViolateRulePath(caseType, errorType);
@@ -119,6 +162,7 @@ public class BgpDiagnosis {
         }
         return errlines;
     }
+
 
     public Map<String, String> genCfgPathEachNode() {
         cfgPathMap = new HashMap<>();
@@ -176,13 +220,16 @@ public class BgpDiagnosis {
         Map<String, Map<Integer, String>> errMap = new HashMap<>();
         // 输入是violated condition文件的路径
         Map<String, Violation> violations = genViolationsFromFile(filePath);
-        if (violations==null || violations.size()<1) {
-            return null;
+        if (violations!=null && violations.size()>0) {
+            violations.forEach((node, vio)->{
+                errMap.put(node, vio.localize(node, generator));
+            });
+            return errMap.entrySet().stream().filter(m->m.getValue()!=null && m.getValue().size()>0).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));  
+        } else {
+            return errMap;
         }
-        violations.forEach((node, vio)->{
-            errMap.put(node, vio.localize(node, generator));
-        });
-        return errMap.entrySet().stream().filter(m->m.getValue()!=null && m.getValue().size()>0).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));  
+        
+        
     }
 
     // 把peer connection这种双向的错误分发到两端的设备上
@@ -217,4 +264,28 @@ public class BgpDiagnosis {
         }
         return violations;
     }
+
+    public boolean isOldBgpTreeCorrect(Set<String> nodes) {
+        // 判断所有任一node，及其AS内其他所有节点是否都有forwarding path
+        boolean flag = true;
+        Set<String> checkedNodes = new HashSet<>();
+        for (String node : nodes) {
+            Set<String> nodesInSameAS = errGenerator.getBgpTopology().getAllNodesInSameAs(node);
+            for (String nodeInSameAS : nodesInSameAS) {
+                if (checkedNodes.contains(nodeInSameAS)) {
+                    continue;
+                }
+                if (errGenerator.getBgpTree().getForwardingPath(nodeInSameAS, errGenerator.getDstDevName())==null) {
+                    flag = false;
+                    break;
+                }
+                checkedNodes.add(nodeInSameAS);
+            }
+            if (!flag) {
+                break;
+            }
+        }
+        return flag;
+    }
+
 }

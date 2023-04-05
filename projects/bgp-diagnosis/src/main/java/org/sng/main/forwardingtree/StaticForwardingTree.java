@@ -1,6 +1,7 @@
 package org.sng.main.forwardingtree;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +9,7 @@ import java.util.Map;
 import org.sng.datamodel.Prefix;
 import org.sng.main.BgpDiagnosis;
 import org.sng.main.common.Layer2Topology;
-import org.sng.main.common.LocalRoute;
+import org.sng.main.common.StaticRoute;
 import org.sng.main.util.ConfigTaint;
 import org.sng.main.util.KeyWord;
 
@@ -23,7 +24,7 @@ public class StaticForwardingTree {
     private Prefix _dstPrefix;
     private String _dstDevName;
 
-    private Map<String, List<LocalRoute>> _routeMap;
+    private Map<String, List<StaticRoute>> _routeMap;
 
     public StaticForwardingTree(String dstDev, Prefix prefix) {
         _dstDevName = dstDev;
@@ -34,6 +35,24 @@ public class StaticForwardingTree {
 
     public String getNextHop(String node) {
         return _nextHopForwardingMap.get(node);
+    }
+
+    public int getRoutePref(String node) {
+        if (_routeMap.containsKey(node) && _routeMap.get(node).size()>0) {
+            return getMaxPrefRoute(_routeMap.get(node)).getPref();
+        }
+        throw new IllegalArgumentException("Node (" + node + ")" + "has not target static route");
+    }
+
+    public StaticRoute getBestRoute(String node) {
+        if (_routeMap.containsKey(node) && _routeMap.get(node).size()>0) {
+            return getMaxPrefRoute(_routeMap.get(node));
+        }
+        throw new IllegalArgumentException("Node (" + node + ")" + "has not target static route");
+    }
+
+    public StaticRoute getMaxPrefRoute(List<StaticRoute> routes) {
+        return routes.stream().min(Comparator.comparing(StaticRoute::getPref)).get();
     }
     
     public StaticForwardingTree serializeStaticTreeFromProvJson(JsonObject jsonObject, String ip, Layer2Topology layer2Topology) {
@@ -52,9 +71,9 @@ public class StaticForwardingTree {
                         // String nextHopIface = route_raw.getAsJsonObject().get(KeyWord.OUT_INFO).getAsJsonObject().get(KeyWord.IFACE_NAME).getAsString();
                         // String nextHopIp = route_raw.getAsJsonObject().get(KeyWord.OUT_INFO).getAsJsonObject().get(KeyWord.IFACE_IP).getAsString();
                         if (!_routeMap.containsKey(node)) {
-                            _routeMap.put(node, new ArrayList<LocalRoute>());
+                            _routeMap.put(node, new ArrayList<StaticRoute>());
                         }
-                        LocalRoute route = new Gson().fromJson(route_raw.toString(), LocalRoute.class);
+                        StaticRoute route = new Gson().fromJson(route_raw.toString(), StaticRoute.class);
                         route.checkPrefix();
                         // 加上pref值
                         route = ConfigTaint.staticRouteFinder(cfgPathMap.get(node), route);

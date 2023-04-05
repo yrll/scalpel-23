@@ -447,5 +447,8 @@ public class BgpForwardingTree {
         return nodesInTree.size()==0;
     }
 
+    public String getBestNextHop(String node) {
+        return _nextHopForwardingMap.get(node);
+    }
 
 }

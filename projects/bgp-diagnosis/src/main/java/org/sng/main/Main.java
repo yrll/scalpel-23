@@ -14,14 +14,14 @@ public class Main {
         Logger logger = Logger.getLogger(KeyWord.LOGGER_NAME);
         logger.setLevel(Level.WARNING);
 
-        String caseType = "1.1";
+        String caseType = "2.3";
         ErrorType type = ErrorType.BGP;
 
         Set<String> reachNodes = new HashSet<>();
         reachNodes.add("BNG1");
         
         BgpDiagnosis diagnoser = new BgpDiagnosis(caseType, type);
-        diagnoser.diagnose(reachNodes, null, false);
+        diagnoser.diagnose(reachNodes, null, true);
         diagnoser.localize(true);
         System.out.println("pause");
 
