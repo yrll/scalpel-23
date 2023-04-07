@@ -81,7 +81,8 @@ public class JsonParser {
     }
 
     /** 从JSON对象"dstPrefix2ImportNodes"获取每个prefix的路由导入信息 **/
-    public static Map<Prefix,List<IsisEdge>> parsePrefixImportEdges(JsonObject prefixImport, Set<IsisNode> isisNodeList){
+    public static Map<Prefix,List<IsisEdge>> parsePrefixImportEdges(JsonObject prefixImport, Set<IsisNode> isisNodeList,
+                                                                    Map<String, Configuration> configurations){
         Map<Prefix,List<IsisEdge>> prefixEdgesMap = new HashMap<>();
 
         for (Map.Entry<String, JsonElement> entry : prefixImport.entrySet()){
@@ -98,18 +99,39 @@ public class JsonParser {
                 IsisNode dstNode = getExistingNode(isisNodeList,devName,dstIsisId);
 
                 // ISIS进程导入信息
-                if (srcProtocol.equals("ISIS")){
+                if ("ISIS".equals(srcProtocol)){
                     int srcIsisId = importInfo.get("srcIsisProc").getAsInt();
                     IsisNode srcNode = getExistingNode(isisNodeList,devName,srcIsisId);
                     IsisEdgeValue isisEdgeValue = new IsisEdgeValue("null","null",cost);
                     isisEdgeSet.add(new IsisEdge(srcNode,dstNode,isisEdgeValue));
                 }
                 // 其他协议导入信息（direct，static）
-                else {
-                    IsisNode srcNode = IsisNode.creatDirectNode(devName);
-                    String srcDevIf = importInfo.get("srcDevIf").getAsString();
-                    IsisEdgeValue isisEdgeValue = new IsisEdgeValue("null",srcDevIf,cost);
+                else if ("DIRECT".equals(srcProtocol)){
+                    String srcDevIfName = importInfo.get("srcDevIf").getAsString();
+                    Configuration devConfig = configurations.get(devName);
+                    // todo: 暂时没有处理设备名相同的情况
+                    assert devConfig != null;
+                    Interface srcIface = devConfig.getInterfaces().get(srcDevIfName);
+                    IsisNode srcNode = null;
+                    // 如果直连端口开启isis进程，不是协议重分发
+                    if (srcIface.getIsisEnable() != null){
+                        srcNode = IsisNode.creatDirectEnableNode(devName);
+                    }
+                    // 否则，从direct协议重分发到ISIS
+                    else {
+                        srcNode = IsisNode.creatDirectImportNode(devName);
+                    }
+                    IsisEdgeValue isisEdgeValue = new IsisEdgeValue("null",srcDevIfName,cost);
                     isisEdgeSet.add(new IsisEdge(srcNode,dstNode,isisEdgeValue));
+                }
+                else if ("STATIC".equals(srcProtocol)) {
+                    String srcDevIfName = importInfo.get("srcDevIf").getAsString();
+                    IsisNode srcNode = IsisNode.creatStaticImportNode(devName);
+                    IsisEdgeValue isisEdgeValue = new IsisEdgeValue("null",srcDevIfName,cost);
+                    isisEdgeSet.add(new IsisEdge(srcNode,dstNode,isisEdgeValue));
+                }
+                else {
+                    System.out.println("暂未考虑该协议"+srcProtocol);
                 }
             }
             prefixEdgesMap.put(prefix,new ArrayList<>(isisEdgeSet));
@@ -182,17 +204,17 @@ public class JsonParser {
         for (JsonElement element: elements){
             JsonObject configObject = (JsonObject) element;
             String uniqueName = configObject.get("uniqName").getAsString();
-            List<Interface> allIfaceConfigs = getAllIfaceConfigs(configObject.get("allInterfaces").getAsJsonObject());
+            Map<String,Interface> allIfaceConfigs = getAllIfaceConfigs(configObject.get("allInterfaces").getAsJsonObject());
             List<IpPrefixesV4Info> allIpPrefixesV4Info = getAllIpPrefixesV4Info(configObject.get("allIpPrefixesV4Info").getAsJsonObject());
-            List<IsisConfiguration> isisConfigurations = getIsisConfigurations(configObject.get("isisIds").getAsJsonObject(), allIpPrefixesV4Info);
+            Map<Integer,IsisConfiguration>isisConfigurations = getIsisConfigurations(configObject.get("isisIds").getAsJsonObject(), allIpPrefixesV4Info);
             configurations.put(uniqueName,new Configuration(uniqueName,allIfaceConfigs,isisConfigurations));
         }
         return configurations;
     }
 
     /** 解析接口配置 **/
-    private static List<Interface> getAllIfaceConfigs(JsonObject allInterfacesObject){
-        List<Interface> allIfaceConfigs = new ArrayList<>();
+    private static Map<String,Interface>getAllIfaceConfigs(JsonObject allInterfacesObject){
+        Map<String,Interface> allIfaceConfigs = new HashMap<>();
         List<JsonElement> elements = new ArrayList<>(allInterfacesObject.asMap().values());
         for (JsonElement element: elements){
             JsonObject ifaceConfigObject = (JsonObject) element;
@@ -216,7 +238,7 @@ public class JsonParser {
             Integer vlanTypeDotLq = ifaceConfigObject.get("vlanTypeDotLq").isJsonNull() ? null : ifaceConfigObject.get("vlanTypeDotLq").getAsInt();
             String ipv6MtuAndSpread = ifaceConfigObject.get("ipv6MtuAndSpread").getAsJsonObject().asMap().keySet().stream().findFirst().get();
 
-            allIfaceConfigs.add(new Interface(name,vpnName, phyIfOrEthTrunk, originalAddress,isShutdown,isisEnable, isisSilent2ZeroCost, isisCost,tagValue,circuitTypeP2P,vlanTypeDotLq,ipv6MtuAndSpread));
+            allIfaceConfigs.put(name,new Interface(name,vpnName, phyIfOrEthTrunk, originalAddress,isShutdown,isisEnable, isisSilent2ZeroCost, isisCost,tagValue,circuitTypeP2P,vlanTypeDotLq,ipv6MtuAndSpread));
         }
         return allIfaceConfigs;
     }
@@ -247,8 +269,8 @@ public class JsonParser {
     }
 
     /** 解析ISIS配置信息 **/
-    private static List<IsisConfiguration> getIsisConfigurations(JsonObject isisConfigsObject,List<IpPrefixesV4Info> allIpPrefixesV4Info){
-        List<IsisConfiguration> isisConfigurations = new ArrayList<>();
+    private static Map<Integer,IsisConfiguration> getIsisConfigurations(JsonObject isisConfigsObject,List<IpPrefixesV4Info> allIpPrefixesV4Info){
+        Map<Integer,IsisConfiguration> isisConfigurations = new HashMap<>();
         List<JsonElement> elements = new ArrayList<>(isisConfigsObject.asMap().values());
         for (JsonElement element: elements) {
             JsonObject isisConfigObject = (JsonObject) element;
@@ -263,7 +285,7 @@ public class JsonParser {
             Integer circuitCost = isisConfigObject.get("circuitCost").isJsonNull() ? null : isisConfigObject.get("circuitCost").getAsInt();
             List<IsisRouteImport> routeImports = isisConfigObject.get("importRoutes").isJsonNull() ? null : getRouteImports(isisConfigObject.get("importRoutes").getAsJsonArray(),allIpPrefixesV4Info);
             String networkEntity = isisConfigObject.get("networkEntity").getAsString();
-            isisConfigurations.add(new IsisConfiguration(isisId,isisLevel,vpnName,costStyle,areaId,systemId,summary,loadBalancingNum,circuitCost,routeImports, networkEntity));
+            isisConfigurations.put(isisId,new IsisConfiguration(isisId,isisLevel,vpnName,costStyle,areaId,systemId,summary,loadBalancingNum,circuitCost,routeImports, networkEntity));
         }
 
         return isisConfigurations;

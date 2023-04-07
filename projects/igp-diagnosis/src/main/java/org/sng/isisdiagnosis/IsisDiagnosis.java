@@ -67,7 +67,8 @@ public class IsisDiagnosis {
         // 如果目的前缀没有被发布，加上对应的前缀节点
         if (!_prefixFwdGraphMap.containsKey(dstPrefix)){
             MutableValueGraph<IsisNode,IsisEdgeValue> dstPrefixGraph = Graphs.copyOf(_newCommonGraph);
-            dstPrefixGraph.addNode(IsisNode.creatDirectNode(dstDevice));
+            // todo: 静态路由？
+            dstPrefixGraph.addNode(IsisNode.creatDirectEnableNode(dstDevice));
             _prefixFwdGraphMap.put(dstPrefix,dstPrefixGraph);
         }
         MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph = _prefixFwdGraphMap.get(dstPrefix);
@@ -81,10 +82,13 @@ public class IsisDiagnosis {
 
         // 如果路由可达，诊断转发错误。目前仅考虑了多源发前缀错误，由错误路由导入导致，修复方案为删除对应路由导入。
         if (routeReachability){
-            List<IsisEdge> deleteImports = forwardingDiagnosis(srcNodes,dstNode,dstPrefix,prefixFwdGraph);
-            for (IsisEdge edge: deleteImports){
-                System.out.println(edge.getSource().getDevName()+"-("+edge.getSource().getIsisId()+")\t"
-                        +edge.getTarget().getDevName()+"-("+edge.getTarget().getIsisId()+")");
+            List<IsisEdge> deleteImports = forwardingDiagnosis(srcNodes,dstNode,prefixFwdGraph);
+            if (deleteImports.size() > 0){
+                System.out.println("多源发前缀导致错误，删除以下路由导入");
+                for (IsisEdge isisEdge : deleteImports){
+                    System.out.println(isisEdge.getSource().getDevName()+"-ISIS"+isisEdge.getSource().getIsisId()+"-->"
+                            +isisEdge.getTarget().getDevName()+"-ISIS"+isisEdge.getTarget().getIsisId());
+                }
             }
         }
         // 否则，诊断路由错误
@@ -99,14 +103,20 @@ public class IsisDiagnosis {
             // 如果前缀没有路径到达源节点，构建路径（BFS）
             if(!hasRoutePath){
                 List<IsisEdge> candidateEdges = computeCandidateEdges(_edgesNotPeering,prefixFwdGraphWithImportEdge);
-                List<Set<IsisEdge>> connectEdges = new ArrayList<>(findMinimalConnectEdges(srcNodes, dstNode, prefixFwdGraph, candidateEdges));
-                connectEdgeDiagnosis(connectEdges);
+                Set<Set<IsisEdge>> connectEdges = new HashSet<>(findMinimalConnectEdges(srcNodes, dstNode, prefixFwdGraph, candidateEdges));
+                connectEdgeDiagnosis(connectEdges,dstPrefix);
 
             }
             // 否则，诊断路由导入错误（路由路径上某条边由于导入失败断开）
             else {
-                List<IsisEdge> breakPoints = findImportBreakPoints(srcNodes,dstNode,dstPrefix,prefixFwdGraph,prefixFwdGraphWithImportEdge);
-
+                List<IsisEdge> breakPoints = findImportBreakPoints(srcNodes,dstNode,prefixFwdGraph,prefixFwdGraphWithImportEdge);
+                int i =0;
+                for (IsisEdge breakPoint:breakPoints){
+                    i++;
+                    System.out.println("-------------修复方案"+i+"-------------");
+                    List<String> errorConfigs = isisRouteImportDiagnosis(breakPoint.getSource(),breakPoint.getTarget(),dstPrefix);
+                    printErrorConfigs(breakPoint.getSource(),breakPoint.getTarget(),errorConfigs, IsisErrorType.ErrorType.ISIS_ROUTE_IMPORT_ERROR);
+                }
             }
         }
     }
@@ -137,43 +147,42 @@ public class IsisDiagnosis {
     /** 判断源节点能否到达目的前缀 **/
     private boolean isSrcToPrefixConnected(List<IsisNode> srcNodes, IsisNode dstNode,
                                                   MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph){
-        boolean canReach = true;
+        boolean canReach = false;
 
         if (srcNodes.size() == 1 && srcNodes.get(0).getIsisId() == IsisNode.NEW_ISIS_PROCESS){
-            canReach = false;
+            return false;
         }
-
-        if (canReach){
-            Set<IsisNode> reachableNodes = new HashSet<>();
-            // 从dst找src，因为图的边是路由传播方向
-            for (IsisNode srcNode : srcNodes){
-                reachableNodes.addAll(reverseReachableNodes(prefixFwdGraph,srcNode));
-            }
-            if (!reachableNodes.contains(dstNode)){
-                canReach = false;
+        for (IsisNode srcNode : srcNodes){
+            Set<IsisNode> reachableNodes = reverseReachableNodes(prefixFwdGraph,srcNode);
+            if (reachableNodes.contains(dstNode)){
+                canReach = true;
             }
         }
         return canReach;
     }
 
-    /** 根据配置得到所有的进程间路由引入，对比ISIS转发图得到未生效的路由引入 **/
+    /** 根据配置得到所有的同设备进程间路由引入，对比ISIS转发图得到未生效的路由引入 **/
     private List<IsisEdge> getInvalidImportEdge(MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph, Prefix dstPrefix){
-        List<IsisEdge> existingImportEdges = _prefixEdgesMap.get(dstPrefix);
+        List<IsisEdge> existingImportEdges = _prefixEdgesMap.containsKey(dstPrefix) ? _prefixEdgesMap.get(dstPrefix) : new ArrayList<>();
         List<IsisEdge> invalidImportEdges = new ArrayList<>();
         for (Map.Entry<String,Configuration> configEntry: _configurations.entrySet()){
             String deviceName = configEntry.getKey();
             Configuration configuration = configEntry.getValue();
-            for (IsisConfiguration isisConfiguration:configuration.getIsisConfigurations()){
+            for (IsisConfiguration isisConfiguration:configuration.getIsisConfigurations().values()){
                 IsisNode dstProcess = getNodeFromGrah(deviceName,isisConfiguration.getIsisId(),prefixFwdGraph);
                 // ISIS图中包含了所有配置的进程
                 assert dstProcess != null;
                 for (IsisRouteImport isisRouteImport : isisConfiguration.getImportRoutes()){
-                    // todo：目前只考虑ISIS进程间交互
-                    if (isisRouteImport.getProtocol().equals("ISIS")){
+                    if ("ISIS".equals(isisRouteImport.getProtocol())){
                         IsisNode srcProcess = getNodeFromGrah(deviceName,isisRouteImport.getProtocolId(),prefixFwdGraph);
                         IsisEdge isisEdge = new IsisEdge(srcProcess,dstProcess,new IsisEdgeValue(null,null,isisRouteImport.getCost()));
                         if (!existingImportEdges.contains(isisEdge)){
-                            invalidImportEdges.add(isisEdge);
+                            // 考虑重发布路由不能导入给同节点其他进程 ，判断src进程的路由来源是否只有其他协议
+                            Set<IsisNode> srcProcessPredecessors = prefixFwdGraph.predecessors(srcProcess);
+                            boolean isSrcProcessRedistribute = srcProcessPredecessors.stream().allMatch(pre -> IsisNode.NOT_ISIS_PROTOCOL_IDS.contains(pre.getIsisId()));
+                            if (isSrcProcessRedistribute){
+                                invalidImportEdges.add(isisEdge);
+                            }
                         }
                     }
                 }
@@ -183,11 +192,11 @@ public class IsisDiagnosis {
     }
 
     /** BFS构建连通路径 **/
-    private List<Set<IsisEdge>> findMinimalConnectEdges(List<IsisNode> srcNodes, IsisNode dstNode,
+    private Set<Set<IsisEdge>> findMinimalConnectEdges(List<IsisNode> srcNodes, IsisNode dstNode,
                                                    MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph,
                                                    List<IsisEdge> candidateEdges){
         int maxDepth = 5;
-        List<Set<IsisEdge>> connectEdges = new ArrayList<>();
+        Set<Set<IsisEdge>> connectEdges = new HashSet<>();
 
         // 求初始状态的连通域
         Set<IsisNode> srcReachableNodes = new HashSet<>();
@@ -201,7 +210,7 @@ public class IsisDiagnosis {
         taskQueue.add(new ImmutablePair<>(srcReachableNodes,edges));
 
         // BFS主循环，每次循环选择一个边连接
-        // todo: DFS，启发式选择修复方案
+        // todo:启发式权重
         for (int depth = 0; depth < maxDepth && !taskQueue.isEmpty() ; depth++){
             Queue<Pair<Set<IsisNode>,Set<IsisEdge>>> currentTaskQueue = new LinkedList<>(taskQueue);
             taskQueue.clear();
@@ -228,7 +237,10 @@ public class IsisDiagnosis {
                         newEdges.add(candidateEdge);
                         // 加上边之后，源节点和目的前缀连通，即找到了连通方案
                         if (newSrcComponent.contains(dstNode)){
-                            connectEdges.add(newEdges);
+                            // 考虑重分发路由不能导入到同设备其他进程
+                            if (isEdgesValid(newEdges,dstNode,prefixFwdGraph)){
+                                connectEdges.add(newEdges);
+                            }
                         }
                         // 否则，在下次迭代过程中查找
                         else {
@@ -243,13 +255,29 @@ public class IsisDiagnosis {
         return connectEdges;
     }
 
-    private List<IsisEdge> findImportBreakPoints(List<IsisNode> srcNodes, IsisNode dstNode, Prefix dstPrefix,
+    // 考虑重分发路由不能导入到同设备其他进程
+    private boolean isEdgesValid(Set<IsisEdge> edges, IsisNode dstNode, MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph){
+        if (!IsisNode.NOT_ISIS_PROTOCOL_IDS.contains(dstNode.getIsisId())){
+            return true;
+        }
+        // todo: 这里假设了源发前缀只有一个
+        Set<IsisNode> prefixSuccessors = prefixFwdGraph.successors(dstNode);
+        for (IsisEdge edge: edges){
+            if (prefixSuccessors.contains(edge.getSource())){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** 找到路由导入失败的边 **/
+    private List<IsisEdge> findImportBreakPoints(List<IsisNode> srcNodes, IsisNode dstNode,
                                                  MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph,
                                                  MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraphWithImportEdge){
         List<IsisEdge> breakPoints = new ArrayList<>();
         List<List<IsisNode>> paths = new ArrayList<>();
         for (IsisNode srcNode: srcNodes){
-            paths.addAll(computeForwardingPath(srcNode,dstPrefix,prefixFwdGraphWithImportEdge));
+            paths.addAll(computeForwardingPath(srcNode,prefixFwdGraphWithImportEdge));
         }
         Set<IsisNode> routeReachableNodes = Graphs.reachableNodes(prefixFwdGraph.asGraph(),dstNode);
         for (List<IsisNode> path : paths){
@@ -270,22 +298,22 @@ public class IsisDiagnosis {
         return breakPoints;
     }
 
-    private List<IsisEdge> forwardingDiagnosis(List<IsisNode> srcNodes, IsisNode dstNode, Prefix dstPrefix
-            , MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph){
+    /** 路由可达但转发不可达诊断，目前只考虑了多源发前缀的情况 **/
+    private List<IsisEdge> forwardingDiagnosis(List<IsisNode> srcNodes, IsisNode dstNode, MutableValueGraph<IsisNode, IsisEdgeValue> prefixFwdGraph){
         List<List<IsisNode>> paths = new ArrayList<>();
         for (IsisNode srcNode: srcNodes){
-            paths.addAll(computeForwardingPath(srcNode,dstPrefix,prefixFwdGraph));
+            paths.addAll(computeForwardingPath(srcNode,prefixFwdGraph));
         }
         //如果最优路径的终点不是目的节点，找到对应的import节点并删除
         List<IsisEdge> repairs = new ArrayList<>();
-        PriorityQueue<List<IsisNode>> pq = new PriorityQueue<>(paths.size(), Comparator.comparingInt(path -> computePathWeight(path,prefixFwdGraph)));
+        PriorityQueue<List<IsisNode>> pq = new PriorityQueue<>(paths.size(), Comparator.comparingInt(path -> computePathCost(path,prefixFwdGraph)));
         pq.addAll(paths);
         while (!pq.isEmpty()){
             List<IsisNode> path = pq.poll();
             IsisEdge importEdge = getImportNodeOfPath(path);
             if (!path.get(path.size()-1).equals(dstNode)){
                 repairs.add(importEdge);
-                printPath(path,prefixFwdGraph);
+//                printPath(path,prefixFwdGraph);
             }
             else {
                 break;
@@ -295,13 +323,14 @@ public class IsisDiagnosis {
     }
 
     /** 给定源节点，计算到达目的前缀转发路径 **/
-    private List<List<IsisNode>> computeForwardingPath(IsisNode srcNode, Prefix dstPrefix,ValueGraph<IsisNode, IsisEdgeValue> isisFwdGraph){
+    private List<List<IsisNode>> computeForwardingPath(IsisNode srcNode,ValueGraph<IsisNode, IsisEdgeValue> isisFwdGraph){
         //找到_newCommonGraph内对应的源和目的节点
         IsisNode srcNodeInCommonGraph = getNodeFromGrah(srcNode.getDevName(),srcNode.getIsisId(),_newCommonGraph);
 
         List<List<IsisNode>> paths = new ArrayList<>();
         Set<IsisNode> sameInstanceNodes = reverseReachableNodes(_newCommonGraph,srcNodeInCommonGraph);
-        for (IsisEdge importEdge: _prefixEdgesMap.get(dstPrefix)){
+        List<IsisEdge> importEdges = getImportEdges(isisFwdGraph);
+        for (IsisEdge importEdge: importEdges){
             IsisNode importNode = importEdge.getTarget();
             // 找到引入节点，使用SPF计算源节点到各引入节点的路径
             if (sameInstanceNodes.contains(importNode)){
@@ -309,14 +338,15 @@ public class IsisDiagnosis {
                 IsisNode originNode = importEdge.getSource();
                 shortestPath.add(originNode);
                 // 如果引入节点是源发节点，返回结果
-                if (originNode.getIsisId() == IsisNode.DIRECT ){
+                if (IsisNode.PREFIX_ORIGIN_IDS.contains(originNode.getIsisId())){
                         paths.add(shortestPath);
                 }
                 // 否则，递归查找下一个ISIS实例的路径，与当前的路径进行组合
                 else {
-                    List<List<IsisNode>> followPaths = computeForwardingPath(originNode,dstPrefix,isisFwdGraph);
+                    List<List<IsisNode>> followPaths = computeForwardingPath(originNode,isisFwdGraph);
                     for (List<IsisNode> followPath: followPaths){
                         List<IsisNode> combinePath = new ArrayList<>(shortestPath);
+                        followPath.remove(originNode);
                         combinePath.addAll(followPath);
                         paths.add(combinePath);
                     }
@@ -324,6 +354,14 @@ public class IsisDiagnosis {
             }
         }
         return paths;
+    }
+
+    /** 找到所有路由引入的边 **/
+    private List<IsisEdge> getImportEdges(ValueGraph<IsisNode, IsisEdgeValue> isisFwdGraph){
+        return isisFwdGraph.edges().stream()
+                .filter(endPointPair -> endPointPair.source().getDevName().equals(endPointPair.target().getDevName()))
+                .map(endPointPair -> new IsisEdge(endPointPair.source(),endPointPair.target(),isisFwdGraph.edgeValue(endPointPair.source(),endPointPair.target()).get()))
+                .collect(Collectors.toList());
     }
 
     /** 使用Dijkstra算法寻找在同一个ISIS实例下的最短路径 **/
@@ -368,7 +406,8 @@ public class IsisDiagnosis {
         return path;
     }
 
-    private int computePathWeight(List<IsisNode> path,ValueGraph<IsisNode, IsisEdgeValue> isisFwdGraph){
+    /** 计算路径cost **/
+    private int computePathCost(List<IsisNode> path,ValueGraph<IsisNode, IsisEdgeValue> isisFwdGraph){
         int weight = 0;
         IsisNode head = path.get(0);
         for (int i = 1; i < path.size(); i++ ){
@@ -534,7 +573,7 @@ public class IsisDiagnosis {
     private IsisNode getDstNode(String devName, Set<IsisNode> nodes){
         IsisNode dstNode = null;
         for (IsisNode node: nodes){
-            if (node.getDevName().equals(devName) && node.getIsisId() == IsisNode.DIRECT){
+            if (node.getDevName().equals(devName) && IsisNode.PREFIX_ORIGIN_IDS.contains(node.getIsisId())){
                 dstNode = node;
                 break;
             }
@@ -582,7 +621,7 @@ public class IsisDiagnosis {
     }
 
     /** 根据配置找到添加ISIS邻居或进程间路由导入的修复方案 **/
-    private void connectEdgeDiagnosis(List<Set<IsisEdge>> connectEdges){
+    private void connectEdgeDiagnosis(Set<Set<IsisEdge>> connectEdges, Prefix dstPrefix){
         int i =0;
         for (Set<IsisEdge> connectEdgeList:connectEdges){
             i++;
@@ -592,15 +631,13 @@ public class IsisDiagnosis {
                 IsisNode tail = edge.getTarget();
                 // 修改配置使得ISIS进程间路由导入成功
                 if (head.getDevName().equals(tail.getDevName())){
-                    continue;
+                    List<String> errorConfigs = isisRouteImportDiagnosis(head,tail,dstPrefix);
+                    printErrorConfigs(head,tail,errorConfigs, IsisErrorType.ErrorType.ISIS_ROUTE_IMPORT_ERROR);
                 }
                 // 修改配置使得ISIS邻居能够建立
                 else {
-                    System.out.println(head.getDevName()+"与"+tail.getDevName()+"建立ISIS邻居:");
                     List<String> errorConfigs = isisIpv4PeerDiagnosis(head,tail);
-                    for (String errorConfig : errorConfigs){
-                        System.out.println("*\t"+errorConfig);
-                    }
+                    printErrorConfigs(head,tail,errorConfigs, IsisErrorType.ErrorType.ISIS_PEER_ERROR);
                 }
             }
         }
@@ -620,10 +657,12 @@ public class IsisDiagnosis {
 
         // 考虑多个物理连接情况
         for (Layer1Edge layer1Edge: layer1Edges){
-            Interface headIfaceConfig = getIfaceConfig(layer1Edge.getNode1().getInterfaceName(),headConfig);
-            Interface tailIfaceConfig = getIfaceConfig(layer1Edge.getNode2().getInterfaceName(),tailConfig);
+            Interface headIfaceConfig = headConfig.getInterfaces().get(layer1Edge.getNode1().getInterfaceName());
+            Interface tailIfaceConfig = tailConfig.getInterfaces().get(layer1Edge.getNode2().getInterfaceName());
             List<IsisErrorType.IsisPeerErrorType> errorTypeList = new ArrayList<>();
-
+            // 记录实际比较的端口
+            Interface effectiveHeadIface = headIfaceConfig;
+            Interface effectiveTailIface = tailIfaceConfig;
             // 有一边端口没有配置
             if (headIfaceConfig == null || tailIfaceConfig == null){
                 if (headIfaceConfig == null ) {
@@ -654,13 +693,13 @@ public class IsisDiagnosis {
                     if (ethTrunks.contains(ethTrunkEdge)){
                         continue;
                     }
-                    headIfaceConfig = getIfaceConfig(headEthTrunkName,headConfig);
-                    tailIfaceConfig = getIfaceConfig(tailEthTrunkName,tailConfig);
-                    if (headIfaceConfig == null || tailIfaceConfig == null){
-                        if (headIfaceConfig == null ) {
+                    effectiveHeadIface = headConfig.getInterfaces().get(headEthTrunkName);
+                    effectiveTailIface = tailConfig.getInterfaces().get(tailEthTrunkName);
+                    if (effectiveHeadIface == null || effectiveTailIface == null){
+                        if (effectiveHeadIface == null ) {
                             errorTypeList.add(IsisErrorType.IsisPeerErrorType.IS_HEAD_INTERFACE_UP);
                         }
-                        if (tailIfaceConfig  == null){
+                        if (effectiveTailIface  == null){
                             errorTypeList.add(IsisErrorType.IsisPeerErrorType.IS_TAIL_IFACE_STATE_UP);
                         }
                         isEthTrunkValid = false;
@@ -677,17 +716,19 @@ public class IsisDiagnosis {
                     tailIfaceSubIfaces.add(tailIfaceConfig);
                     if (!headIfaceConfig.getIsShutdown()){
                         String headIfaceName = headIfaceConfig.getName();
-                        headIfaceSubIfaces.addAll(headConfig.getInterfaces().stream().filter(i -> i.getName().contains(headIfaceName+".")).collect(Collectors.toList()));
+                        headIfaceSubIfaces.addAll(headConfig.getInterfaces().values().stream().filter(i -> i.getName().contains(headIfaceName+".")).collect(Collectors.toList()));
                     }
                     if (!tailIfaceConfig.getIsShutdown()){
                         String tailIfaceName = tailIfaceConfig.getName();
-                        tailIfaceSubIfaces.addAll(tailConfig.getInterfaces().stream().filter(i -> i.getName().contains(tailIfaceName+".")).collect(Collectors.toList()));
+                        tailIfaceSubIfaces.addAll(tailConfig.getInterfaces().values().stream().filter(i -> i.getName().contains(tailIfaceName+".")).collect(Collectors.toList()));
                     }
                     int errorWeight = Integer.MAX_VALUE;
                     for (Interface headSubIface: headIfaceSubIfaces){
                         for (Interface tailSubIface: tailIfaceSubIfaces){
                             List<IsisErrorType.IsisPeerErrorType> subIfacePeerErrors = isisIpv4PeerIfaceDiagnosis(headConfig,headSubIface,tailConfig,tailSubIface);
                             if(subIfacePeerErrors.size() < errorWeight){
+                                effectiveHeadIface = headSubIface;
+                                effectiveTailIface = tailSubIface;
                                 errorTypeList = subIfacePeerErrors;
                             }
                         }
@@ -699,7 +740,7 @@ public class IsisDiagnosis {
             if (errorConfigs.size() == 0 || errorTypeList.size() < errorConfigs.size()){
                 errorConfigs.clear();
                 for (IsisErrorType.IsisPeerErrorType errorType: errorTypeList){
-                    errorConfigs.addAll(mapIsisPeerErrorToConfig(errorType,headConfig, headIfaceConfig,tailConfig,tailIfaceConfig));
+                    errorConfigs.add(mapIsisPeerErrorToConfig(errorType,headConfig, effectiveHeadIface,tailConfig,effectiveTailIface));
                 }
             }
         }
@@ -707,6 +748,7 @@ public class IsisDiagnosis {
         return errorConfigs;
     }
 
+    /** 在两个端口进程生效的前提下，诊断导致ISIS邻居失效的错误端口配置 **/
     private List<IsisErrorType.IsisPeerErrorType> isisIpv4PeerIfaceDiagnosis(Configuration headConfig,Interface headIfaceConfig,
                                                                              Configuration tailConfig, Interface tailIfaceConfig){
         Map<IsisErrorType.IsisPeerErrorType,Boolean> predicates = new HashMap<>();
@@ -717,14 +759,18 @@ public class IsisDiagnosis {
         boolean isisTailProcConfigValid = true;
         if (isisHeadEnable){
             int headIsisId = headIfaceConfig.getIsisEnable();
-            isisHeadProcConfigValid = headConfig.getIsisConfigurations().stream().anyMatch(isisConfig -> (isisConfig.getIsisId()== headIsisId && isisConfig.getNetworkEntity()!=null));
+            isisHeadProcConfigValid = headConfig.getIsisConfigurations().containsKey(headIsisId) &&
+                    headConfig.getIsisConfigurations().get(headIsisId).getNetworkEntity() != null;
         }
         if (isisTailEnable){
             int tailIsisId = tailIfaceConfig.getIsisEnable();
-            isisTailProcConfigValid = tailConfig.getIsisConfigurations().stream().anyMatch(isisConfig -> (isisConfig.getIsisId()== tailIsisId && isisConfig.getNetworkEntity()!=null));
+            isisTailProcConfigValid = tailConfig.getIsisConfigurations().containsKey(tailIsisId) &&
+                    tailConfig.getIsisConfigurations().get(tailIsisId).getNetworkEntity() != null;
         }
         boolean circuitTypeCoincide = headIfaceConfig.getCircuitTypeP2P().equals(tailIfaceConfig.getCircuitTypeP2P());
-        boolean isisPeerNoSilent = !headIfaceConfig.getIsisSilent2ZeroCost() && !tailIfaceConfig.getIsisSilent2ZeroCost();
+        boolean isisHeadPeerNoSilent =  !headIfaceConfig.getIsisSilent2ZeroCost();
+        boolean isisTailPeerNoSilent =  !tailIfaceConfig.getIsisSilent2ZeroCost();
+
         boolean isHeadIfaceShutDown = !headIfaceConfig.getIsShutdown();
         boolean isTailIfaceShutDown = !tailIfaceConfig.getIsShutdown();
         boolean isHeadIfaceStateUp = headIfaceConfig.getOriginalAddress()!=null;
@@ -742,7 +788,8 @@ public class IsisDiagnosis {
         predicates.put(IsisErrorType.IsisPeerErrorType.CIRCUIT_TYPE_COINCIDE,circuitTypeCoincide);
         predicates.put(IsisErrorType.IsisPeerErrorType.ISIS_HEAD_PROC_CONFIG_VALID,isisHeadProcConfigValid);
         predicates.put(IsisErrorType.IsisPeerErrorType.ISIS_TAIL_PROC_CONFIG_VALID,isisTailProcConfigValid);
-        predicates.put(IsisErrorType.IsisPeerErrorType.ISIS_PEER_NO_SILENT,isisPeerNoSilent);
+        predicates.put(IsisErrorType.IsisPeerErrorType.ISIS_HEAD_PEER_NO_SILENT,isisHeadPeerNoSilent);
+        predicates.put(IsisErrorType.IsisPeerErrorType.ISIS_TAIL_PEER_NO_SILENT,isisTailPeerNoSilent);
         predicates.put(IsisErrorType.IsisPeerErrorType.IS_HEAD_IFACE_SHUT_DOWN,isHeadIfaceShutDown);
         predicates.put(IsisErrorType.IsisPeerErrorType.IS_TAIL_IFACE_SHUT_DOWN,isTailIfaceShutDown);
         predicates.put(IsisErrorType.IsisPeerErrorType.IS_HEAD_IFACE_STATE_UP,isHeadIfaceStateUp);
@@ -750,78 +797,76 @@ public class IsisDiagnosis {
         predicates.put(IsisErrorType.IsisPeerErrorType.IS_SAME_SUBNET,isSameSubnet);
         predicates.put(IsisErrorType.IsisPeerErrorType.IS_SAME_VLAN,isSameVlan);
 
-        List<IsisErrorType.IsisPeerErrorType> errors = predicates.entrySet().stream().filter(e->!e.getValue())
+        return predicates.entrySet().stream().filter(e->!e.getValue())
                 .map(Map.Entry::getKey).collect(Collectors.toList());
-        return errors;
     }
 
-    private List<String> mapIsisPeerErrorToConfig(IsisErrorType.IsisPeerErrorType errorType, Configuration headConfig, Interface headIfaceConfig,
+    /** 将ISIS邻居建立错误配置类型映射到配置行 **/
+    private String mapIsisPeerErrorToConfig(IsisErrorType.IsisPeerErrorType errorType, Configuration headConfig, Interface headIfaceConfig,
                                                   Configuration tailConfig, Interface tailIfaceConfig){
-        List<String> errorConfigs = new ArrayList<>();
+        String errorConfig = null;
         switch (errorType){
             case IS_HEAD_INTERFACE_UP:
-                errorConfigs.add(headConfig.getSysName()+"-"+headIfaceConfig.getName()+"端口没有配置");
+                errorConfig = headConfig.getSysName()+"-"+headIfaceConfig.getName()+"端口没有配置";
                 break;
             case IS_TAIL_INTERFACE_UP:
-                errorConfigs.add(tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"端口没有配置");
+                errorConfig = tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"端口没有配置";
                 break;
             case HEAD_ETH_TRUNK_COINCIDE:
-                errorConfigs.add(headConfig.getSysName()+"-"+headIfaceConfig.getName()+"端口没有配置Eth-Trunk口");
+                errorConfig = headConfig.getSysName()+"-"+headIfaceConfig.getName()+"端口没有配置Eth-Trunk口";
                 break;
             case TAIL_ETH_TRUNK_COINCIDE:
-                errorConfigs.add(tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"端口没有配置Eth-Trunk口");
+                errorConfig = tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"端口没有配置Eth-Trunk口";
                 break;
             case INTERFACE_MTU_COMPARE:
-                errorConfigs.add(headConfig.getSysName()+"-"+headIfaceConfig.getName()+"与"
-                        +tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"端口MTU配置不一致");
+                errorConfig = headConfig.getSysName()+"-"+headIfaceConfig.getName()+"与"
+                        +tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"端口MTU配置不一致";
                 break;
             case ISIS_HEAD_ENABLE:
-                errorConfigs.add(headConfig.getSysName()+"-"+headIfaceConfig.getName()+"端口没有使能ISIS进程");
+                errorConfig = headConfig.getSysName()+"-"+headIfaceConfig.getName()+"端口没有使能ISIS进程";
                 break;
             case ISIS_TAIL_ENABLE:
-                errorConfigs.add(tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"端口没有使能ISIS进程");
+                errorConfig = tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"端口没有使能ISIS进程";
                 break;
             case CIRCUIT_TYPE_COINCIDE:
-                errorConfigs.add((headConfig.getSysName()+"-"+headIfaceConfig.getName()+"与"
-                        +tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"端口网络类型配置不一致"));
+                errorConfig = (headConfig.getSysName()+"-"+headIfaceConfig.getName()+"与"
+                        +tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"端口网络类型配置不一致");
                 break;
             case ISIS_HEAD_PROC_CONFIG_VALID:
-                errorConfigs.add(headConfig.getSysName()+"-"+headIfaceConfig.getName()+"配置的进程不存在");
+                errorConfig = headConfig.getSysName()+"-"+headIfaceConfig.getName()+"配置的进程不存在";
                 break;
             case ISIS_TAIL_PROC_CONFIG_VALID:
-                errorConfigs.add(tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"配置的进程不存在");
+                errorConfig = tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"配置的进程不存在";
                 break;
-            case ISIS_PEER_NO_SILENT:
-                if (headIfaceConfig.getIsisSilent2ZeroCost() == true){
-                    errorConfigs.add(headConfig.getSysName()+"-"+headIfaceConfig.getName()+"为抑制状态");
-                }
-                if (tailIfaceConfig.getIsisSilent2ZeroCost() == true){
-                    errorConfigs.add(tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"为抑制状态");
-                }
+            case ISIS_HEAD_PEER_NO_SILENT:
+                errorConfig = headConfig.getSysName()+"-"+headIfaceConfig.getName()+"为抑制状态";
+                break;
+            case ISIS_TAIL_PEER_NO_SILENT:
+                errorConfig = tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"为抑制状态";
                 break;
             case IS_HEAD_IFACE_SHUT_DOWN:
-                errorConfigs.add(headConfig.getSysName()+"-"+headIfaceConfig.getName()+"shutdown");
+                errorConfig = headConfig.getSysName()+"-"+headIfaceConfig.getName()+"shutdown";
                 break;
             case IS_TAIL_IFACE_SHUT_DOWN:
-                errorConfigs.add(tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"shutdown");
+                errorConfig = tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"shutdown";
                 break;
             case IS_HEAD_IFACE_STATE_UP:
-                errorConfigs.add(headConfig.getSysName()+"-"+headIfaceConfig.getName()+"没有配置网段");
+                errorConfig = headConfig.getSysName()+"-"+headIfaceConfig.getName()+"没有配置网段";
                 break;
             case IS_TAIL_IFACE_STATE_UP:
-                errorConfigs.add(tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"没有配置网段");
+                errorConfig = tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"没有配置网段";
                 break;
             case IS_SAME_VLAN:
-                errorConfigs.add(headConfig.getSysName()+"-"+headIfaceConfig.getName()+"与"
-                        +tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"VLAN不一致");
+                errorConfig = headConfig.getSysName()+"-"+headIfaceConfig.getName()+"与"
+                        +tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"VLAN不一致";
                 break;
             case IS_SAME_SUBNET:
-                errorConfigs.add(headConfig.getSysName()+"-"+headIfaceConfig.getName()+"与"
-                        +tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"端口网段不一致");
+                errorConfig = headConfig.getSysName()+"-"+headIfaceConfig.getName()+"与"
+                        +tailConfig.getSysName()+"-"+tailIfaceConfig.getName()+"端口网段不一致";
                 break;
             default:
         }
-        return errorConfigs;
+        return errorConfig;
     }
 
 
@@ -836,20 +881,92 @@ public class IsisDiagnosis {
         return layer1Edges;
     }
 
-    private Interface getIfaceConfig(String ifaceName,Configuration configuration){
-        Interface ifaceConfig = null;
-        for (Interface iface : configuration.getInterfaces()){
-            if (iface.getName().equals(ifaceName)){
-                ifaceConfig = iface;
-                break;
+    private List<String> isisRouteImportDiagnosis(IsisNode head, IsisNode tail, Prefix dstPrefix) {
+        Configuration configuration = _configurations.get(head.getDevName());
+        List<IsisErrorType.IsisRouteImportErrorType> errorTypes = new ArrayList<>();
+        IsisConfiguration tailIsisProcess = configuration.getIsisConfigurations().get(tail.getIsisId());
+        // 若是新加的进程，不存在节点内进程路由导入。所以，进程节点存在于ISIS转发图上，也就是必有对应进程配置
+        assert tailIsisProcess !=null;
+        Interface originIface = null;
+        // 直连路由导入失败
+        if (head.getIsisId() == -1){
+            //查询源发路由端口是否开启了ISIS进程
+            List<Interface> originIfaces = configuration.getInterfaces().values().stream()
+                    .filter(iface -> dstPrefix.equals(iface.getOriginalAddress()))
+                    .collect(Collectors.toList());
+            if (originIfaces.isEmpty()){
+                throw new RuntimeException("节点没有端口源发该前缀");
+            }
+            if (originIfaces.size() !=1 ){
+                throw new RuntimeException("多个端口配置同样的前缀");
+            }
+            originIface = originIfaces.get(0);
+            // 源发端口没有加入ISIS进程
+            if (!Objects.equals(originIface.getIsisEnable(), tail.getIsisId())){
+                errorTypes.add(IsisErrorType.IsisRouteImportErrorType.PREFIX_ISIS_ENABLE);
             }
         }
-        assert ifaceConfig != null;
-        return ifaceConfig;
+        // 进程间路由导入失败
+        else {
+            boolean hasRouteImport = tailIsisProcess.getImportRoutes().stream().anyMatch(routeImport ->
+                    Objects.equals(routeImport.getProtocolId(), head.getIsisId()));
+            // 没有配置路由导入
+            if (!hasRouteImport){
+                errorTypes.add(IsisErrorType.IsisRouteImportErrorType.ISIS_IMPORT_ENABLE);
+            }
+            // 配置了导入，但没能导入成功，诊断路由策略
+            else {
+                IsisRouteImport isisRouteImport = tailIsisProcess.getImportRoutes().stream().filter(routeImport ->
+                        Objects.equals(routeImport.getProtocolId(), head.getIsisId())).collect(Collectors.toList()).get(0);
+                errorTypes.add(IsisErrorType.IsisRouteImportErrorType.IMPORT_POLICY_FILTER);
+            }
+        }
+
+        List<String> errorConfigs = new ArrayList<>();
+        // 启发算法：在多种错误情况中选择错误数量最少的
+        for (IsisErrorType.IsisRouteImportErrorType errorType: errorTypes){
+            errorConfigs.add(mapIsisPeerErrorToConfig(errorType,head,tail,originIface));
+        }
+        return errorConfigs;
     }
 
-    private List<String> isisRouteImportDiagnosis(IsisNode head, IsisNode tail) {
-        return null;
+    /** 将ISIS邻居建立错误配置类型映射到配置行 **/
+    private String mapIsisPeerErrorToConfig(IsisErrorType.IsisRouteImportErrorType errorType, IsisNode head, IsisNode tail,
+                                            Interface originIface){
+        String errorConfig = null;
+        switch (errorType){
+            case PREFIX_ISIS_ENABLE:
+                errorConfig = head.getDevName()+originIface.getName()+"直连路由没有导入到进程"+tail.getIsisId();
+                break;
+            case ISIS_IMPORT_ENABLE:
+                errorConfig = "设备"+tail.getDevName()+"的进程"+tail.getIsisId()+"没有配置对进程"+head.getIsisId()+"的路由导入";
+                break;
+            case IMPORT_POLICY_FILTER:
+                errorConfig ="设备"+tail.getDevName()+"的进程"+tail.getIsisId()+"对进程"+head.getIsisId()+"的策略过滤失败";
+                break;
+            default:
+        }
+        return errorConfig;
+    }
+
+    private void printErrorConfigs(IsisNode head, IsisNode tail,List<String> errorConfigs, IsisErrorType.ErrorType errorType){
+        if (errorConfigs.isEmpty()){
+            return;
+        }
+        switch (errorType){
+            case ISIS_PEER_ERROR:
+                System.out.println(head.getDevName()+"与"+tail.getDevName()+"建立ISIS邻居:");
+                break;
+            case ISIS_ROUTE_IMPORT_ERROR:
+                String headIsisId = IsisNode.PREFIX_ORIGIN_IDS.contains(head.getIsisId()) ? "源发" : "进程"+head.getIsisId();
+                String tailIsisId = IsisNode.PREFIX_ORIGIN_IDS.contains(tail.getIsisId()) ? "源发" : "进程"+tail.getIsisId();
+                System.out.println("将"+head.getDevName()+headIsisId+"的路由导入到"+tailIsisId+":");
+                break;
+            default:
+        }
+        for (String errorConfig : errorConfigs){
+            System.out.println("*\t"+errorConfig);
+        }
     }
 
     /** 根据IP获取源前缀 **/
