@@ -14,15 +14,19 @@ public class Main {
         Logger logger = Logger.getLogger(KeyWord.LOGGER_NAME);
         logger.setLevel(Level.WARNING);
 
-        String caseType = "2.3";
-        ErrorType type = ErrorType.BGP;
+        String caseType = "1.1";
+        ErrorType type = ErrorType.ISIS;
 
         Set<String> reachNodes = new HashSet<>();
-        reachNodes.add("BNG1");
+        reachNodes.add("CSG1-1-1");
         
         BgpDiagnosis diagnoser = new BgpDiagnosis(caseType, type);
+
         diagnoser.diagnose(reachNodes, null, true);
+
         diagnoser.localize(true);
+
+        diagnoser.genIgpConstraints(null, true);
         System.out.println("pause");
 
     }

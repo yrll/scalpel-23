@@ -1,4 +1,4 @@
-package org.sng.main.forwardingtree;
+package org.sng.main.diagnosis;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,16 +16,23 @@ import java.util.regex.Pattern;
 
 import org.sng.datamodel.Ip;
 import org.sng.datamodel.Prefix;
+import org.sng.main.BgpDiagnosis;
+import org.sng.main.InputData;
+import org.sng.main.InputData.ErrorType;
 import org.sng.main.common.BgpPeer;
 import org.sng.main.common.BgpTopology;
 import org.sng.main.common.Interface;
 import org.sng.main.common.Layer2Topology;
-import org.sng.main.forwardingtree.BgpForwardingTree.TreeType;
+import org.sng.main.common.StaticRoute;
+import org.sng.main.diagnosis.BgpForwardingTree.TreeType;
 import org.sng.main.localization.RouteForbiddenLocalizer;
+import org.sng.main.util.ConfigTaint;
 import org.sng.main.util.KeyWord;
 
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -42,28 +49,34 @@ public class Generator {
 
     private String _dstDevName;
     private Prefix _dstPrefix;
+    private String _vpnName;
+    private boolean _ifMpls;
 
     // 
     private BgpForwardingTree _oldBgpTree;
     private StaticForwardingTree _oldStaticTree;
+    // private BgpForwardingTree _newBgpTree;
 
     private BgpTopology _bgpTopology;
 
     private Layer2Topology _layer2Topology;
 
-    public enum ProtocolPreference {
+
+
+    public enum Protocol {
         IBGP("ibgp", 255),
         EBGP("ebgp", 255),
         MBGP("mbgp", 255),
         STATIC("static", 60),
-        DIRECT("direct", 0);
+        DIRECT("direct", 0),
+        BGP_LOCAL("local", 255);
 
       
         private final String _name;
       
         private final int _preference;
       
-        ProtocolPreference(String originType, int preference) {
+        Protocol(String originType, int preference) {
           _name = originType;
           _preference = preference;
         }
@@ -77,11 +90,25 @@ public class Generator {
         }
       }
 
-    public Generator(String nodeName, String prefix, BgpTopology bgpTopology) {
+    public Generator(String nodeName, String prefix, BgpTopology bgpTopology, String vpnName) {
         _dstDevName = nodeName;
         _dstPrefix = Prefix.parse(prefix);
         _bgpTopology = bgpTopology;
+        _vpnName = vpnName;
+        _ifMpls = !vpnName.equals(KeyWord.PUBLIC_VPN_NAME);
     }
+
+    public boolean ifMpls() {
+        return _ifMpls;
+    }
+
+    public BgpForwardingTree getOldBgpTree() {
+        return _oldBgpTree;
+    }
+
+    // public BgpForwardingTree getNewBgpTree() {
+    //     return _newBgpTree;
+    // }
 
     public BgpTopology getBgpTopology() {
         return _bgpTopology;
@@ -103,10 +130,45 @@ public class Generator {
         return _oldBgpTree;
     }
 
+    public int getNextHopRecursively(List<StaticRoute> routes, Ip ip) {
+        for (StaticRoute staticRoute : routes) {
+            if (staticRoute.getPrefix().containsIp(ip)) {
+                if (staticRoute.getInterface()!=null) {
+                    return 2;
+                } else if (staticRoute.getNextHop()!=null) {
+                    return 1 + getNextHopRecursively(routes, staticRoute.getNextHop());
+                } else {
+                    return 255;
+                }
+            }
+        }
+        return 255;
+    }
+
 
     public int hopNumberToReachIpUsingStatic(String node, Ip ip) {
         // TODO: implement
-        return 2;
+        // 如果是静态路由，
+        String filePath = InputData.getCorrectProvFilePath(BgpDiagnosis.caseType, BgpDiagnosis.errorType, KeyWord.RELATED_STATIC_INFO_FILE);
+        Map<String, Map<String, Map<String, List<StaticRoute>>>> relatedStaticRoutes = genStaticOrDirectRouteFromFile(filePath, Protocol.STATIC);
+        Prefix prefix = ip.toPrefix();
+        int hopNum = 0;
+
+        // TODO： 需要全部的static信息
+        if (ConfigTaint.staticRouteFinder(node, prefix)!=null) {
+            return 2;
+        }
+
+        if (relatedStaticRoutes.containsKey(node)) {
+            if (relatedStaticRoutes.get(node).containsKey(KeyWord.PUBLIC_VPN_NAME)) {
+                List<StaticRoute> routes = new ArrayList<>();
+                relatedStaticRoutes.get(node).get(KeyWord.PUBLIC_VPN_NAME).keySet().forEach(ipName->{
+                    routes.addAll(relatedStaticRoutes.get(node).get(KeyWord.PUBLIC_VPN_NAME).get(ipName));
+                });
+                return getNextHopRecursively(routes, ip);
+            }
+        }
+        return 255;
     }
 
     public void genBgpRoutePropTree(String filePath) {
@@ -124,13 +186,13 @@ public class Generator {
                 case BGP: {
                     // get BGP RIB
                     JsonObject jsonObject = JsonParser.parseString(jsonStr).getAsJsonObject().get(UPT_TABLE).getAsJsonObject();
-                    _oldBgpTree = new BgpForwardingTree(_dstDevName, _dstPrefix);
+                    _oldBgpTree = new BgpForwardingTree(_dstDevName, _dstPrefix, _vpnName);
                     _oldBgpTree.serializeBgpTreeFromProvJson(jsonObject, _dstPrefix.toString(), _bgpTopology);
                     break;
                 }
                 case STATIC: {
                     JsonObject jsonObject = JsonParser.parseString(jsonStr).getAsJsonObject().get(STATIC_INFO).getAsJsonObject();
-                    _oldStaticTree = new StaticForwardingTree(_dstDevName, _dstPrefix);
+                    _oldStaticTree = new StaticForwardingTree(_dstDevName, _dstPrefix, _vpnName);
                     _oldStaticTree.serializeStaticTreeFromProvJson(jsonObject, _dstPrefix.toString(), _layer2Topology);
                     break;
                 } 
@@ -185,14 +247,23 @@ public class Generator {
     }
 
     // 输入是spec中要求可达的节点，如果某个节点X在AS i中，则需要将AS i中其他iBGP节点也加入需要可达的nodes集合
+    // 如果使用隧道，则不需要AS内 full mesh
+    // 返回的节点集合就是要在MST加入的节点
     private Set<String> processReachNodes(Set<String> nodes) {
-        Set<String> reachNodes = new HashSet<>(nodes);
-        nodes.forEach(n->{
-            reachNodes.addAll(_bgpTopology.getAllNodesInSameAs(n));
-        });
-        // 总是移除dst节点
-        reachNodes.remove(_dstDevName);
-        return reachNodes;
+        nodes.remove(_dstDevName);
+        if (!_ifMpls) {
+            Set<String> reachNodes = new HashSet<>(nodes);
+            nodes.forEach(n->{
+                reachNodes.addAll(_bgpTopology.getAllNodesInSameAs(n));
+            });
+            // 总是移除dst节点
+            reachNodes.remove(_dstDevName);
+            return reachNodes;
+        } else {
+            return nodes;
+        }
+        
+        
     }
 
     /*
@@ -225,6 +296,7 @@ public class Generator {
         Map<String, String> primNearestNodeMap = new HashMap<>(_oldBgpTree.getBestRouteFromMap());
         // disMap initialization
         unreachableNodes.stream().forEach(node->distanceMap.put(node, Integer.MAX_VALUE));
+        // TODO: 如果没有serialize到BGPTree时，没有节点和bgp ip的映射，这里会出现bestRouteFrom和nextHopForwarding不一致问题：nextHop有devName，但是bestRouteFrom没有devName
         reachableNodes.stream().forEach(node->distanceMap.put(node, _oldBgpTree.getBestRouteFromPath(node, _dstDevName).size()-1));
         // dstNode init
         distanceMap.put(_dstDevName, 0);
@@ -264,5 +336,45 @@ public class Generator {
         String bgpNextHop = _oldBgpTree.getBestNextHop(node);
         String staticNextHop = _oldStaticTree.getNextHop(node);
         return bgpNextHop.equals(staticNextHop) || staticNextHop.equals("") || staticNextHop==null;
+    }
+
+    // public <T> T matchedSetElement(Set<T> targSet) {
+    //     for (T t : targSet) {
+    //     }
+    // }
+ 
+    public static Map<String, Map<String, Map<String, List<StaticRoute>>>> genStaticOrDirectRouteFromFile(String filePath, Protocol protocol) {
+        String jsonStr = BgpDiagnosis.fromJsonToString(filePath);
+        if (jsonStr==null || jsonStr.equals("")) {
+            return null;
+        }
+        JsonObject jsonObject = JsonParser.parseString(jsonStr).getAsJsonObject();
+        String protocolType = protocol.getProtocol();
+        String targetKey = "";
+        // 检测key值里是否有匹配协议名称的关键字
+        for (String keyString : jsonObject.keySet()) {
+            if (keyString.toLowerCase().contains(protocolType)) {
+                targetKey = keyString;
+                break;
+            }
+        }
+        // 没有关键词则返回
+        if (targetKey.equals("")) {
+            return null;
+        }
+        // 按照返回类型格式解析相应的json对象
+        jsonStr = jsonObject.get(targetKey).toString();
+        // Map<String, Map<String, List<StaticRoute>>> routes = new Gson().fromJson(jsonStr, new TypeToken<Map<String, Map<String, List<StaticRoute>>>>() {}.getType());
+        return new Gson().fromJson(jsonStr, new TypeToken<Map<String, Map<String, Map<String, List<StaticRoute>>>>>() {}.getType());
+    }
+
+    public Map<String, Set<Node>> computeReachIgpNodes(BgpForwardingTree newBgpTree) {
+        if (newBgpTree!=null) {
+            return newBgpTree.computeReachIgpNodes(_bgpTopology);
+        } else if (_oldBgpTree!=null) {
+            return _oldBgpTree.computeReachIgpNodes(_bgpTopology);
+        } else {
+            return null;
+        }
     }
 }

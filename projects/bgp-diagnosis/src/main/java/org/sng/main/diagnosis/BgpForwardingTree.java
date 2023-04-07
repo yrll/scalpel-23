@@ -1,4 +1,4 @@
-package org.sng.main.forwardingtree;
+package org.sng.main.diagnosis;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.io.ObjectInputFilter.Config;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,6 +29,8 @@ import org.sng.main.common.BgpTopology;
 import org.sng.main.common.BgpPeer.BgpPeerType;
 import org.sng.main.conditions.BgpCondition;
 import org.sng.main.conditions.SelectionRoute;
+import org.sng.main.diagnosis.Generator.Protocol;
+import org.sng.main.util.ConfigTaint;
 import org.sng.main.util.KeyWord;
 
 import com.google.gson.Gson;
@@ -40,6 +43,12 @@ import com.google.gson.JsonObject;
  */
 
 public class BgpForwardingTree {
+    private int _ebgpPref = Protocol.EBGP.getPreference();
+    private int _ibgpPref = Protocol.IBGP.getPreference();
+    private int _bgpLocalPref = Protocol.BGP_LOCAL.getPreference();
+
+    private String _vpnName;
+    private boolean _ifMpls;
     // Destination (origin) router and the prefix in it.
     private Prefix _dstPrefix;
     private String _dstDevName;
@@ -51,11 +60,18 @@ public class BgpForwardingTree {
     // The best route source map is for each router to receive and select its best route
     // 【路由级】路由传播和优选的from节点 
     private Map<String, String> _bestRouteFromMap;
-
-    private Set<String> _unreachableNodes;
-
-
-    private boolean _ifMpls;
+    // 一开始路由不可达的节点集合
+    private Set<String> _unreachableNodesPrev;
+    // 一开始接收的可达路由的集合, 最优的, 最长前缀匹配的
+    private Map<String, BgpRoute> _bestRouteMap;
+    
+    public int getRouteTypePref(Protocol protocol) {
+        switch (protocol) {
+            case EBGP: return _ebgpPref;
+            case IBGP: return _ibgpPref;
+            default: return _bgpLocalPref;
+        }
+    }
 
     public enum TreeType {
         BGP,
@@ -67,10 +83,14 @@ public class BgpForwardingTree {
         BEST_FORWARDING
     }
 
+    public BgpRoute getBestBgpRoute(String node) {
+        return _bestRouteMap.get(node);
+    }
+
     public String chooseFirstNodeHasUnreachablePeer(BgpTopology bgpTopology) {
         Set<String> reachNodes = getReachableNodes();
         for (String node : reachNodes) {
-            if (bgpTopology.getConfiguredPeers(node).stream().filter(n->_unreachableNodes.contains(n)).count()>0) {
+            if (bgpTopology.getConfiguredPeers(node).stream().filter(n->_unreachableNodesPrev.contains(n)).count()>0) {
                 return node;
             }
         }
@@ -83,13 +103,28 @@ public class BgpForwardingTree {
         _dstPrefix = Prefix.ZERO;
         _nextHopForwardingMap = new HashMap<>();
         _bestRouteFromMap = new HashMap<>();
+        _bestRouteMap = new HashMap<>();
+        _vpnName = KeyWord.PUBLIC_VPN_NAME;
+        _ifMpls = false;
     }
-    public BgpForwardingTree(String dstDev, Prefix prefix) {
+    public BgpForwardingTree(String dstDev, Prefix prefix, String vpnName) {
         _dstDevName = dstDev;
         _dstPrefix = prefix;
         _nextHopForwardingMap = new HashMap<>();
         _bestRouteFromMap = new HashMap<>();
-        _ifMpls = false;
+        _vpnName = vpnName;
+        _bestRouteMap = new HashMap<>();
+        _ifMpls = !vpnName.equals(KeyWord.PUBLIC_VPN_NAME);
+    }
+
+    public BgpForwardingTree(String dstDev, Prefix prefix, String vpnName, boolean ifMpls) {
+        _dstDevName = dstDev;
+        _dstPrefix = prefix;
+        _nextHopForwardingMap = new HashMap<>();
+        _bestRouteFromMap = new HashMap<>();
+        _ifMpls = ifMpls;
+        _vpnName = vpnName;
+        _bestRouteMap = new HashMap<>();
     }
 
     public String getDstDevName() {
@@ -97,7 +132,7 @@ public class BgpForwardingTree {
     } 
 
     public void setUnreachableNodes(Set<String> nodes) {
-        _unreachableNodes = nodes;
+        _unreachableNodesPrev = nodes;
     }
 
     public void addNextHopForwardingEdge(String head, String tail) {
@@ -138,7 +173,7 @@ public class BgpForwardingTree {
     }
 
     public Set<String> getUnreachableNodes() {
-        return _unreachableNodes;
+        return _unreachableNodesPrev;
     }
 
     // RECONSTRUCTION: genNewTree
@@ -193,46 +228,64 @@ public class BgpForwardingTree {
         }   
     }
 
+    private void setProtocolPref() {
+        List<Integer> prefList = ConfigTaint.getBgpIpv4Preference(_dstDevName, _vpnName);
+        if (prefList!=null && prefList.size()==3) {
+            _ebgpPref = prefList.get(0);
+            _ibgpPref = prefList.get(1);
+            _bgpLocalPref = prefList.get(2);
+        }
+    }
+
     public Set<String> serializeBgpTreeFromProvJson(JsonObject jsonObject, String ip, BgpTopology bgpTopology) {
         // input "updateInfo" as jsonObject
-        _unreachableNodes = new HashSet<>(bgpTopology.getAllNodes().keySet());
+        // 解析配置里对该(vpn)ip的preference
+        setProtocolPref();
+        Prefix tagetPrefix = Prefix.parse(ip);
+        _unreachableNodesPrev = new HashSet<>(bgpTopology.getAllNodes().keySet());
         // 移除dst节点, 这是针对BGP的unreachable, 指通过BGP路由不可达的节点集合
         //【prov文件里也不会记录准换后的BGP route，只有准备redistribute出去的static route】
-        _unreachableNodes.remove(_dstDevName);
+        _unreachableNodesPrev.remove(_dstDevName);
 
         for (String node : jsonObject.asMap().keySet()) {
             JsonObject nodeRoutes = jsonObject.asMap().get(node).getAsJsonObject();
-            if (nodeRoutes.get(ip)!=null) {
-                int routeIndex = Integer.MAX_VALUE;
-                for (JsonElement route_raw : nodeRoutes.get(ip).getAsJsonArray()) {
-                    // 保持index最小的route作为bestRoute【prov文件里并不是所有route的index都是从0开始】
-                    int index = Integer.valueOf(route_raw.getAsJsonObject().get(KeyWord.INDEX).getAsString());
-                    if (index >= routeIndex) {
-                        // 以遇到的第一个index最高的为准
-                        continue;
-                    }
-                    routeIndex = index;
-                    JsonObject route = route_raw.getAsJsonObject().get(KeyWord.ROUTE).getAsJsonObject();
+            for (String ipString : nodeRoutes.keySet()) {
+                Prefix curPrefix = Prefix.parse(ipString);
+                if (curPrefix.containsPrefix(tagetPrefix)) {
+                    // 当前RIB表前缀匹配目标前缀
+                    int routeIndex = Integer.MAX_VALUE;
+                    for (JsonElement route_raw : nodeRoutes.get(ipString).getAsJsonArray()) {
+                        // 保持index最小的route作为bestRoute【prov文件里并不是所有route的index都是从0开始】
+                        int index = Integer.valueOf(route_raw.getAsJsonObject().get(KeyWord.INDEX).getAsString());
+                        if (index >= routeIndex) {
+                            // 以遇到的第一个index最高的为准
+                            continue;
+                        }
+                        routeIndex = index;
+                        JsonObject route = route_raw.getAsJsonObject().get(KeyWord.ROUTE).getAsJsonObject();
+                        BgpRoute bgpRoute = new Gson().fromJson(route, BgpRoute.class);
 
-                    String nextHopDev = route.get(KeyWord.NEXT_HOP_DEV).getAsString();
-                    String nextHopIp = route.get(KeyWord.NEXT_HOP_IP).getAsString();
-                    String peerIp = route.get(KeyWord.PEER_IP).getAsString();
-                    String peerDevName = bgpTopology.getNodeNameFromIp(Prefix.parse(peerIp).getEndIp());
-                    
-                    if (_nextHopForwardingMap.containsKey(node)) {
-                        assert _nextHopForwardingMap.get(node).equals(nextHopDev);
+                        String nextHopDev = route.get(KeyWord.NEXT_HOP_DEV).getAsString();
+                        String nextHopIp = route.get(KeyWord.NEXT_HOP_IP).getAsString();
+                        String peerIp = route.get(KeyWord.PEER_IP).getAsString();
+                        String peerDevName = bgpTopology.getNodeNameFromIp(Prefix.parse(peerIp).getEndIp());
+                        if (_bestRouteMap.containsKey(node)) {
+                            Prefix bestRoutePrefix = _bestRouteMap.get(node).getPrefix();
+                            // 新的route前缀更短则更新best*Map
+                            if (bgpRoute.getPrefix().getPrefixLength() > bestRoutePrefix.getPrefixLength()) {
+                                continue;
+                            }
+                        }
+                        _nextHopForwardingMap.put(node, nextHopDev);
+                        _bestRouteMap.put(node, bgpRoute);
+                        _bestRouteFromMap.put(node, peerDevName);
+                        System.out.println("Best route from: " + node + "-->" + peerDevName);
+                        System.out.println("Next-hop from: " + node + "-->" + nextHopDev);
                     }
-                    _nextHopForwardingMap.put(node, nextHopDev);
-                    if (_bestRouteFromMap.containsKey(node)) {
-                        assert _bestRouteFromMap.get(node).equals(peerDevName);
-                    }
-                    _bestRouteFromMap.put(node, peerDevName);
-
-                    System.out.println("Best route from: " + node + "-->" + peerDevName);
-                    System.out.println("Next-hop from: " + node + "-->" + nextHopDev);
-                    
                 }
-            } 
+                
+            }
+
         }
         // 把dst节点也放进来，下一跳是自己
         _bestRouteFromMap.put(_dstDevName,_dstDevName);
@@ -242,11 +295,11 @@ public class BgpForwardingTree {
             // TODO 这里应该用哪个map？
             List<String> path = getForwardingPath(node, _dstDevName);
             if (path!=null) {
-                path.stream().forEach(n->_unreachableNodes.remove(n));
+                path.stream().forEach(n->_unreachableNodesPrev.remove(n));
             }
         }
         assert ifAllConnected();
-        return _unreachableNodes;
+        return _unreachableNodesPrev;
     }
 
     public Map<String, List<String>> getAllInNeighbors(Map<String, String> forwardingMap) {
@@ -372,6 +425,7 @@ public class BgpForwardingTree {
                 continue;
             }
             conds.put(node, new BgpCondition.Builder(_dstPrefix)
+                                            .vpnName(_vpnName)
                                             .propNeighbors(propNeighborMap.get(node))
                                             .acptNeighbors(acptNeighborMap.get(node))
                                             .ibgpPeers(bgpTopology.getBgpPeers(node, propNeighborMap.get(node), BgpPeerType.IBGP))
@@ -449,6 +503,82 @@ public class BgpForwardingTree {
 
     public String getBestNextHop(String node) {
         return _nextHopForwardingMap.get(node);
+    }
+
+    public <T> boolean ifSetContainsSameElement(Set<T> inputSet, T eleT) {
+        for (T t : inputSet) {
+            if (t.equals(eleT)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*
+     * 计算满足转发可达所需的IGP互通的点对集合：
+     * 1）IBGP Peer（只考虑原来在unreachableNodes里的，不在的说明已经可达了）
+     * 2）所有节点BGP路由下一跳
+     */
+    /**
+     * @param bgpTopology
+     * @return
+     */
+    public Map<String, Set<Node>> computeReachIgpNodes(BgpTopology bgpTopology) {
+        Map<String, Set<Node>> reachNodes = new HashMap<>();
+        Map<String, List<String>> inNeighborMap = getAllInNeighbors(_bestRouteFromMap);
+        // Ibgp peer 互达
+        for (String node : inNeighborMap.keySet()) {
+            // 每个node都要和它的所有in节点建立peer关系（双向可达）
+            if (!reachNodes.containsKey(node)) {
+                reachNodes.put(node, new HashSet<Node>());
+            }
+            inNeighborMap.get(node).forEach(peer->{
+                
+                // node到peer可达
+                Ip peerIp;
+                if (bgpTopology.getNodeIp(peer)!=null) {
+                    peerIp = bgpTopology.getNodeIp(peer);
+                } else {
+                    peerIp = _bestRouteMap.get(peer).getPeerIp();
+                }
+                Node reachPeerNode = new Node(peer, peerIp);
+                if (!ifSetContainsSameElement(reachNodes.get(node), reachPeerNode)) {
+                    reachNodes.get(node).add(reachPeerNode);
+                }
+                
+                // peer到node也可达
+                if (!reachNodes.containsKey(peer)) {
+                    reachNodes.put(peer, new HashSet<Node>());
+                }
+                Ip thisIp;
+                if (bgpTopology.getNodeIp(node)!=null) {
+                    thisIp = bgpTopology.getNodeIp(node);
+                } else {
+                    thisIp = _bestRouteMap.get(node).getPeerIp();
+                }
+                Node reachThisNode = new Node(node, thisIp);
+                if (!ifSetContainsSameElement(reachNodes.get(peer), reachThisNode)) {
+                    reachNodes.get(peer).add(reachThisNode);
+                }
+            });
+        }
+        // best-route下一跳可达
+        if (_bestRouteMap!=null) {
+            _bestRouteMap.forEach((node, route)->{
+                if (!reachNodes.containsKey(node)) {
+                    reachNodes.put(node, new HashSet<Node>());
+                }
+                // TODO 避开EBGP下一跳
+                if (bgpTopology.getAsNumber(node)==bgpTopology.getAsNumber(route.getNextHopDev())) {
+                    Node nextHopNode = new Node(route.getNextHopDev(), route.getNextHopIp());
+                    if (!ifSetContainsSameElement(reachNodes.get(node), nextHopNode)) {
+                        reachNodes.get(node).add(nextHopNode);
+                    }
+                } 
+            });
+        }
+        
+        return reachNodes;
     }
 
 }

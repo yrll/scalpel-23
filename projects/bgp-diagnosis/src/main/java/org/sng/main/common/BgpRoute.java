@@ -2,6 +2,9 @@ package org.sng.main.common;
 
 import java.util.List;
 
+import org.sng.datamodel.Ip;
+import org.sng.datamodel.Prefix;
+
 import com.google.gson.Gson;
 
 public class BgpRoute {
@@ -69,6 +72,10 @@ public class BgpRoute {
     private String exRoutePolicy;
     private String imRoutePolicy;
 
+    public Prefix getPrefix() {
+        return Prefix.parse(ipPrefix);
+    }
+
     public static BgpRoute deserialize(String jsonStr) {
         return new Gson().fromJson(jsonStr, BgpRoute.class);
     }
@@ -96,6 +103,30 @@ public class BgpRoute {
 
     public String getImportPolicyName() {
         return imRoutePolicy;
+    }
+
+    public Ip getNextHopIp() {
+        if (Prefix.tryParse(nextHopIp).isPresent()) {
+            return Prefix.parse(nextHopIp).getEndIp();
+        } else if (Ip.tryParse(nextHopIp).isPresent()) {
+            return Ip.parse(nextHopIp);
+        } else {
+            return Ip.ZERO;
+        }
+    }
+
+    public Ip getPeerIp() {
+        if (Prefix.tryParse(peerIp).isPresent()) {
+            return Prefix.parse(peerIp).getEndIp();
+        } else if (Ip.tryParse(peerIp).isPresent()) {
+            return Ip.parse(peerIp);
+        } else {
+            return Ip.ZERO;
+        }
+    }
+
+    public String getNextHopDev() {
+        return nextHopDevice;
     }
 
 }

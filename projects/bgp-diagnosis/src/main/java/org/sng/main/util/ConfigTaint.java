@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+
+import javax.xml.namespace.QName;
 
 import org.sng.datamodel.Prefix;
 import org.sng.datamodel.Ip;
@@ -15,9 +18,10 @@ import org.sng.main.common.StaticRoute;
 
 public class ConfigTaint {
 
-    public static StaticRoute staticRouteFinder(String filePath, StaticRoute route) {
+    public static StaticRoute staticRouteRefine(String node, StaticRoute route) {
         // filePath是cfg文件地址，keyWords是静态路由相关的
         // 直接在入参的route上了
+        String filePath = BgpDiagnosis.cfgPathMap.get(node);
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(filePath));
@@ -26,11 +30,15 @@ public class ConfigTaint {
             int lineNum = 1;
             while (line != null) {
                 // System.out.println(line);
-                // read next line
-                // ifThisLine = true;
                 line = line.strip();
                 if (line.startsWith(KeyWord.IP_STATIC)) {
-                    // 查询当前static route的前缀ip+mask是否和传入的route一致
+                    // 1. 检查vpn是否匹配
+                    if (!route.getVpnName().equals(KeyWord.PUBLIC_VPN_NAME)) {
+                        if (!line.contains(route.getVpnName())) {
+                            continue;
+                        }
+                    }
+                    // 2. 查询当前static route的前缀ip+mask是否和传入的route一致
                     String[] words = line.split(" ");
                     boolean ifFindTargetPrefix = false; // 标识是否读取过前缀，下一个匹配的ip才是下一跳
                     for (int i=0; i<words.length; i+=1) {
@@ -61,6 +69,50 @@ public class ConfigTaint {
         }
         return route;
     }
+
+    public static StaticRoute staticRouteFinder(String node, Prefix prefix) {
+        // filePath是cfg文件地址，keyWords是静态路由相关的
+        // 直接在入参的route上了
+        String filePath = BgpDiagnosis.cfgPathMap.get(node);
+        BufferedReader reader;
+        try {
+            reader = new BufferedReader(new FileReader(filePath));
+            String line = reader.readLine().strip();
+            String targetLine = "";
+            int lineNum = 1;
+            while (line != null) {
+                // System.out.println(line);
+                // read next line
+                // ifThisLine = true;
+                line = line.strip();
+                if (line.startsWith(KeyWord.IP_STATIC)) {
+                    // 查询当前static route的前缀ip+mask是否和传入的route一致
+                    String[] words = line.split(" ");
+                    boolean ifFindTargetPrefix = false; // 标识是否读取过前缀，下一个匹配的ip才是下一跳
+                    for (int i=0; i<words.length; i+=1) {
+                        String ss = words[i];
+                        if (Ip.isIpv4Addr(words[i]) && !ifFindTargetPrefix) {
+                            Ip ip = Ip.parse(words[i]);
+                            Prefix thisPrefix = Prefix.create(ip, Integer.valueOf(words[i+1]));
+                            if (!thisPrefix.equals(prefix)) {
+                                break;
+                            }
+                            ifFindTargetPrefix = true;
+                            return new StaticRoute(node, prefix.toString(), words[i+2]);
+                        }
+                        
+                    }
+                }
+                line = reader.readLine();
+                lineNum += 1;
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     public static Map<Integer, String> staticRouteLinesFinder(String node, Prefix prefix) {
         // filePath是cfg文件地址，keyWords是静态路由相关的
@@ -252,7 +304,7 @@ public class ConfigTaint {
         return lineMap;
     }
 
-
+    // 查找 peer ip [keyword] 语句是否存在，遇到group可以迭代找到相关语句
     public static Map<Integer, String> peerTaint(String node, String[] keyWords) {
         Map<Integer, String> lineMap = new HashMap<>();
         // 检查关键词前两位是否是peer和ip地址, 固定index 0是peer关键字, index 1是peer ip
@@ -281,6 +333,8 @@ public class ConfigTaint {
                         String groupName = lineWords[lineWords.length-1];
                         String[] groupTargetWords = keyWords;
                         groupTargetWords[1] = groupName;
+                        // 把ref peer groupd 那行也加进来
+                        lineMap.put(lineNum, line);
                         Map<Integer, String> groupLines = taint(node, groupTargetWords);
                         lineMap.putAll(groupLines);
                     }
@@ -305,5 +359,45 @@ public class ConfigTaint {
         return true;
     }
 
+    // 获取 bgp 相应地址镞的preference值设置(单播、vpn实例)
+    public static List<Integer> getBgpIpv4Preference(String node, String vpnName) {
+        BufferedReader reader;
+        String filePath = BgpDiagnosis.cfgPathMap.get(node);
+        String startKeyWord = KeyWord.IPV4_FAMILY;
+        if (vpnName.equals(KeyWord.PUBLIC_VPN_NAME)) {
+            vpnName = KeyWord.UNICAST;       
+        }
+        try {
+            reader = new BufferedReader(new FileReader(filePath));
+            String line = reader.readLine().strip();
+            boolean ifReachTargetVpn = false;
+            while (line != null && !ifReachTargetVpn) {
+                // System.out.println(line);
+                // read next line
+                line = line.strip();
+                if (!ifReachTargetVpn && line.startsWith(startKeyWord)) {
+                    if (line.contains(vpnName)) {
+                        ifReachTargetVpn = true;
+                    }
+                }
+                if (ifReachTargetVpn && line.contains(KeyWord.PREFERENCE)) {
+                    String[] words = line.split(" ");
+                    if (words.length!=4) {
+                        break;
+                    }
+                    List<Integer> prefList = new ArrayList<>();
+                    prefList.add(Integer.parseInt(words[1]));
+                    prefList.add(Integer.parseInt(words[2]));
+                    prefList.add(Integer.parseInt(words[3]));
+                    return prefList;
+                }
+                line = reader.readLine();
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 }
