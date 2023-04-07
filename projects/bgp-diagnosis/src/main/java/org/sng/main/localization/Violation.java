@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import org.sng.main.BgpDiagnosis;
 import org.sng.main.common.BgpRoute;
 import org.sng.main.common.StaticRoute;
-import org.sng.main.forwardingtree.Generator;
+import org.sng.main.diagnosis.Generator;
 import org.sng.main.localization.RouteForbiddenLocalizer.Direction;
 
 import com.google.gson.annotations.SerializedName;
@@ -24,7 +24,8 @@ public class Violation {
     List<String> violatedRrClient;
     List<BgpRoute> violatedPropNeighbors;
     List<BgpRoute> violatedAcptNeighbors;
-    // prefer 的表示？
+    // prefer 的表示?
+    List<Map<String, BgpRoute>> violatedRoutePrefer;
     Set<String> violateIbgpPeer;
     Set<String> violateEbgpPeer;
     StaticRoute originStaticRoute;

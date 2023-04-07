@@ -40,16 +40,6 @@ public class BgpPeer implements Serializable{
 
     private boolean _ifPeerClient;
 
-    // public BgpPeer(String localDevName, String peerDevName, Ip localIp,
-    //                 Ip peerIp, long localAsNum, String localVpnName) {
-    //     _localDevName = localDevName;
-    //     _peerDevName = peerDevName;
-    //     _localIp = localIp;
-    //     _peerIp = peerIp;
-    //     _localAsNum = localAsNum;
-    //     _localVpnName = localVpnName;
-    // }
-
     public Ip getLocalIp() {
         return _localIp;
     }

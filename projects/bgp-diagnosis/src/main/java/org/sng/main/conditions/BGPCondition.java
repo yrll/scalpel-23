@@ -22,6 +22,9 @@ public class BgpCondition {
     @Expose(serialize = false)
     private transient Prefix _network;
 
+    @SerializedName("vpnName")
+    private String _vpnName;
+
     @SerializedName("ipPrefix")
     private String _networkString;
 
@@ -57,6 +60,7 @@ public class BgpCondition {
         this._rrClients = builder._rrClients;
         this._ibgpPeers = builder._ibgpPeers;
         this._ebgpPeers = builder._ebgpPeers;
+        this._vpnName = builder._vpnName;
     }
 
     public static Map<String, BgpCondition> deserialize(String filePath) {
@@ -94,9 +98,16 @@ public class BgpCondition {
         private List<String> _ibgpPeers;
 
         private List<String> _ebgpPeers;
+
+        private String _vpnName;
     
         public Builder(Prefix network) {
             this._network = network;
+        }
+
+        public Builder vpnName(String name) {
+            this._vpnName = name;
+            return this;
         }
         
         public Builder redistribution(boolean flag) {

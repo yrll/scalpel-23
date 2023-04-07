@@ -33,6 +33,7 @@ public class KeyWord {
 
     public static String ERROR = "error";
     public static String CORRECT = "correct";
+    public static String REPAIRED = "repaired";
 
     public static String IBGP_PEER_INFO = "ibgpPeerInfoSet";
     public static String EBGP_PEER_INFO = "ebgpPeerInfoSet";
@@ -47,4 +48,8 @@ public class KeyWord {
 
     public static String DEV2_VIOLATE_RULES = "dev2ViolateRules";
     // public static int MISSING_LINE = -1;
+    public static String PUBLIC_VPN_NAME = "_public_";
+    public static String IPV4_FAMILY = "ipv4-family";
+    public static String UNICAST = "unicast";
+
 }

@@ -2,7 +2,9 @@ package org.sng.main.common;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputFilter.Config;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,7 +23,9 @@ import javax.lang.model.element.Element;
 import org.apache.commons.io.FileUtils;
 import org.sng.datamodel.Ip;
 import org.sng.main.BgpDiagnosis;
-import org.sng.main.forwardingtree.Node;
+import org.sng.main.diagnosis.Node;
+import org.sng.main.diagnosis.Generator.Protocol;
+import org.sng.main.util.ConfigTaint;
 import org.sng.main.util.KeyWord;
 
 import com.google.common.collect.HashBasedTable;
@@ -66,10 +70,20 @@ public class BgpTopology {
         _configuredPeerMap =  new HashMap<>();
     }
 
+    public Protocol getNodesRelation(String node1, String node2) {
+        if (node1.equals(node2)) {
+            return Protocol.BGP_LOCAL;
+        } else if (getAsNumber(node2)==getAsNumber(node1)) {
+            return Protocol.IBGP;
+        } else {
+            return Protocol.EBGP;
+        }
+    }
+
     public Set<String> getAllNodesInSameAs(String node) {
         long asNumber = getAsNumber(node);
         if (_peers==null || _peers.size()<1) {
-            return null;
+            return new HashSet<String>(Arrays.asList(node));
         } else {
             Set<String> nodes = new HashSet<>();
             _peers.forEach(p->{
@@ -144,7 +158,13 @@ public class BgpTopology {
     }
 
     public long getAsNumber(String node) {
-        return _asNumMap.get(node);
+        if (_asNumMap.containsKey(node)) {
+            return _asNumMap.get(node);
+        } else {
+            // TODO 会有这种情况？
+            return 0;
+        }
+        
     }
 
     public Map<String, Ip> getAllNodes() {

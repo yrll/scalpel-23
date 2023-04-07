@@ -1,1 +1,105 @@
-{"directRouteInfo":{"CR2":{"_public_":{"70.0.0.3/32":[{"deviceName":"CR2","vpnName":"_public_","ipPrefix":"70.0.0.3/32","outInf":{"deviceName":"CR2","infName":"LoopBack0","vpnName":"_public_","infIpv4Ip":"70.0.0.3/32","infIpv4HostIp":"70.0.0.3/32","infIpv6Ip":null,"infIpv6HostIp":null}}]}},"BR4":{"_public_":{"70.0.0.7/32":[{"deviceName":"BR4","vpnName":"_public_","ipPrefix":"70.0.0.7/32","outInf":{"deviceName":"BR4","infName":"LoopBack0","vpnName":"_public_","infIpv4Ip":"70.0.0.7/32","infIpv4HostIp":"70.0.0.7/32","infIpv6Ip":null,"infIpv6HostIp":null}}]}}},"staticRouteInfo":{"CR2":{"_public_":{"70.0.0.7/32":[{"deviceName":"CR2","vpnName":"_public_","addressIp":"70.0.0.7/32","nextHop":"10.0.0.34/32","outInf":{"deviceName":"CR2","infName":"GigabitEthernet3/0/2","vpnName":"_public_","infIpv4Ip":"10.0.0.32/30","infIpv4HostIp":"10.0.0.33/32","infIpv6Ip":null,"infIpv6HostIp":null}}]}},"BR4":{"_public_":{"70.0.0.3/32":[{"deviceName":"BR4","vpnName":"_public_","addressIp":"70.0.0.3/32","nextHop":"10.0.0.33/32","outInf":{"deviceName":"BR4","infName":"GigabitEthernet1/0/1","vpnName":"_public_","infIpv4Ip":"10.0.0.32/30","infIpv4HostIp":"10.0.0.34/32","infIpv6Ip":null,"infIpv6HostIp":null}}],"209.0.0.12/30":[{"deviceName":"BR4","vpnName":"_public_","addressIp":"209.0.0.12/30","nextHop":"69.0.0.14/32","outInf":{"deviceName":"BR4","infName":"GigabitEthernet3/0/1.20","vpnName":"_public_","infIpv4Ip":"69.0.0.12/30","infIpv4HostIp":"69.0.0.13/32","infIpv6Ip":null,"infIpv6HostIp":null}}]}}}}
+{
+  "directRouteInfo": {
+    "CR2": {
+      "_public_": {
+        "70.0.0.3/32": [
+          {
+            "deviceName": "CR2",
+            "vpnName": "_public_",
+            "ipPrefix": "70.0.0.3/32",
+            "outInf": {
+              "deviceName": "CR2",
+              "infName": "LoopBack0",
+              "vpnName": "_public_",
+              "infIpv4Ip": "70.0.0.3/32",
+              "infIpv4HostIp": "70.0.0.3/32",
+              "infIpv6Ip": null,
+              "infIpv6HostIp": null
+            }
+          }
+        ]
+      }
+    },
+    "BR4": {
+      "_public_": {
+        "70.0.0.7/32": [
+          {
+            "deviceName": "BR4",
+            "vpnName": "_public_",
+            "ipPrefix": "70.0.0.7/32",
+            "outInf": {
+              "deviceName": "BR4",
+              "infName": "LoopBack0",
+              "vpnName": "_public_",
+              "infIpv4Ip": "70.0.0.7/32",
+              "infIpv4HostIp": "70.0.0.7/32",
+              "infIpv6Ip": null,
+              "infIpv6HostIp": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  "staticRouteInfo": {
+    "CR2": {
+      "_public_": {
+        "70.0.0.7/32": [
+          {
+            "deviceName": "CR2",
+            "vpnName": "_public_",
+            "addressIp": "70.0.0.7/32",
+            "nextHop": "10.0.0.34/32",
+            "outInf": {
+              "deviceName": "CR2",
+              "infName": "GigabitEthernet3/0/2",
+              "vpnName": "_public_",
+              "infIpv4Ip": "10.0.0.32/30",
+              "infIpv4HostIp": "10.0.0.33/32",
+              "infIpv6Ip": null,
+              "infIpv6HostIp": null
+            }
+          }
+        ]
+      }
+    },
+    "BR4": {
+      "_public_": {
+        "70.0.0.3/32": [
+          {
+            "deviceName": "BR4",
+            "vpnName": "_public_",
+            "addressIp": "70.0.0.3/32",
+            "nextHop": "10.0.0.33/32",
+            "outInf": {
+              "deviceName": "BR4",
+              "infName": "GigabitEthernet1/0/1",
+              "vpnName": "_public_",
+              "infIpv4Ip": "10.0.0.32/30",
+              "infIpv4HostIp": "10.0.0.34/32",
+              "infIpv6Ip": null,
+              "infIpv6HostIp": null
+            }
+          }
+        ],
+        "209.0.0.12/30": [
+          {
+            "deviceName": "BR4",
+            "vpnName": "_public_",
+            "addressIp": "209.0.0.12/30",
+            "nextHop": "69.0.0.14/32",
+            "outInf": {
+              "deviceName": "BR4",
+              "infName": "GigabitEthernet3/0/1.20",
+              "vpnName": "_public_",
+              "infIpv4Ip": "69.0.0.12/30",
+              "infIpv4HostIp": "69.0.0.13/32",
+              "infIpv6Ip": null,
+              "infIpv6HostIp": null
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -10,7 +10,7 @@ import org.sng.main.BgpDiagnosis;
 import org.sng.main.common.BgpPeer;
 import org.sng.main.common.BgpTopology;
 import org.sng.main.common.BgpPeer.BgpPeerType;
-import org.sng.main.forwardingtree.Generator;
+import org.sng.main.diagnosis.Generator;
 import org.sng.main.util.ConfigTaint;
 import org.sng.main.util.KeyWord;
 

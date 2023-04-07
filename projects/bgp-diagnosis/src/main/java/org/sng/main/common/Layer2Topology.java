@@ -86,7 +86,7 @@ public class Layer2Topology {
     }
 
     public String getPeerDevNameFromInface(String node, Interface iface) {
-        if (!_edgeMap.containsKey(node)) {
+        if (!_edgeMap.containsKey(node) || iface.getPrefix()==null) {
             return null;
         }
         for (Layer2Edge layer2Edge : _edgeMap.get(node)) {

@@ -22,6 +22,22 @@ public class InputData {
         }
     }
 
+    public enum NetworkType{
+        IPMetro("ipmetro"),
+        IPRAN("ipran"),
+        CLOUDNET("cloudnet");
+
+        private String name;
+
+        NetworkType(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
     public static String concatFilePath(String rootPath, String sub) {
         return rootPath + "/" + sub;
     }
@@ -45,6 +61,7 @@ public class InputData {
     private static String relativeConditionRootPath = "sse_conditions/";
     private static String relativeVioRuleRootPath = "violated_rules/";
     private static String relativeLocalizeResultRootPath = "localize_results/";
+    private static String relativeIgpResultRootPath = "igp_reqs/";
 
     private static String errBgpDstName1 = "BNG30";
     private static String errBgpDstIp1 = "179.0.0.117/30";
@@ -85,6 +102,11 @@ public class InputData {
 
     }
 
+    public String getIgpRequirementFilePath(String keyString, ErrorType type) {
+        String relativePath = concatFilePath(relativeIgpResultRootPath, concatFilePath(type.name(), "case" + keyString +".json"));
+        return concatFilePath(projectRootPath, relativePath);
+    }
+
     public String getConditionFilePath(String keyString, ErrorType type) {
         String relativePath = concatFilePath(relativeConditionRootPath, concatFilePath(type.name(), "case" + keyString +".json"));
         return concatFilePath(projectRootPath, relativePath);
@@ -113,7 +135,7 @@ public class InputData {
     }
 
 
-    public String getErrorProvFilePath(String keyString, ErrorType type, String fileName) {
+    public static String getErrorProvFilePath(String keyString, ErrorType type, String fileName) {
         if (type.equals(ErrorType.BGP)) {
             String bgpProvRootPath = concatFilePath(projectRootPath, relativeProvRootPath + type.name());
             String finalPath = concatFilePath(bgpProvRootPath, concatFilePath("case"+keyString, concatFilePath(KeyWord.ERROR, fileName)));
@@ -125,7 +147,19 @@ public class InputData {
         }
     }
 
-    public String getCorrectProvFilePath(String keyString, ErrorType type, String fileName) {
+    public static String getRepairProvFilePath(String keyString, ErrorType type, String fileName) {
+        if (type.equals(ErrorType.BGP)) {
+            String bgpProvRootPath = concatFilePath(projectRootPath, relativeProvRootPath + type.name());
+            String finalPath = concatFilePath(bgpProvRootPath, concatFilePath("case"+keyString, concatFilePath(KeyWord.REPAIRED, fileName)));
+            return finalPath;
+        } else {
+            String isisProvRootPath = concatFilePath(projectRootPath, relativeProvRootPath+type.name());
+            String finalPath = concatFilePath(isisProvRootPath, concatFilePath("case"+keyString, fileName));
+            return finalPath;
+        }
+    }
+
+    public static String getCorrectProvFilePath(String keyString, ErrorType type, String fileName) {
         if (type.equals(ErrorType.BGP)) {
             String bgpProvRootPath = concatFilePath(projectRootPath, relativeProvRootPath + type.name());
             String finalPath = concatFilePath(bgpProvRootPath, concatFilePath("case"+keyString, concatFilePath(KeyWord.CORRECT, fileName)));
@@ -148,7 +182,14 @@ public class InputData {
         } else {
             return errIsisDstNameMap.get(keyString);
         }
-        
+    }
+
+    public String getErrorVpnName(String keyString, ErrorType type) {
+        if (type.equals(ErrorType.BGP)) {
+            return KeyWord.PUBLIC_VPN_NAME;
+        } else {
+            return "LTE_RAN";
+        }
     }
 
     public String getErrorDstIp(String keyString, ErrorType type) {
