@@ -2,7 +2,7 @@ package org.sng.main;
 
 import com.google.common.graph.ValueGraph;
 import com.google.gson.JsonObject;
-import org.sng.isisdiagnosis.ErrorFlow;
+import org.sng.isisdiagnosis.IsisErrorFlow;
 import org.sng.datamodel.Layer1Topology;
 import org.sng.datamodel.Prefix;
 import org.sng.datamodel.configuration.Configuration;
@@ -13,10 +13,7 @@ import org.sng.isisdiagnosis.IsisDiagnosis;
 import org.sng.parse.JsonParser;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Main {
     static String baseDirectory = "networks/provenanceInfo/isis/case3/";
@@ -27,28 +24,27 @@ public class Main {
         IsisDiagnosis isisDiagnosis = initIgpDiagnosis();
 
         // 设置错误流
-        List<ErrorFlow> errorFlowList = new ArrayList<>();
-        errorFlowList.add(new ErrorFlow("CSG1-1-1", Prefix.parse("70.0.0.11/32")));
-        errorFlowList.add(new ErrorFlow("CSG1-2-1", Prefix.parse("70.0.0.6/32")));
-        errorFlowList.add(new ErrorFlow("CSG1-1-1", Prefix.parse("110.0.0.8/32")));
-        errorFlowList.add(new ErrorFlow("ASG1", Prefix.parse("70.0.0.6/32")));
+        List<IsisErrorFlow> isisErrorFlowList = new ArrayList<>();
+//        isisErrorFlowList.add(new IsisErrorFlow("CSG1-1-1", Prefix.parse("70.0.0.11/32")));
+//        isisErrorFlowList.add(new IsisErrorFlow("CSG1-2-1", Prefix.parse("70.0.0.6/32")));
+//        isisErrorFlowList.add(new IsisErrorFlow("CSG1-1-1", Prefix.parse("110.0.0.8/32")));
+        isisErrorFlowList.add(new IsisErrorFlow("ASG1", Prefix.parse("70.0.0.6/32")));
 
         // ISIS 诊断
-        for (ErrorFlow errorFlow: errorFlowList){
-            System.out.println(errorFlow.getPrefix());
-            isisDiagnosis.igpDiagnosis(errorFlow);
+        for (IsisErrorFlow isisErrorFlow : isisErrorFlowList){
+            System.out.println(isisErrorFlow.getPrefix());
+            isisDiagnosis.igpDiagnosis(isisErrorFlow);
         }
     }
 
     /** 从JSON文件中初始化IGP诊断所需信息 **/
     private static IsisDiagnosis initIgpDiagnosis() throws IOException {
-
         // 获取物理拓扑
         String layer1TopologyFilePath = baseDirectory + "connectInterfaceInfo.json";
         JsonObject layer1TopologyJsonObject = JsonParser.getJsonObject(layer1TopologyFilePath);
         Layer1Topology layer1Topology = JsonParser.getLayer1Toplogy(layer1TopologyJsonObject);
 
-        //获取配置
+        //获取配置数据结构
         String configFilePath = baseDirectory + "configurationInfo.json";
         JsonObject configFileObject = JsonParser.getJsonObject(configFilePath);
         Map<String, Configuration> configurations = JsonParser.getConfigurations(configFileObject);
@@ -65,7 +61,10 @@ public class Main {
         Map<Prefix, List<IsisEdge>> prefixEdgesMap = JsonParser.
                 parsePrefixImportEdges(isisInfoJsonObject.get("dstPrefix2ImportNodes").getAsJsonObject(), commonFwdGraph.nodes(),configurations);
 
-        return new IsisDiagnosis(layer1Topology,configurations,commonFwdGraph,prefixEdgesMap,directRouteDevicesMap);
+        // 获取配置行定位所需信息
+        Map<String,String> filePathMap = new HashMap<>();
+        configurations.keySet().forEach(deviceName -> filePathMap.put(deviceName,baseDirectory+deviceName+".cfg"));
+        return new IsisDiagnosis(layer1Topology,configurations,commonFwdGraph,prefixEdgesMap,directRouteDevicesMap,filePathMap);
 
     }
 }

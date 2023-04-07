@@ -3,13 +3,26 @@ package org.sng.isisdiagnosis;
 public class IsisErrorType {
 
     public enum ErrorType{
-        // 两个设备ISIS邻居建立失败
-        ISIS_PEER_ERROR,
+        // 不存在路由传播路径
+        ISIS_NO_ROUTE_PATH_ERROR("目的前缀没有路径到达源节点"),
         // ISIS路由引入失败（进程间或协议间）
-        ISIS_ROUTE_IMPORT_ERROR
+        ISIS_ROUTE_IMPORT_FAIL_ERROR("路由导入失败"),
+        // 需要删除的ISIS路由引入
+        ISIS_ROUTE_IMPORT_UNWANTED_ERROR("多源发前缀导致错误，需要删除非指定前缀的路由导入");
+
+        private final String _name;
+
+        ErrorType(String name) {
+            _name = name;
+        }
+
+        public String errorString() {
+            return _name;
+        }
     }
 
-    public enum IsisPeerErrorType{
+
+    public enum IsisPeerFailErrorType{
         // 头部节点端口是否有配置
         IS_HEAD_INTERFACE_UP,
         // 尾部节点端口是否有配置
@@ -47,13 +60,18 @@ public class IsisErrorType {
         // 端口网段是否一致
         IS_SAME_SUBNET
     }
-    public enum IsisRouteImportErrorType {
+    public enum IsisRouteImportFailErrorType {
         // 源发路由端口没有加入指定ISIS进程
         PREFIX_ISIS_ENABLE,
         // 没有使能ISIS进程导入
         ISIS_IMPORT_ENABLE,
         // 策略过滤
         IMPORT_POLICY_FILTER,
+        // 需要删除的ISIS进程引入
+    }
 
+    public enum IsisRouteImportUnwantedError{
+        // 需要删除路由引入
+        ISIS_UNWANTED_IMPORT,
     }
 }

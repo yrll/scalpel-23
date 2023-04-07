@@ -1,5 +1,7 @@
 package org.sng.datamodel.configuration;
 
+import org.sng.datamodel.Prefix;
+
 import java.util.List;
 
 public class IpPrefixesV4Info {
@@ -24,5 +26,15 @@ public class IpPrefixesV4Info {
 
     public List<IpPrefixNodeModel> getIpPrefixNodeModelList() {
         return _ipPrefixNodeModelList;
+    }
+
+    public IpPrefixNodeModel matchPrefix(Prefix prefix){
+        IpPrefixNodeModel matchNode = null;
+        for (IpPrefixNodeModel ipPrefixNode: _ipPrefixNodeModelList){
+            if (ipPrefixNode.matchPrefix(prefix)){
+                matchNode = ipPrefixNode;
+            }
+        }
+        return matchNode;
     }
 }
