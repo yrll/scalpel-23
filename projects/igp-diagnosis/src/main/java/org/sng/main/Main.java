@@ -37,7 +37,7 @@ public class Main {
         }
     }
 
-    /** 从JSON文件中初始化IGP诊断所需信息 **/
+    /** 从文件中初始化IGP诊断所需信息 **/
     private static IsisDiagnosis initIgpDiagnosis() throws IOException {
         // 获取物理拓扑
         String layer1TopologyFilePath = baseDirectory + "connectInterfaceInfo.json";
