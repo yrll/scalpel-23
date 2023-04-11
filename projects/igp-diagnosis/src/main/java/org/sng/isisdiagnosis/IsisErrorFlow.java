@@ -3,13 +3,13 @@ package org.sng.isisdiagnosis;
 
 import org.sng.datamodel.Prefix;
 
-public class ErrorFlow {
+public class IsisErrorFlow {
     // todo:对于指定路径的错误，还需要加上原路径和指定路径这个输入
     private final String _srcDevice;
     private final Prefix _prefix;
 
 
-    public ErrorFlow(String srcDevice, Prefix prefix) {
+    public IsisErrorFlow(String srcDevice, Prefix prefix) {
         _srcDevice = srcDevice;
         _prefix = prefix;
     }

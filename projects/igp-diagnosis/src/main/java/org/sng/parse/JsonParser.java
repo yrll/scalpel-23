@@ -109,7 +109,7 @@ public class JsonParser {
                 else if ("DIRECT".equals(srcProtocol)){
                     String srcDevIfName = importInfo.get("srcDevIf").getAsString();
                     Configuration devConfig = configurations.get(devName);
-                    // todo: 暂时没有处理设备名相同的情况
+                    // todo: 暂时没有处理设备名相同的情况,需要将isis转发图上的设备名和配置名都转成唯一ID
                     assert devConfig != null;
                     Interface srcIface = devConfig.getInterfaces().get(srcDevIfName);
                     IsisNode srcNode = null;

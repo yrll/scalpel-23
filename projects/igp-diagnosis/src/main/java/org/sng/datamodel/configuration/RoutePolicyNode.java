@@ -1,6 +1,8 @@
 package org.sng.datamodel.configuration;
 
 public class RoutePolicyNode {
+    public static String PERMIT_MODE = "PERMIT";
+    public static String DENY_MODE = "DENY";
     private final Integer _nodeNum;
     private final String _policyMatchMode;
     private final IpPrefixesV4Info _ifMatchIpPrefix;

@@ -37,4 +37,19 @@ public class IpPrefixNodeModel {
     public Integer getLessEqual() {
         return _lessEqual;
     }
+
+    public boolean matchPrefix(Prefix prefix){
+        if (_greaterEqual == null && _lessEqual == null){
+            return _ipMask.equals(prefix);
+        }
+        else {
+            int greatEqual = _greaterEqual == null ? _ipMask.getPrefixLength() :_greaterEqual;
+            int lessEqual = _lessEqual == null ? 32  : _lessEqual;
+            if (_ipMask.containsIp(prefix.getStartIp())){
+                int prefixLength = prefix.getPrefixLength();
+                return prefixLength >= greatEqual && prefixLength <= lessEqual;
+            }
+        }
+        return false;
+    }
 }

@@ -13,6 +13,10 @@ public class IsisEdgeValue {
         _cost = cost;
     }
 
+    public static IsisEdgeValue creatNewEdgeValue(){
+        return new IsisEdgeValue(null,null,-1);
+    }
+
     public String getSrcPhyIf() {
         return _srcPhyIf;
     }
