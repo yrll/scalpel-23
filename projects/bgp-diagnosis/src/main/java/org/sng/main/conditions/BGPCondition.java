@@ -77,6 +77,7 @@ public class BgpCondition {
         return null;
     }
 
+
     public void setRedistribute(boolean value) {
         this._redistribution = value;
     }

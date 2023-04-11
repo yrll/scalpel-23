@@ -5,7 +5,11 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.sng.main.InputData.ErrorType;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
+import org.sng.main.InputData.NetworkType;
+import org.sng.main.conditions.BgpCondition;
+import org.sng.main.diagnosis.VpnInstance;
+import org.sng.main.util.ConfigTaint;
 import org.sng.main.util.KeyWord;
 
 public class Main {
@@ -14,19 +18,27 @@ public class Main {
         Logger logger = Logger.getLogger(KeyWord.LOGGER_NAME);
         logger.setLevel(Level.WARNING);
 
-        String caseType = "1.1";
-        ErrorType type = ErrorType.ISIS;
+        String caseType = "4.1";
+        NetworkType type = NetworkType.BGP;
 
         Set<String> reachNodes = new HashSet<>();
-        reachNodes.add("CSG1-1-1");
+        reachNodes.add("BNG1");
+        boolean ifSave = false;
+
+        // String fp = "E:/Java/IdeaProjects/scalpel-23/sse_conditions/bgp/case1.1.json";
+        // BgpCondition.deserialize(fp);
+        
         
         BgpDiagnosis diagnoser = new BgpDiagnosis(caseType, type);
+        
+        // VpnInstance vv = ConfigTaint.getVpnInstance("ASG1", "LTE_RAN");
 
-        diagnoser.diagnose(reachNodes, null, true);
+        diagnoser.diagnose(reachNodes, null,true);
 
-        diagnoser.localize(true);
+        diagnoser.localize(reachNodes, ifSave, diagnoser.getGenerator());
 
-        diagnoser.genIgpConstraints(null, true);
+        diagnoser.genIgpConstraints(null, ifSave);
+
         System.out.println("pause");
 
     }

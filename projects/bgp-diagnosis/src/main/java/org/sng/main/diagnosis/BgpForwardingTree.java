@@ -33,6 +33,7 @@ import org.sng.main.diagnosis.Generator.Protocol;
 import org.sng.main.util.ConfigTaint;
 import org.sng.main.util.KeyWord;
 
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -64,6 +65,15 @@ public class BgpForwardingTree {
     private Set<String> _unreachableNodesPrev;
     // 一开始接收的可达路由的集合, 最优的, 最长前缀匹配的
     private Map<String, BgpRoute> _bestRouteMap;
+
+    public Set<String> getRouteReachableNodesInTree() {
+        if (_bestRouteFromMap!=null) {
+            return _bestRouteFromMap.keySet();
+        } else {
+            return Sets.newHashSet(_dstDevName);
+        }
+        
+    }
     
     public int getRouteTypePref(Protocol protocol) {
         switch (protocol) {
@@ -432,6 +442,7 @@ public class BgpForwardingTree {
                                             .ebgpPeers(bgpTopology.getBgpPeers(node, propNeighborMap.get(node), BgpPeerType.EBGP))
                                             .rrClient(clientsMap.get(node))
                                             .selectionRoute(new SelectionRoute.Builder(_dstPrefix)
+                                                                              .vpnName(_vpnName)
                                                                               .nextHop(getNextHopList(node, bgpTopology))
                                                                               .asPath(getAsPath(node, bgpTopology))
                                                                               .build())

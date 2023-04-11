@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.sng.datamodel.Prefix;
-import org.sng.main.InputData.ErrorType;
+import org.sng.main.InputData.NetworkType;
 import org.sng.main.common.BgpTopology;
 import org.sng.main.common.Interface;
 import org.sng.main.common.Layer2Topology;
@@ -25,6 +26,7 @@ import org.sng.main.conditions.BgpCondition;
 import org.sng.main.diagnosis.BgpForwardingTree;
 import org.sng.main.diagnosis.Generator;
 import org.sng.main.diagnosis.Node;
+import org.sng.main.diagnosis.VpnInstance;
 import org.sng.main.diagnosis.BgpForwardingTree.TreeType;
 import org.sng.main.localization.Violation;
 import org.sng.main.util.ConfigTaint;
@@ -38,15 +40,20 @@ import com.google.gson.reflect.TypeToken;
 
 public class BgpDiagnosis {
     public static String caseType;
-    public static ErrorType errorType;
-    private Generator errGenerator;
+    public static NetworkType errorType;
+    private Generator generator;
     private Generator corGenerator;
 
     public static String cfgRootPath;
     public static Map<String, String> cfgPathMap;
     public static InputData inputData;
+
+    private String dstDev;
+    private String dstIpString;
+    private String dstVpnName;
+    private boolean ifMpls;
     
-    public BgpDiagnosis(String caseType, ErrorType errorType) {
+    public BgpDiagnosis(String caseType, NetworkType errorType) {
         // input数据初始化
         this.caseType = caseType;
         this.errorType = errorType;
@@ -58,9 +65,10 @@ public class BgpDiagnosis {
         String peerInfoPath = inputData.getPeerInfoPath(caseType, errorType);
         // 输入3：错误流的Provenance Info
         // error trace: (errorDstDevName, errorDstPrefix) and prov files path
-        String errDstNode = inputData.getErrorDstName(caseType, errorType);
-        String errDstIp = inputData.getErrorDstIp(caseType, errorType);
-        String errDstVpnName = inputData.getErrorVpnName(errDstIp, errorType);
+        dstDev = inputData.getErrorDstName(caseType, errorType);
+        dstIpString = inputData.getErrorDstIp(caseType, errorType);
+        dstVpnName = inputData.getErrorVpnName(dstIpString, errorType);
+        ifMpls = false;
         String errBgpProvFilePath = inputData.getErrorProvFilePath(caseType, errorType, KeyWord.PROV_INFO_FILE_NAME);
         String errStaticProvFilePath = inputData.getErrorProvFilePath(caseType, errorType, KeyWord.RELATED_STATIC_INFO_FILE);
         // 输入4(可选)：正确流的Provenance Info
@@ -79,13 +87,14 @@ public class BgpDiagnosis {
         // 中间状态2：BGP & Static的原始（错误）路由传播与转发的树 
         // generate the error traffic forwarding tree (paths)
         System.out.println("ERROR TREE GENERATE...");
-        if ((errDstNode==null || errDstNode.equals("")) || (errDstIp==null || errDstIp.equals(""))) {
+        if ((dstDev==null || dstDev.equals("")) || (dstIpString==null || dstIpString.equals(""))) {
             throw new IllegalArgumentException("NULL error destination Ip or NULL error destination Node!");
         } else {
-            errGenerator = new Generator(errDstNode, errDstIp, bgpTopology, errDstVpnName);
-            errGenerator.setLayer2Topology(layer2Topology);
-            errGenerator.serializeTreeFromJson(errStaticProvFilePath, TreeType.STATIC);
-            errGenerator.serializeTreeFromJson(errBgpProvFilePath, TreeType.BGP);
+            generator = new Generator(dstDev, dstIpString, bgpTopology, dstVpnName);
+            generator.setLayer2Topology(layer2Topology);
+            generator.serializeTreeFromJson(errStaticProvFilePath, TreeType.STATIC);
+            generator.serializeTreeFromJson(errBgpProvFilePath, TreeType.BGP);
+            ifMpls = generator.ifMpls();
         }
         
         
@@ -104,35 +113,49 @@ public class BgpDiagnosis {
         
     }
 
-    public Generator getErrGenerator() {
-        return errGenerator;
+    public Generator getGenerator() {
+        return generator;
     }
 
     public BgpForwardingTree diagnose(Set<String> reachNodes, Set<Interface> failedInfaces, boolean ifSave) {
         // use the correct traffic as a reference to generate the policy-compliant "Forwarding Tree"
         String conditionPath = inputData.getConditionFilePath(caseType, errorType);
-        BgpForwardingTree reqTree = errGenerator.getBgpTree();
-        Set<String> reachNodesBackup = new HashSet<>(reachNodes);
+        BgpForwardingTree reqTree = generator.getBgpTree();
+        
+        // 模块1：BGP路由可达诊断
         if (isOldBgpTreeCorrect(reachNodes)) {
             // STEP1: 分析是否错在BGP上（是否现有静态路由可以修正）
             serializeToFile(conditionPath, new HashMap<>());
         } else {
             // STEP2: 生成BGP的路由转发树
             if (corGenerator!=null) {
-                reqTree = errGenerator.genBgpTree(reachNodes, failedInfaces, corGenerator.getBgpTree());
+                reqTree = generator.genBgpTree(reachNodes, failedInfaces, corGenerator.getBgpTree());
             } else {
-                reqTree = errGenerator.genBgpTree(reachNodes, failedInfaces, null);
+                reqTree = generator.genBgpTree(reachNodes, failedInfaces, null);
             }
             
             if (ifSave) {
-                serializeToFile(conditionPath, reqTree.genBgpConditions(errGenerator.getBgpTopology()));
+                serializeToFile(conditionPath, reqTree.genBgpConditions(generator.getBgpTopology()));
             }
         }
-        // 如果原始BGP Tree上node路由可达，这里reachNodes会被删完，所以输入拷贝的那份
-        localizeStaticInconsistent(reachNodesBackup, errGenerator, ifSave);
+        // vpn一致性检查
+
+        
         return reqTree;
     }
 
+    public Map<String, Map<Integer, String>> localize(Set<String> reachNodes, boolean ifSave, Generator generator) {
+        String violatedRulePath = inputData.getViolateRulePath(caseType, errorType);
+        Map<String, Map<Integer, String>> errlines = getErrorLinesEachNode(violatedRulePath, generator);
+        if (ifSave) {
+            serializeToFile(inputData.getResultFilePath(caseType, errorType), errlines);
+            // 如果原始BGP Tree上node路由可达，这里reachNodes会被删完，所以输入拷贝的那份
+            // TODO 再检查一次static的错误，在newBgpTree的基础上
+        }
+        localizeStaticInconsistent(new HashSet<>(reachNodes), generator, ifSave);
+        localizeInconsitentCrossFromVpn(generator.getBgpTree());
+        return errlines;
+    }
 
     /*
      * 最精确的检测方法是static的下一跳和BGP的转发路径不成环，但是由于无法提前得知BGP的实际转发路径，
@@ -175,19 +198,6 @@ public class BgpDiagnosis {
         return lineMap;
     }
 
-
-    public Map<String, Map<Integer, String>> localize(boolean ifSave) {
-        String violatedRulePath = inputData.getViolateRulePath(caseType, errorType);
-        Map<String, Map<Integer, String>> errlines = getErrorLinesEachNode(violatedRulePath, errGenerator);
-        if (ifSave) {
-            serializeToFile(inputData.getResultFilePath(caseType, errorType), errlines);
-            // 如果原始BGP Tree上node路由可达，这里reachNodes会被删完，所以输入拷贝的那份
-            // TODO 再检查一次static的错误，在newBgpTree的基础上
-        }
-        return errlines;
-    }
-
-
     public Map<String, String> genCfgPathEachNode() {
         cfgPathMap = new HashMap<>();
         File rootFile = new File(cfgRootPath);
@@ -209,7 +219,6 @@ public class BgpDiagnosis {
                 e.printStackTrace();
             }
         }
-        
         return jsonStr;
     }
 
@@ -220,7 +229,6 @@ public class BgpDiagnosis {
         // System.out.println(jsonString);
         try{
             File file = new File(filePath);
-    
             if(!file.getParentFile().exists()){
                 //若父目录不存在则创建父目录
                 file.getParentFile().mkdirs();
@@ -228,7 +236,6 @@ public class BgpDiagnosis {
             if(file.exists()){
                 file.delete();
             }
-    
             file.createNewFile();
             Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8);
             writer.write(jsonString);
@@ -294,19 +301,19 @@ public class BgpDiagnosis {
         boolean flag = true;
         Set<String> checkedNodes = new HashSet<>();
         for (String node : nodes) {
-            if (errGenerator.ifMpls()) {
-                if (errGenerator.getBgpTree().getForwardingPath(node, errGenerator.getDstDevName())==null) {
+            if (generator.ifMpls()) {
+                if (generator.getBgpTree().getForwardingPath(node, generator.getDstDevName())==null) {
                     flag = false;
                     break;
                 }
             } else {
-                Set<String> nodesInSameAS = errGenerator.getBgpTopology().getAllNodesInSameAs(node);
+                Set<String> nodesInSameAS = generator.getBgpTopology().getAllNodesInSameAs(node);
                 if (nodesInSameAS!=null) {
                     for (String nodeInSameAS : nodesInSameAS) {
                         if (checkedNodes.contains(nodeInSameAS)) {
                             continue;
                         }
-                        if (errGenerator.getBgpTree().getForwardingPath(nodeInSameAS, errGenerator.getDstDevName())==null) {
+                        if (generator.getBgpTree().getForwardingPath(nodeInSameAS, generator.getDstDevName())==null) {
                             flag = false;
                             break;
                         }
@@ -317,14 +324,12 @@ public class BgpDiagnosis {
                     }
                 }
             }
-            
-            
         }
         return flag;
     }
 
     public Map<String, Set<Node>> genIgpConstraints(BgpForwardingTree newTree, boolean ifSave) {
-        Map<String, Set<Node>> reachNodes = errGenerator.computeReachIgpNodes(newTree);
+        Map<String, Set<Node>> reachNodes = generator.computeReachIgpNodes(newTree);
         if (reachNodes!=null) {
             if (ifSave) {
                 String filePath = inputData.getIgpRequirementFilePath(caseType, errorType);
@@ -333,6 +338,53 @@ public class BgpDiagnosis {
             return reachNodes;
         }
         return null;
+    }
+
+    public Map<VpnInstance, VpnInstance> localizeInconsitentCrossFromVpn(BgpForwardingTree bgpForwardingTree) {
+        Map<VpnInstance, VpnInstance> inconsistentVpnMap = new HashMap<>();
+        Set<String> checkedNodes = new HashSet<>();
+        for (String node : bgpForwardingTree.getRouteReachableNodesInTree()) {
+            if (node.equals(dstDev) || checkedNodes.contains(node)) {
+                continue;
+            }
+            // 判断除dst外所有节点的路径上节点上下游的vpn是否可以匹配
+            List<String> path;
+            if (ifMpls) {
+                path = bgpForwardingTree.getForwardingPath(node, dstDev); 
+            } else {
+                path = bgpForwardingTree.getBestRouteFromPath(node, dstDev);
+            }
+            // path的getter确保至少有一个节点在路径上
+            ListIterator pathIter = path.listIterator(path.size()-1);
+            String upstreamNode = path.get(path.size()-1);
+            VpnInstance upstreamVpnInstance = ConfigTaint.getVpnInstance(upstreamNode, dstVpnName);
+            while (pathIter.hasPrevious()) {
+                String curNode = (String) pathIter.previous();
+                VpnInstance curVpnInstance = ConfigTaint.getVpnInstance(curNode, upstreamVpnInstance.getVpnName());
+                if (!curVpnInstance.canCrossFrom(upstreamVpnInstance)) {
+                    inconsistentVpnMap.put(curVpnInstance, upstreamVpnInstance);
+                }
+                upstreamNode = curNode;
+                upstreamVpnInstance = curVpnInstance;
+                checkedNodes.add(curNode);
+            }
+        }
+        return inconsistentVpnMap;
+    }
+
+    public Generator getNewGenerator() {
+        String dstNode = inputData.getErrorDstName(caseType, errorType);
+        String dstIp = inputData.getErrorDstIp(caseType, errorType);
+        String dstVpnName = inputData.getErrorVpnName(dstIp, errorType);
+        String bgpProvFilePath = inputData.getErrorProvFilePath(caseType, errorType, KeyWord.PROV_INFO_FILE_NAME);
+        String staticProvFilePath = inputData.getErrorProvFilePath(caseType, errorType, KeyWord.RELATED_STATIC_INFO_FILE);
+        
+        generator = new Generator(dstNode, dstIp, generator.getBgpTopology(), dstVpnName);
+        generator.setLayer2Topology(generator.getLayer2Topology());
+        generator.serializeTreeFromJson(staticProvFilePath, TreeType.STATIC);
+        generator.serializeTreeFromJson(bgpProvFilePath, TreeType.BGP);
+
+        return generator;
     }
 
 }

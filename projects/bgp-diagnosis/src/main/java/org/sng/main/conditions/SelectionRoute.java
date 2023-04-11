@@ -27,6 +27,9 @@ public class SelectionRoute implements Serializable {
     @SerializedName("ipPrefix")
     private String _networkString;
 
+    @SerializedName("vpnName")
+    private String _vpnName;
+
     public SelectionRoute(Builder builder) {
         this._network = builder.network;
         this._asPath = builder.asPath;
@@ -34,6 +37,7 @@ public class SelectionRoute implements Serializable {
 
         this._networkString = _network.toString();
         this._nextHopStrings = transIpListToString(_nextHopIps);
+        this._vpnName = builder.vpnName;
     }
 
     public List<String> transIpListToString(List<Ip> ips) {
@@ -53,6 +57,8 @@ public class SelectionRoute implements Serializable {
     public static class Builder{
         private Prefix network;
 
+        private String vpnName;
+
         private List<Ip> nextHopIps;
 
         private List<Long> asPath;
@@ -63,6 +69,11 @@ public class SelectionRoute implements Serializable {
 
         public Builder nextHop(List<Ip> nextHopIp) {
             this.nextHopIps = nextHopIp;
+            return this;
+        }
+
+        public Builder vpnName(String name) {
+            this.vpnName = name;
             return this;
         }
 

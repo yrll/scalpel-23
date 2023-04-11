@@ -18,7 +18,7 @@ import org.sng.datamodel.Ip;
 import org.sng.datamodel.Prefix;
 import org.sng.main.BgpDiagnosis;
 import org.sng.main.InputData;
-import org.sng.main.InputData.ErrorType;
+import org.sng.main.InputData.NetworkType;
 import org.sng.main.common.BgpPeer;
 import org.sng.main.common.BgpTopology;
 import org.sng.main.common.Interface;
@@ -61,8 +61,6 @@ public class Generator {
 
     private Layer2Topology _layer2Topology;
 
-
-
     public enum Protocol {
         IBGP("ibgp", 255),
         EBGP("ebgp", 255),
@@ -96,6 +94,10 @@ public class Generator {
         _bgpTopology = bgpTopology;
         _vpnName = vpnName;
         _ifMpls = !vpnName.equals(KeyWord.PUBLIC_VPN_NAME);
+    }
+
+    public Layer2Topology getLayer2Topology() {
+        return _layer2Topology;
     }
 
     public boolean ifMpls() {

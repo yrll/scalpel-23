@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.sng.datamodel.Prefix;
 import org.sng.datamodel.Ip;
 import org.sng.main.BgpDiagnosis;
 import org.sng.main.common.StaticRoute;
+import org.sng.main.diagnosis.VpnInstance;
 
 public class ConfigTaint {
 
@@ -400,4 +402,51 @@ public class ConfigTaint {
         return null;
     }
 
+    public static VpnInstance getVpnInstance(String node, String vpnName) {
+        BufferedReader reader;
+        String filePath = BgpDiagnosis.cfgPathMap.get(node);
+        VpnInstance vpnInstance = new VpnInstance(node, vpnName);
+        try {
+            reader = new BufferedReader(new FileReader(filePath));
+            String line = reader.readLine().strip();
+            int lineNum = 1;
+            boolean ifReachVpnLine = false;
+            while (line != null) {
+                // System.out.println(line);
+                // read next line
+                if (line.contains(KeyWord.IP_VPN_INSTANCE) && line.contains(vpnName)) {
+                    ifReachVpnLine = true;
+                    line = reader.readLine();
+                    while (line != null && !line.contains(KeyWord.ENDING_TOKEN)) {
+                        String[] words = line.split(" ");
+                        if (line.contains(KeyWord.IP_FAMILY_TOKEN)){
+                            vpnInstance.setIpFamily(line.strip());
+                        } else if (line.contains(KeyWord.TUNNEL_POLICY)){
+                            // tnl-policy [policy-name]
+                            vpnInstance.setTnlPolicyName(words[words.length-1]);
+                        } else if (line.contains(KeyWord.RD_TOKEN)) {
+                            // route-distinguisher [route-distinguisher]
+                            vpnInstance.setRouterDistinguisher(words[words.length-1]);
+                        } else if (line.contains(KeyWord.RT_TOKEN)) {
+                            // vpn-target { vpn-target } &<1-8> [ vrfRtType ]
+                            vpnInstance.setRtList(words, words[words.length-1]);
+                        } 
+                        line = reader.readLine();
+                    }
+                }
+                if (ifReachVpnLine) {
+                    break;
+                }
+                line = reader.readLine();
+                lineNum += 1;
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // 如果解析失败 返回空值
+        return vpnInstance;
+        
+        
+    }
 }

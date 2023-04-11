@@ -51,5 +51,16 @@ public class KeyWord {
     public static String PUBLIC_VPN_NAME = "_public_";
     public static String IPV4_FAMILY = "ipv4-family";
     public static String UNICAST = "unicast";
+    public static String IP_VPN_INSTANCE = "ip vpn-instance";
+
+    // vpn keywords
+    public static final String IP_FAMILY_TOKEN = "family";
+    public static final String TUNNEL_POLICY = "tnl-policy";
+    public static final String RD_TOKEN = "route-distinguisher";
+    public static final String RT_TOKEN = "vpn-target"; 
+    public static final String EXPORT = "export";
+    public static final String IMPORT = "import";
+
+    public static String ENDING_TOKEN = "#";
 
 }
