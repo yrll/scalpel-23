@@ -18,24 +18,23 @@ public class Main {
         Logger logger = Logger.getLogger(KeyWord.LOGGER_NAME);
         logger.setLevel(Level.WARNING);
 
-        String caseType = "4.1";
-        NetworkType type = NetworkType.BGP;
+        String caseType = "2.4";
+        NetworkType type = NetworkType.IPRAN;
 
         Set<String> reachNodes = new HashSet<>();
-        reachNodes.add("BNG1");
+        reachNodes.add("RSG1");
         boolean ifSave = false;
 
         // String fp = "E:/Java/IdeaProjects/scalpel-23/sse_conditions/bgp/case1.1.json";
         // BgpCondition.deserialize(fp);
         
-        
         BgpDiagnosis diagnoser = new BgpDiagnosis(caseType, type);
         
         // VpnInstance vv = ConfigTaint.getVpnInstance("ASG1", "LTE_RAN");
 
-        diagnoser.diagnose(reachNodes, null,true);
+        diagnoser.diagnose(reachNodes, null,ifSave);
 
-        diagnoser.localize(reachNodes, ifSave, diagnoser.getGenerator());
+        diagnoser.localize(reachNodes, ifSave, diagnoser.getErrGenerator());
 
         diagnoser.genIgpConstraints(null, ifSave);
 

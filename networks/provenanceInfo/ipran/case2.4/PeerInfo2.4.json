@@ -1,0 +1,1013 @@
+{
+  "ibgpPeerInfoSet": [
+    {
+      "localDevName": "ASG3",
+      "peerDevName": "CSG2-1-1",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.16/32",
+      "localIp": "110.0.0.10/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "P-RR2",
+      "peerDevName": "RSG4",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.5/32",
+      "localIp": "110.0.0.7/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG1-1-1",
+      "peerDevName": "ASG2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.9/32",
+      "localIp": "70.0.0.6/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG1-1-5",
+      "peerDevName": "ASG2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.9/32",
+      "localIp": "70.0.0.10/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG3",
+      "peerDevName": "CSG2-2-5",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.25/32",
+      "localIp": "110.0.0.10/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "P-RR1",
+      "peerDevName": "ASG2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.9/32",
+      "localIp": "110.0.0.6/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG4",
+      "peerDevName": "CSG2-2-1",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.21/32",
+      "localIp": "110.0.0.11/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG2",
+      "peerDevName": "CSG1-2-2",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.12/32",
+      "localIp": "110.0.0.9/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG2-2-5",
+      "peerDevName": "ASG3",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.10/32",
+      "localIp": "70.0.0.25/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG2-2-3",
+      "peerDevName": "ASG4",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.11/32",
+      "localIp": "70.0.0.23/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "RSG2",
+      "peerDevName": "P-RR1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.6/32",
+      "localIp": "110.0.0.3/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG2",
+      "peerDevName": "CSG1-1-1",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.6/32",
+      "localIp": "110.0.0.9/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG2",
+      "peerDevName": "CSG1-1-3",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.8/32",
+      "localIp": "110.0.0.9/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG3",
+      "peerDevName": "CSG2-1-3",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.18/32",
+      "localIp": "110.0.0.10/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG2-2-5",
+      "peerDevName": "ASG4",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.11/32",
+      "localIp": "70.0.0.25/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "P-RR2",
+      "peerDevName": "RSG2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.3/32",
+      "localIp": "110.0.0.7/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG4",
+      "peerDevName": "CSG2-1-2",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.17/32",
+      "localIp": "110.0.0.11/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "P-RR1",
+      "peerDevName": "RSG3",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.4/32",
+      "localIp": "110.0.0.6/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG2-1-4",
+      "peerDevName": "ASG4",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.11/32",
+      "localIp": "70.0.0.19/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG2",
+      "peerDevName": "CSG1-2-4",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.14/32",
+      "localIp": "110.0.0.9/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG2-1-5",
+      "peerDevName": "ASG4",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.11/32",
+      "localIp": "70.0.0.20/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG3",
+      "peerDevName": "P-RR1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.6/32",
+      "localIp": "110.0.0.10/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG4",
+      "peerDevName": "CSG2-1-1",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.16/32",
+      "localIp": "110.0.0.11/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "RSG3",
+      "peerDevName": "P-RR1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.6/32",
+      "localIp": "110.0.0.4/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG1-1-1",
+      "peerDevName": "ASG1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.8/32",
+      "localIp": "70.0.0.6/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "P-RR2",
+      "peerDevName": "ASG3",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.10/32",
+      "localIp": "110.0.0.7/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG1-2-5",
+      "peerDevName": "ASG2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.9/32",
+      "localIp": "70.0.0.15/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG4",
+      "peerDevName": "CSG2-1-3",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.18/32",
+      "localIp": "110.0.0.11/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG2-1-3",
+      "peerDevName": "ASG4",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.11/32",
+      "localIp": "70.0.0.18/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG2-2-4",
+      "peerDevName": "ASG3",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.10/32",
+      "localIp": "70.0.0.24/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG1",
+      "peerDevName": "CSG1-1-1",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.6/32",
+      "localIp": "110.0.0.8/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG1-1-4",
+      "peerDevName": "ASG2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.9/32",
+      "localIp": "70.0.0.9/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG1-2-4",
+      "peerDevName": "ASG1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.8/32",
+      "localIp": "70.0.0.14/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG1",
+      "peerDevName": "P-RR1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.6/32",
+      "localIp": "110.0.0.8/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG2-1-5",
+      "peerDevName": "ASG3",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.10/32",
+      "localIp": "70.0.0.20/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG3",
+      "peerDevName": "CSG2-1-2",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.17/32",
+      "localIp": "110.0.0.10/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG2-1-4",
+      "peerDevName": "ASG3",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.10/32",
+      "localIp": "70.0.0.19/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "P-RR1",
+      "peerDevName": "ASG4",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.11/32",
+      "localIp": "110.0.0.6/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "P-RR2",
+      "peerDevName": "ASG1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.8/32",
+      "localIp": "110.0.0.7/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG1",
+      "peerDevName": "CSG1-2-5",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.15/32",
+      "localIp": "110.0.0.8/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG2",
+      "peerDevName": "CSG1-2-5",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.15/32",
+      "localIp": "110.0.0.9/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "P-RR1",
+      "peerDevName": "RSG2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.3/32",
+      "localIp": "110.0.0.6/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG3",
+      "peerDevName": "CSG2-1-4",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.19/32",
+      "localIp": "110.0.0.10/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG2-1-1",
+      "peerDevName": "ASG4",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.11/32",
+      "localIp": "70.0.0.16/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG2-2-1",
+      "peerDevName": "ASG4",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.11/32",
+      "localIp": "70.0.0.21/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG2-2-3",
+      "peerDevName": "ASG3",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.10/32",
+      "localIp": "70.0.0.23/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG1-1-4",
+      "peerDevName": "ASG1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.8/32",
+      "localIp": "70.0.0.9/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG1-2-5",
+      "peerDevName": "ASG1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.8/32",
+      "localIp": "70.0.0.15/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG3",
+      "peerDevName": "P-RR2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.7/32",
+      "localIp": "110.0.0.10/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "P-RR2",
+      "peerDevName": "ASG2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.9/32",
+      "localIp": "110.0.0.7/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG4",
+      "peerDevName": "CSG2-2-5",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.25/32",
+      "localIp": "110.0.0.11/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG4",
+      "peerDevName": "CSG2-1-5",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.20/32",
+      "localIp": "110.0.0.11/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG1-2-1",
+      "peerDevName": "ASG2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.9/32",
+      "localIp": "70.0.0.11/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "P-RR2",
+      "peerDevName": "RSG1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.1/32",
+      "localIp": "110.0.0.7/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "RSG4",
+      "peerDevName": "P-RR1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.6/32",
+      "localIp": "110.0.0.5/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG1-2-4",
+      "peerDevName": "ASG2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.9/32",
+      "localIp": "70.0.0.14/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG1",
+      "peerDevName": "CSG1-2-3",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.13/32",
+      "localIp": "110.0.0.8/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "RSG3",
+      "peerDevName": "P-RR2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.7/32",
+      "localIp": "110.0.0.4/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG3",
+      "peerDevName": "CSG2-2-4",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.24/32",
+      "localIp": "110.0.0.10/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG1-2-2",
+      "peerDevName": "ASG2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.9/32",
+      "localIp": "70.0.0.12/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG2",
+      "peerDevName": "CSG1-1-4",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.9/32",
+      "localIp": "110.0.0.9/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "P-RR2",
+      "peerDevName": "RSG3",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.4/32",
+      "localIp": "110.0.0.7/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "RSG1",
+      "peerDevName": "P-RR2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.7/32",
+      "localIp": "110.0.0.1/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG1",
+      "peerDevName": "CSG1-1-2",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.7/32",
+      "localIp": "110.0.0.8/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG4",
+      "peerDevName": "P-RR2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.7/32",
+      "localIp": "110.0.0.11/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG2-1-2",
+      "peerDevName": "ASG4",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.11/32",
+      "localIp": "70.0.0.17/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG2-2-2",
+      "peerDevName": "ASG4",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.11/32",
+      "localIp": "70.0.0.22/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG3",
+      "peerDevName": "CSG2-2-2",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.22/32",
+      "localIp": "110.0.0.10/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG4",
+      "peerDevName": "CSG2-2-2",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.22/32",
+      "localIp": "110.0.0.11/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG1-2-2",
+      "peerDevName": "ASG1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.8/32",
+      "localIp": "70.0.0.12/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG4",
+      "peerDevName": "CSG2-2-3",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.23/32",
+      "localIp": "110.0.0.11/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "P-RR1",
+      "peerDevName": "RSG4",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.5/32",
+      "localIp": "110.0.0.6/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG3",
+      "peerDevName": "CSG2-1-5",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.20/32",
+      "localIp": "110.0.0.10/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG2",
+      "peerDevName": "CSG1-2-3",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.13/32",
+      "localIp": "110.0.0.9/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "RSG1",
+      "peerDevName": "P-RR1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.6/32",
+      "localIp": "110.0.0.1/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG4",
+      "peerDevName": "CSG2-1-4",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.19/32",
+      "localIp": "110.0.0.11/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG1-2-1",
+      "peerDevName": "ASG1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.8/32",
+      "localIp": "70.0.0.11/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG2",
+      "peerDevName": "CSG1-2-1",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.11/32",
+      "localIp": "110.0.0.9/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG1",
+      "peerDevName": "CSG1-1-5",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.10/32",
+      "localIp": "110.0.0.8/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "P-RR1",
+      "peerDevName": "ASG1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.8/32",
+      "localIp": "110.0.0.6/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG2-2-2",
+      "peerDevName": "ASG3",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.10/32",
+      "localIp": "70.0.0.22/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG1",
+      "peerDevName": "P-RR2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.7/32",
+      "localIp": "110.0.0.8/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG2-2-1",
+      "peerDevName": "ASG3",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.10/32",
+      "localIp": "70.0.0.21/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG3",
+      "peerDevName": "CSG2-2-1",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.21/32",
+      "localIp": "110.0.0.10/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG1-2-3",
+      "peerDevName": "ASG1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.8/32",
+      "localIp": "70.0.0.13/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG2",
+      "peerDevName": "P-RR1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.6/32",
+      "localIp": "110.0.0.9/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG2-1-2",
+      "peerDevName": "ASG3",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.10/32",
+      "localIp": "70.0.0.17/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "P-RR1",
+      "peerDevName": "RSG1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.1/32",
+      "localIp": "110.0.0.6/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG4",
+      "peerDevName": "CSG2-2-4",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.24/32",
+      "localIp": "110.0.0.11/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG3",
+      "peerDevName": "CSG2-2-3",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.23/32",
+      "localIp": "110.0.0.10/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG4",
+      "peerDevName": "P-RR1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.6/32",
+      "localIp": "110.0.0.11/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG1-1-2",
+      "peerDevName": "ASG1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.8/32",
+      "localIp": "70.0.0.7/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG2",
+      "peerDevName": "CSG1-1-2",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.7/32",
+      "localIp": "110.0.0.9/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG1-1-3",
+      "peerDevName": "ASG1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.8/32",
+      "localIp": "70.0.0.8/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "P-RR2",
+      "peerDevName": "ASG4",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.11/32",
+      "localIp": "110.0.0.7/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG2",
+      "peerDevName": "CSG1-1-5",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.10/32",
+      "localIp": "110.0.0.9/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG2-1-1",
+      "peerDevName": "ASG3",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.10/32",
+      "localIp": "70.0.0.16/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG1",
+      "peerDevName": "CSG1-2-4",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.14/32",
+      "localIp": "110.0.0.8/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG1",
+      "peerDevName": "CSG1-1-3",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.8/32",
+      "localIp": "110.0.0.8/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "ASG2",
+      "peerDevName": "P-RR2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.7/32",
+      "localIp": "110.0.0.9/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "P-RR1",
+      "peerDevName": "ASG3",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.10/32",
+      "localIp": "110.0.0.6/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG1-1-5",
+      "peerDevName": "ASG1",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.8/32",
+      "localIp": "70.0.0.10/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG2-2-4",
+      "peerDevName": "ASG4",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.11/32",
+      "localIp": "70.0.0.24/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "RSG4",
+      "peerDevName": "P-RR2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.7/32",
+      "localIp": "110.0.0.5/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG1",
+      "peerDevName": "CSG1-2-2",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.12/32",
+      "localIp": "110.0.0.8/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG1-2-3",
+      "peerDevName": "ASG2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.9/32",
+      "localIp": "70.0.0.13/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "RSG2",
+      "peerDevName": "P-RR2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.7/32",
+      "localIp": "110.0.0.3/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG1",
+      "peerDevName": "CSG1-1-4",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.9/32",
+      "localIp": "110.0.0.8/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG1-1-2",
+      "peerDevName": "ASG2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.9/32",
+      "localIp": "70.0.0.7/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "ASG1",
+      "peerDevName": "CSG1-2-1",
+      "localVpnName": "VPNV4",
+      "peerIp": "70.0.0.11/32",
+      "localIp": "110.0.0.8/32",
+      "peerAsNum": "100",
+      "rrclient": true
+    },
+    {
+      "localDevName": "CSG1-1-3",
+      "peerDevName": "ASG2",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.9/32",
+      "localIp": "70.0.0.8/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    },
+    {
+      "localDevName": "CSG2-1-3",
+      "peerDevName": "ASG3",
+      "localVpnName": "VPNV4",
+      "peerIp": "110.0.0.10/32",
+      "localIp": "70.0.0.18/32",
+      "peerAsNum": "100",
+      "rrclient": false
+    }
+  ],
+  "ebgpPeerInfoSet": []
+}

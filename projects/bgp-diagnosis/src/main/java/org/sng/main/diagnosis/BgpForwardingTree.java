@@ -104,8 +104,8 @@ public class BgpForwardingTree {
                 return node;
             }
         }
-        assert false;
-        return "";
+        assert reachNodes.size() < 1;
+        return reachNodes.iterator().next();
     }
 
     public BgpForwardingTree() {
@@ -379,7 +379,7 @@ public class BgpForwardingTree {
                 // dstDev没有out nodes
                 continue;
             }
-            
+            // 把已经配了的删除了
             List<String> nodesOutNotClient = bgpTopology.getNodesInAs(bgpTopology.getAsNumber(node), nodesIn).stream().filter(nodeIn->!bgpTopology.ifConfiguredRRClient(node, nodeIn)).collect(Collectors.toList());
             List<String> nodesInNotClient = bgpTopology.getNodesInAs(bgpTopology.getAsNumber(node), nodesIn).stream().filter(nodeIn->!bgpTopology.ifConfiguredRRClient(node, nodeIn)).collect(Collectors.toList()); 
             

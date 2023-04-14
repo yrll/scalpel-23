@@ -1,0 +1,25 @@
+{
+  "importedDirectRoutes": {},
+  "importedStaticRoues": {
+    "BR4": {
+      "_public_": [
+        {
+          "deviceName": "BR4",
+          "vpnName": "_public_",
+          "addressIp": "209.0.0.12/30",
+          "nextHop": "69.0.0.14/32",
+          "outInf": {
+            "deviceName": "BR4",
+            "infName": "GigabitEthernet3/0/1.20",
+            "vpnName": "_public_",
+            "infIpv4Ip": "69.0.0.12/30",
+            "infIpv4HostIp": "69.0.0.13/32",
+            "infIpv6Ip": null,
+            "infIpv6HostIp": null
+          }
+        }
+      ]
+    }
+  },
+  "importedIsIsRoutes": {}
+}

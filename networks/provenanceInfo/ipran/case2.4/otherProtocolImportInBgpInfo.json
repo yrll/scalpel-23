@@ -1,0 +1,134 @@
+{
+  "importedDirectRoutes": {
+    "RSG4": {
+      "LTE_RAN": [
+        {
+          "deviceName": "RSG4",
+          "vpnName": "LTE_RAN",
+          "ipPrefix": "90.0.0.5/32",
+          "outInf": {
+            "deviceName": "RSG4",
+            "infName": "LoopBack10",
+            "vpnName": "LTE_RAN",
+            "infIpv4Ip": "90.0.0.5/32",
+            "infIpv4HostIp": "90.0.0.5/32",
+            "infIpv6Ip": null,
+            "infIpv6HostIp": null
+          }
+        },
+        {
+          "deviceName": "RSG4",
+          "vpnName": "LTE_RAN",
+          "ipPrefix": "90.0.0.5/32",
+          "outInf": {
+            "deviceName": "RSG4",
+            "infName": "LoopBack10",
+            "vpnName": "LTE_RAN",
+            "infIpv4Ip": "90.0.0.5/32",
+            "infIpv4HostIp": "90.0.0.5/32",
+            "infIpv6Ip": null,
+            "infIpv6HostIp": null
+          }
+        }
+      ]
+    },
+    "RSG1": {
+      "LTE_RAN": [
+        {
+          "deviceName": "RSG1",
+          "vpnName": "LTE_RAN",
+          "ipPrefix": "90.0.0.1/32",
+          "outInf": {
+            "deviceName": "RSG1",
+            "infName": "LoopBack10",
+            "vpnName": "LTE_RAN",
+            "infIpv4Ip": "90.0.0.1/32",
+            "infIpv4HostIp": "90.0.0.1/32",
+            "infIpv6Ip": null,
+            "infIpv6HostIp": null
+          }
+        },
+        {
+          "deviceName": "RSG1",
+          "vpnName": "LTE_RAN",
+          "ipPrefix": "90.0.0.1/32",
+          "outInf": {
+            "deviceName": "RSG1",
+            "infName": "LoopBack10",
+            "vpnName": "LTE_RAN",
+            "infIpv4Ip": "90.0.0.1/32",
+            "infIpv4HostIp": "90.0.0.1/32",
+            "infIpv6Ip": null,
+            "infIpv6HostIp": null
+          }
+        }
+      ]
+    }
+  },
+  "importedStaticRoues": {
+    "ASG3": {
+      "LTE_RAN": [
+        {
+          "deviceName": "ASG3",
+          "vpnName": "LTE_RAN",
+          "addressIp": "0.0.0.0/0",
+          "nextHop": "90.0.0.1/32",
+          "outInf": null
+        }
+      ]
+    },
+    "CSG1-1-1": {
+      "LTE_RAN": [
+        {
+          "deviceName": "CSG1-1-1",
+          "vpnName": "LTE_RAN",
+          "addressIp": "191.0.0.0/30",
+          "nextHop": "31.0.0.2/32",
+          "outInf": {
+            "deviceName": "CSG1-1-1",
+            "infName": "GigabitEthernet4/0/1.2",
+            "vpnName": "LTE_RAN",
+            "infIpv4Ip": "31.0.0.0/30",
+            "infIpv4HostIp": "31.0.0.1/32",
+            "infIpv6Ip": null,
+            "infIpv6HostIp": null
+          }
+        }
+      ]
+    },
+    "ASG4": {
+      "LTE_RAN": [
+        {
+          "deviceName": "ASG4",
+          "vpnName": "LTE_RAN",
+          "addressIp": "0.0.0.0/0",
+          "nextHop": "90.0.0.5/32",
+          "outInf": null
+        }
+      ]
+    },
+    "ASG1": {
+      "LTE_RAN": [
+        {
+          "deviceName": "ASG1",
+          "vpnName": "LTE_RAN",
+          "addressIp": "0.0.0.0/0",
+          "nextHop": "90.0.0.1/32",
+          "outInf": null
+        }
+      ]
+    },
+    "ASG2": {
+      "LTE_RAN": [
+        {
+          "deviceName": "ASG2",
+          "vpnName": "LTE_RAN",
+          "addressIp": "0.0.0.0/0",
+          "nextHop": "90.0.0.5/32",
+          "outInf": null
+        }
+      ]
+    }
+  },
+  "importedIsIsRoutes": {}
+}

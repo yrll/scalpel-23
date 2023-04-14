@@ -151,7 +151,7 @@ public class Generator {
     public int hopNumberToReachIpUsingStatic(String node, Ip ip) {
         // TODO: implement
         // 如果是静态路由，
-        String filePath = InputData.getCorrectProvFilePath(BgpDiagnosis.caseType, BgpDiagnosis.errorType, KeyWord.RELATED_STATIC_INFO_FILE);
+        String filePath = InputData.getCorrectProvFilePath(BgpDiagnosis.caseType, BgpDiagnosis.networkType, KeyWord.RELATED_STATIC_INFO_FILE);
         Map<String, Map<String, Map<String, List<StaticRoute>>>> relatedStaticRoutes = genStaticOrDirectRouteFromFile(filePath, Protocol.STATIC);
         Prefix prefix = ip.toPrefix();
         int hopNum = 0;
