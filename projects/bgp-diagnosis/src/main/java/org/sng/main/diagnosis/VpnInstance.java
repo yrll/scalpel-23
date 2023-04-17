@@ -38,6 +38,8 @@ public class VpnInstance {
         this.node = node;
         vpnName = name;
         routerDistinguisher = "";
+        exportRtList = new ArrayList<>();
+        importRtList = new ArrayList<>();
     }
 
     public void setIpFamily(String ipFamilyName) {
@@ -56,8 +58,8 @@ public class VpnInstance {
         routerDistinguisher = rdName;
     }
 
-    public void setExportRtList(String[] rts) {
-        exportRtList = new ArrayList<>();
+    public void addExportRtList(String[] rts) {
+        
         for (String rt : rts) {
             if (rt.contains(":")) {
                 exportRtList.add(rt);
@@ -65,8 +67,8 @@ public class VpnInstance {
         }
     }
 
-    public void setImportRtList(String[] rts) {
-        importRtList = new ArrayList<>();
+    public void addImportRtList(String[] rts) {
+        
         for (String rt : rts) {
             if (rt.contains(":")) {
                 importRtList.add(rt);
@@ -74,11 +76,12 @@ public class VpnInstance {
         }
     }
 
-    public boolean setRtList(String[] rts, String type) {
+
+    public boolean addRtList(String[] rts, String type) {
         if (type.contains("export")) {
-            setExportRtList(rts);
+            addExportRtList(rts);
         } else if (type.contains("import")) {
-            setImportRtList(rts);
+            addImportRtList(rts);
         } else {
             return false;
         }

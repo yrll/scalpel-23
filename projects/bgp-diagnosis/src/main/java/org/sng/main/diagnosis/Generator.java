@@ -88,12 +88,12 @@ public class Generator {
         }
       }
 
-    public Generator(String nodeName, String prefix, BgpTopology bgpTopology, String vpnName) {
+    public Generator(String nodeName, String prefix, BgpTopology bgpTopology, String vpnName, boolean ifMpls) {
         _dstDevName = nodeName;
         _dstPrefix = Prefix.parse(prefix);
         _bgpTopology = bgpTopology;
         _vpnName = vpnName;
-        _ifMpls = !vpnName.equals(KeyWord.PUBLIC_VPN_NAME);
+        _ifMpls = ifMpls;
     }
 
     public Layer2Topology getLayer2Topology() {

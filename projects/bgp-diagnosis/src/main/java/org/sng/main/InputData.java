@@ -1,10 +1,13 @@
 package org.sng.main;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.ArchUtils;
 import org.sng.main.util.KeyWord;
@@ -65,20 +68,32 @@ public class InputData {
     private static String relativeIgpResultRootPath = "igp_reqs/";
     private static String relativeSseProvRootPath = "sse_provenanceInfo/";
 
+    //------------------------------------IPMETRO---------------------------------------------------
     private static String errIpmetroDstName1 = "BNG30";
     private static String errIpmetroDstIp1 = "179.0.0.117/30";
 
     private static String errIpmetroDstName2 = "BR4";
     private static String errIpmetroDstIp2 = "209.0.0.12/30";
 
+    private static Set<String> errIpmetroSrcNameList1 = new HashSet<>(Arrays.asList("BNG1"));
+    //------------------------------------IPMETRO---------------------------------------------------
+
+    //----------------------------------------------------------------------------------------
     private static String corIpmetroDstName1 = "BNG3";
     private static String corIpmetroDstIp1 = "179.0.0.9/30";
 
     private static String corIpmetroDstName2 = "BR3";
     private static String corIpmetroDstIp2 = "209.0.0.9/30";
+    //----------------------------------------------------------------------------------------
 
+    //------------------------------------IPRAN----------------------------------------------------
     private static String errIpranDstName1 = "CSG1-1-1";
     private static String errIpranDstIp1 = "191.0.0.0/30";
+
+    private static Set<String> errIpranSrcNameList1 = new HashSet<>(Arrays.asList("RSG1"));
+    //------------------------------------IPRAN---------------------------------------------------
+    
+    
 
     public InputData() {
         ipmetroCaseType1.forEach(t->{
@@ -104,59 +119,98 @@ public class InputData {
         });
     }
 
+    public static Set<String> getRequirementSrcNodes(String keyString, NetworkType type) {
+        switch (type) {
+            case IPMETRO: {
+                return errIpmetroSrcNameList1;
+            }
+            case IPRAN: {
+                return errIpranSrcNameList1;
+            }
+            case CLOUDNET: {
+                return new HashSet<String>();
+            }
+        }
+        throw new IllegalArgumentException("Invalid network Type!");
+    }
+
+    public static String filterInvalidFilePath(String filePath) {
+        File file = new File(filePath);
+        if (file.exists()) {
+            return filePath;
+        } else {
+            return "";
+        }
+    }
+
+    // 待生成/写入的文件
     public String getIgpRequirementFilePath(String keyString, NetworkType type) {
         String relativePath = concatFilePath(relativeIgpResultRootPath, concatFilePath(type.name(), "case" + keyString +".json"));
-        return concatFilePath(projectRootPath, relativePath);
+        String filePath = concatFilePath(projectRootPath, relativePath);
+        return filePath;
     }
 
+    // 待生成/写入的文件
     public String getConditionFilePath(String keyString, NetworkType type) {
         String relativePath = concatFilePath(relativeConditionRootPath, concatFilePath(type.name(), "case" + keyString +".json"));
-        return concatFilePath(projectRootPath, relativePath);
+        String filePath = concatFilePath(projectRootPath, relativePath);
+        return filePath;
     }
 
+    // 待生成/写入的文件
     public String getResultFilePath(String keyString, NetworkType type) {
         String relativePath = concatFilePath(relativeLocalizeResultRootPath, concatFilePath(type.name(), "case" + keyString +".json"));
-        return concatFilePath(projectRootPath, relativePath);
+        String filePath = concatFilePath(projectRootPath, relativePath);
+        return filePath;
     }
 
+    // 待生成/写入的文件
     public String getPreResultFilePath(String keyString, NetworkType type) {
         String relativePath = concatFilePath(relativeLocalizeResultRootPath, concatFilePath(type.name(), "(pre)case" + keyString +".json"));
-        return concatFilePath(projectRootPath, relativePath);
+        String filePath = concatFilePath(projectRootPath, relativePath);
+        return filePath;
     }
 
+    // 待读取的目录
     public static String getCfgRootPath(String keyString, NetworkType type) {
         String bgpProvRootPath = concatFilePath(projectRootPath, relativeConfigRootPath + type.name());
         String finalPath = concatFilePath(bgpProvRootPath, "case"+keyString);
         return finalPath;
     }
 
+    // 待读取的文件
     public String getViolateRulePath(String keyString, NetworkType type) {
         String relativePath = concatFilePath(relativeVioRuleRootPath, concatFilePath(type.name(), "ViolatedRules_Case" + keyString +".json"));
-        return concatFilePath(projectRootPath, relativePath);
+        String filePath = concatFilePath(projectRootPath, relativePath);
+        return filterInvalidFilePath(filePath);
     }
 
-
+    // 待读取的文件
     public static String getErrorProvFilePath(String keyString, NetworkType type, String fileName) {
         String ProvRootPath = concatFilePath(projectRootPath, relativeErrProvRootPath + type.name());
         String finalPath = concatFilePath(ProvRootPath, concatFilePath("case"+keyString, fileName));
-        return finalPath;
+        return filterInvalidFilePath(finalPath);
     }
 
-    public static String getRepairProvFilePath(String keyString, NetworkType type, String fileName) {
+    // 待读取的文件
+    public static String getSseProvFilePath(String keyString, NetworkType type, String fileName) {
         String ProvRootPath = concatFilePath(projectRootPath, relativeSseProvRootPath + type.name());
         String finalPath = concatFilePath(ProvRootPath, concatFilePath("case"+keyString, fileName));
-        return finalPath;
+        return filterInvalidFilePath(finalPath);
     }
 
+    // 待读取的文件
     public static String getCorrectProvFilePath(String keyString, NetworkType type, String fileName) {
         String ProvRootPath = concatFilePath(projectRootPath, relativeErrProvRootPath + type.name());
         String finalPath = concatFilePath(ProvRootPath, concatFilePath("case"+keyString, concatFilePath(KeyWord.CORRECT, fileName)));
-        return finalPath;
+        return filterInvalidFilePath(finalPath);
     }
 
+    // 待读取的文件
     public String getPeerInfoPath(String keyString, NetworkType type) {
         String relativePath = concatFilePath(relativePeerInfoRootPath, concatFilePath(type.name(), "PeerInfo" + keyString +".json"));
-        return concatFilePath(projectRootPath, relativePath);
+        String filePath = concatFilePath(projectRootPath, relativePath);
+        return filterInvalidFilePath(filePath);
     }
 
     public String getErrorDstName(String keyString, NetworkType type) {
@@ -170,7 +224,7 @@ public class InputData {
         return "";
     }
 
-    public String getErrorVpnName(String keyString, NetworkType type) {
+    public String getErrorVpnName(NetworkType type) {
         if (type.equals(NetworkType.IPMETRO)) {
             return KeyWord.PUBLIC_VPN_NAME;
         } else if (type.equals(NetworkType.IPRAN)){

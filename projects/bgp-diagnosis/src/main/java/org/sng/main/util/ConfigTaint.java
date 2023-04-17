@@ -429,7 +429,7 @@ public class ConfigTaint {
                             vpnInstance.setRouterDistinguisher(words[words.length-1]);
                         } else if (line.contains(KeyWord.RT_TOKEN)) {
                             // vpn-target { vpn-target } &<1-8> [ vrfRtType ]
-                            vpnInstance.setRtList(words, words[words.length-1]);
+                            vpnInstance.addRtList(words, words[words.length-1]);
                         } 
                         line = reader.readLine();
                     }

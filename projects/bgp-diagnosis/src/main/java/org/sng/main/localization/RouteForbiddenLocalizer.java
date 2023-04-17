@@ -1,6 +1,6 @@
 package org.sng.main.localization;
 
-import java.io.ObjectInputFilter.Config;
+
 import java.util.List;
 import java.util.Map;
 
