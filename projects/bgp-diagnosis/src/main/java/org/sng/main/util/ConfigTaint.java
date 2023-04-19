@@ -72,7 +72,8 @@ public class ConfigTaint {
         return route;
     }
 
-    public static StaticRoute staticRouteFinder(String node, Prefix prefix) {
+    // 不包括找默认路由
+    public static StaticRoute staticRouteFinder(String node, Prefix prefix, boolean strictMatch) {
         // filePath是cfg文件地址，keyWords是静态路由相关的
         // 直接在入参的route上了
         String filePath = BgpDiagnosis.cfgPathMap.get(node);
@@ -96,11 +97,21 @@ public class ConfigTaint {
                         if (Ip.isIpv4Addr(words[i]) && !ifFindTargetPrefix) {
                             Ip ip = Ip.parse(words[i]);
                             Prefix thisPrefix = Prefix.create(ip, Integer.valueOf(words[i+1]));
-                            if (!thisPrefix.equals(prefix)) {
+                            if (thisPrefix.equals(Prefix.ZERO)) {
                                 break;
                             }
+                            if (strictMatch) {
+                                if (!thisPrefix.equals(prefix)) {
+                                    break;
+                                }
+                            } else {
+                                if (!thisPrefix.containsPrefix(prefix)) {
+                                    break;
+                                }
+                            }
+
                             ifFindTargetPrefix = true;
-                            return new StaticRoute(node, prefix.toString(), words[i+2]);
+                            return new StaticRoute(node, thisPrefix.toString(), words[i+2]);
                         }
                         
                     }

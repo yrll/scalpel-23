@@ -9,7 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.sng.datamodel.Ip;
+import org.sng.datamodel.Prefix;
 import org.sng.main.BgpDiagnosis;
+import org.sng.main.util.ConfigTaint;
 import org.sng.main.util.KeyWord;
 
 import com.google.gson.Gson;
@@ -28,6 +31,24 @@ public class Layer2Topology {
         _edges = edges;
         _edgeMap = edgeMap;
         _nodes = nodes;
+    }
+
+    public String getMatchInfPrefix(String devName, String ipString) {
+        if (!ipString.contains("/")) {
+            ipString += "/32";
+        }
+        Prefix curPrefix = Prefix.parse(ipString);
+        for (Layer2Node layer2Node: _nodes) {
+            if (devName.equals(layer2Node.getDevName())) {
+                Prefix prefix = layer2Node.getInfPrefix();
+                if (prefix!=null) {
+                    if (prefix.containsPrefix(curPrefix)) {
+                        return prefix.toString();
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     public static Layer2Topology creat(Set<Layer2Node> nodes) {

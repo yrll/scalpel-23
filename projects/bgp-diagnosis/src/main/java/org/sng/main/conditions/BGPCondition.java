@@ -5,9 +5,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.sng.datamodel.Prefix;
+
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -19,8 +20,6 @@ import com.google.gson.annotations.SerializedName;
  */
 public class BgpCondition {
 
-    @Expose(serialize = false)
-    private transient Prefix _network;
 
     @SerializedName("vpnName")
     private String _vpnName;
@@ -32,27 +31,26 @@ public class BgpCondition {
     private boolean _redistribution;
 
     @SerializedName("rrClients")
-    private List<String> _rrClients;
+    private Set<String> _rrClients;
 
     @SerializedName("selectionRoute")
     private SelectionRoute _route;
 
     @SerializedName("propNeighbors")
-    private List<String> _propNeighbors;
+    private Set<String> _propNeighbors;
 
     @SerializedName("acptNeighbors")
-    private List<String> _acptNeighbors;
+    private Set<String> _acptNeighbors;
 
     @SerializedName("ibgpPeers")
-    private List<String> _ibgpPeers;
+    private Set<String> _ibgpPeers;
 
     @SerializedName("ebgpPeers")
-    private List<String> _ebgpPeers;
+    private Set<String> _ebgpPeers;
 
 
     public BgpCondition(Builder builder) {
-        this._network = builder._network;
-        this._networkString = this._network.toString();
+        this._networkString = builder._network;
         this._redistribution = builder._redistribution;
         this._route = builder._route;
         this._propNeighbors = builder._propNeighbors;
@@ -84,25 +82,25 @@ public class BgpCondition {
 
 
     public static class Builder {
-        private Prefix _network;
+        private String _network;
 
         private boolean _redistribution;
 
-        private List<String> _rrClients;
+        private Set<String> _rrClients;
 
         private SelectionRoute _route;
 
-        private List<String> _propNeighbors;
+        private Set<String> _propNeighbors;
 
-        private List<String> _acptNeighbors;
+        private Set<String> _acptNeighbors;
 
-        private List<String> _ibgpPeers;
+        private Set<String> _ibgpPeers;
 
-        private List<String> _ebgpPeers;
+        private Set<String> _ebgpPeers;
 
         private String _vpnName;
     
-        public Builder(Prefix network) {
+        public Builder(String network) {
             this._network = network;
         }
 
@@ -116,7 +114,7 @@ public class BgpCondition {
             return this;
         }
 
-        public Builder rrClient(List<String> rrClients) {
+        public Builder rrClient(Set<String> rrClients) {
             this._rrClients = rrClients;
             return this;
         }
@@ -126,22 +124,22 @@ public class BgpCondition {
             return this;
         }
 
-        public Builder propNeighbors(List<String> nodes) {
+        public Builder propNeighbors(Set<String> nodes) {
             this._propNeighbors = nodes;
             return this;
         }
 
-        public Builder acptNeighbors(List<String> nodes) {
+        public Builder acptNeighbors(Set<String> nodes) {
             this._acptNeighbors = nodes;
             return this;
         }
 
-        public Builder ibgpPeers(List<String> peers) {
+        public Builder ibgpPeers(Set<String> peers) {
             this._ibgpPeers = peers;
             return this;
         }
 
-        public Builder ebgpPeers(List<String> peers) {
+        public Builder ebgpPeers(Set<String> peers) {
             this._ebgpPeers = peers;
             return this;
         } 

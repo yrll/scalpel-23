@@ -52,7 +52,7 @@ public class BgpTopology {
     // The valid peer Info table
     Table<String, String, BgpPeer> _peerTable;
     // The router-id map for routers
-    public static Map<String, Ip> _allNodes;
+    public static Map<String, String> _allNodes;
     // The as-number map for routers 
     Map<String, Long> _asNumMap;
     // store the inconsistent peer pair which violates the validation metrics above
@@ -101,8 +101,8 @@ public class BgpTopology {
     }
 
     // 获取node（输入1）的所有type类型的，且在nodes（输入2）中的peer，无论peer的配置是否有效
-    public List<String> getBgpPeers(String node, List<String> nodes, BgpPeer.BgpPeerType type) {
-        List<String> peers = new ArrayList<>();
+    public Set<String> getBgpPeers(String node, Set<String> nodes, BgpPeer.BgpPeerType type) {
+        Set<String> peers = new HashSet<>();
         if (nodes!=null) {
             nodes.stream().forEach(n->{
                 // 简化版写法，应该要在peer list里遍历判断的，但是目前传入的nodes都是意图上要建立peer的点对，所以只判断as-number号
@@ -132,7 +132,7 @@ public class BgpTopology {
 
 
 
-    public List<String> getNodesInAs(long asNumber, List<String> nodes) {
+    public List<String> getNodesInAs(long asNumber, Set<String> nodes) {
         List<String> targetNodes = new ArrayList<>(nodes);
         for (String node : nodes) {
             if (getAsNumber(node)!=asNumber) {
@@ -167,11 +167,11 @@ public class BgpTopology {
         
     }
 
-    public Map<String, Ip> getAllNodes() {
+    public Map<String, String> getAllNodes() {
         return _allNodes;
     }
 
-    public Ip getNodeIp(String node) {
+    public String getNodeIp(String node) {
         return _allNodes.get(node);
     }
 
@@ -208,7 +208,7 @@ public class BgpTopology {
                 if (!_allNodes.containsKey(localDevName)) {
                     // 以配置里本机的ip为主，作为本机的peer ip
                     // 如果配置里完全没配bgp协议，或者协议里没配peer，则不会加入allNodes
-                    _allNodes.put(localDevName, bgpPeer.getLocalIp());
+                    _allNodes.put(localDevName, bgpPeer.getLocalIpString());
                     _asNumMap.put(localDevName, bgpPeer.getLocalAsNum());
                 }
                 

@@ -22,6 +22,7 @@ import org.sng.main.InputData.NetworkType;
 import org.sng.main.common.BgpTopology;
 import org.sng.main.common.Interface;
 import org.sng.main.common.Layer2Topology;
+import org.sng.main.common.StaticRoute;
 import org.sng.main.conditions.BgpCondition;
 import org.sng.main.diagnosis.BgpForwardingTree;
 import org.sng.main.diagnosis.Generator;
@@ -67,12 +68,15 @@ public class BgpDiagnosis {
         // 输入1：配置根目录
         cfgRootPath = InputData.getCfgRootPath(caseType, networkType);
         cfgPathMap = genCfgPathEachNode();
+
         // 输入2：BGP peer Info路径
         String peerInfoPath = inputData.getPeerInfoPath(caseType, networkType);
+
         // 输入3：错误流的Provenance Info
         // error trace: (errorDstDevName, errorDstPrefix) and prov files path
         dstDev = inputData.getErrorDstName(caseType, networkType);
         dstIpString = inputData.getErrorDstIp(caseType, networkType);
+            // dstIp可能是个32位IP或者子网端，在对应节点配置里查找【因为溯源信息里可能没有】
         dstVpnName = inputData.getErrorVpnName(networkType);
         this.ifMpls = !dstVpnName.equals(KeyWord.PUBLIC_VPN_NAME);
         
@@ -82,9 +86,10 @@ public class BgpDiagnosis {
         // 输入5：Interface信息还原Layer2 Topology（物理拓扑），为了之后找到静态路由的下一跳设备名称
         String infInfoFilePath = inputData.getErrorProvFilePath(caseType, networkType, KeyWord.INTERFACE_INFO_FILE_PATH);
         Layer2Topology layer2Topology = Layer2Topology.fromJson(infInfoFilePath);
+        dstIpString = getTargetPrefix(dstDev, dstIpString, layer2Topology);
 
         // 中间状态1：构建BGP拓扑（Layer3 topology）generate the BGP topology using peer Info
-        BgpTopology bgpTopology = new BgpTopology();
+        bgpTopology = new BgpTopology();
         bgpTopology.genBgpPeersFromJsonFile(peerInfoPath);
         // 中间状态2：BGP & Static的原始（错误）路由传播与转发的树 
         // generate the error traffic forwarding tree (paths)
@@ -107,7 +112,31 @@ public class BgpDiagnosis {
         
     }
 
-    public Generator genCorrecGenerator() {
+    public String getTargetPrefix(String node, String ipString, Layer2Topology layer2Topology) {
+        if (node==null || node.equals("")) {
+            return ipString;
+        }
+        // STEP 1: 先在接口上遍历一遍查找
+        if (layer2Topology!=null) {
+            String targetPrefix = layer2Topology.getMatchInfPrefix(node, ipString);
+            if (targetPrefix!=null && targetPrefix.contains("/")) {
+                return targetPrefix;
+            }
+        }
+
+        // STEP 2: 找配置里的static route
+        if (!ipString.contains("/")) {
+            ipString += "/32";
+        }
+        Prefix curPrefix = Prefix.parse(ipString);
+        StaticRoute route = ConfigTaint.staticRouteFinder(node, curPrefix, false);
+        if (route!=null) {
+            return route.getPrefix().toString();
+        }
+        return ipString;
+    }
+
+    public Generator getCorrecGenerator() {
         if (corGenerator!=null) {
             return corGenerator;
         }
@@ -146,12 +175,13 @@ public class BgpDiagnosis {
             serializeToFile(conditionPath, new HashMap<>());
         } else {
             // STEP2: 生成BGP的路由转发树
+            getCorrecGenerator();
             if (corGenerator!=null) {
                 reqTree = errGenerator.genBgpTree(reachNodes, failedInfaces, corGenerator.getBgpTree());
             } else {
                 reqTree = errGenerator.genBgpTree(reachNodes, failedInfaces, null);
             }
-            Map<String, BgpCondition> conditions = reqTree.genBgpConditions(errGenerator.getBgpTopology());
+            Map<String, BgpCondition> conditions = reqTree.genBgpConditions(srcNodes, errGenerator.getBgpTopology());
             
             if (ifSave) {
                 serializeToFile(conditionPath, conditions);
@@ -177,13 +207,15 @@ public class BgpDiagnosis {
         }
         
         // STEP 2: 根据BGP路由收敛的结果诊断静态路由的错误（还需完善，这个对静态路由的检查是互相依赖的，所以如果全部查到，应该要等BGP、IGP都收敛后才行）
-        localizeInconsistentStatic(new HashSet<>(this.srcNodes), generator, ifSave);
+        errlines.putAll(localizeInconsistentStatic(new HashSet<>(this.srcNodes), generator, ifSave));
         // STEP 3: 根据BGP路由收敛的结果诊断BGP VPN上
         if (ifMpls) {
             localizeInconsitentCrossFromVpn(generator.getBgpTree());
         }
         // STEP 4: 检查隧道使能
-
+        if (ifMpls) {
+            errlines.putAll(localizeMissingLdpLines());
+        }
         return errlines;
     }
 
@@ -234,6 +266,9 @@ public class BgpDiagnosis {
         File rootFile = new File(cfgRootPath);
         File[] files = rootFile.listFiles();
         for (File file : files) {
+            if (!file.getName().contains("cfg")) {
+                continue;
+            }
             System.out.println(file.getName());
             cfgPathMap.put(file.getName().split("\\.")[0], file.getAbsolutePath());
         }
@@ -360,7 +395,29 @@ public class BgpDiagnosis {
     }
 
     public Map<String, Set<Node>> genIgpConstraints(BgpForwardingTree newTree, boolean ifSave) {
+        Set<String> nodesSetCondition = newTree.getBestRouteFromMap().keySet();
+        if (ifMpls) {
+            nodesSetCondition = new HashSet<>();
+            for (String node: srcNodes) {
+                List<String> path = newTree.getBestRouteFromPath(node, dstDev);
+                nodesSetCondition.addAll(path);
+            }
+        }
+        // 先计算转发树上所有点的IGP约束
         Map<String, Set<Node>> reachNodes = errGenerator.computeReachIgpNodes(newTree);
+        // 去除不在考虑范围的节点
+        for (String node: reachNodes.keySet()) {
+            if (!nodesSetCondition.contains(node)) {
+                reachNodes.remove(node);
+            } else {
+                for (Node reachNode: reachNodes.get(node)) {
+                    if (!nodesSetCondition.contains(reachNode.getDevName())) {
+                        reachNodes.get(node).remove(reachNode);
+                    }
+                }
+            }
+        }
+
         if (reachNodes!=null) {
             if (ifSave) {
                 String filePath = inputData.getIgpRequirementFilePath(caseType, networkType);
@@ -423,7 +480,8 @@ public class BgpDiagnosis {
     /*
      * find if all vpn binding interface have configured mpls ldp, also global mpls ldp 
      */
-    public Map<String, Map<Integer, String>> getMissingLdpLines() {
-        return null;
+    public Map<String, Map<Integer, String>> localizeMissingLdpLines() {
+        Map<String, Map<Integer, String>> lines = new HashMap<>();
+        return lines;
     }
 }

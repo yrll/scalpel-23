@@ -2,15 +2,7 @@ package org.sng.main.diagnosis;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -148,29 +140,33 @@ public class Generator {
     }
 
 
-    public int hopNumberToReachIpUsingStatic(String node, Ip ip) {
+    public int hopNumberToReachIpUsingStatic(String node, String ip) {
         // TODO: implement
         // 如果是静态路由，
         String filePath = InputData.getCorrectProvFilePath(BgpDiagnosis.caseType, BgpDiagnosis.networkType, KeyWord.RELATED_STATIC_INFO_FILE);
         Map<String, Map<String, Map<String, List<StaticRoute>>>> relatedStaticRoutes = genStaticOrDirectRouteFromFile(filePath, Protocol.STATIC);
-        Prefix prefix = ip.toPrefix();
+        Optional<Prefix> prefix = Prefix.tryParse(ip);
         int hopNum = 0;
 
         // TODO： 需要全部的static信息
-        if (ConfigTaint.staticRouteFinder(node, prefix)!=null) {
-            return 2;
-        }
-
-        if (relatedStaticRoutes.containsKey(node)) {
-            if (relatedStaticRoutes.get(node).containsKey(KeyWord.PUBLIC_VPN_NAME)) {
-                List<StaticRoute> routes = new ArrayList<>();
-                relatedStaticRoutes.get(node).get(KeyWord.PUBLIC_VPN_NAME).keySet().forEach(ipName->{
-                    routes.addAll(relatedStaticRoutes.get(node).get(KeyWord.PUBLIC_VPN_NAME).get(ipName));
-                });
-                return getNextHopRecursively(routes, ip);
+        if (prefix.isPresent()) {
+            if (ConfigTaint.staticRouteFinder(node, prefix.get(), false)!=null) {
+                return 2;
             }
+            if (relatedStaticRoutes.containsKey(node)) {
+                if (relatedStaticRoutes.get(node).containsKey(KeyWord.PUBLIC_VPN_NAME)) {
+                    List<StaticRoute> routes = new ArrayList<>();
+                    relatedStaticRoutes.get(node).get(KeyWord.PUBLIC_VPN_NAME).keySet().forEach(ipName->{
+                        routes.addAll(relatedStaticRoutes.get(node).get(KeyWord.PUBLIC_VPN_NAME).get(ipName));
+                    });
+                    return getNextHopRecursively(routes, prefix.get().getEndIp());
+                }
+            }
+            return 255;
         }
+        // IPv6的EBGP neighbor??
         return 255;
+
     }
 
     public void genBgpRoutePropTree(String filePath) {
@@ -264,9 +260,9 @@ public class Generator {
         } else {
             return nodes;
         }
-        
-        
     }
+
+
 
     /*
      * 这一步只生成BGP Tree里的路由传播和优选的树（实际转发时，域内路径可能会有出入）
@@ -292,27 +288,54 @@ public class Generator {
 
         Set<String> reachableNodes = new HashSet<>(_oldBgpTree.getReachableNodes());
         reqReachNodes.removeAll(reachableNodes);
-        Set<String> unreachableNodes = processReachNodes(reqReachNodes);
+        Set<String> unreachableNodes = new HashSet<>(_oldBgpTree.getUnreachableNodes());
 
         Map<String, Integer> distanceMap = new HashMap<>();
         Map<String, String> primNearestNodeMap = new HashMap<>(_oldBgpTree.getBestRouteFromMap());
         // disMap initialization
-        unreachableNodes.stream().forEach(node->distanceMap.put(node, Integer.MAX_VALUE));
+        unreachableNodes.forEach(node->distanceMap.put(node, Integer.MAX_VALUE));
         // TODO: 如果没有serialize到BGPTree时，没有节点和bgp ip的映射，这里会出现bestRouteFrom和nextHopForwarding不一致问题：nextHop有devName，但是bestRouteFrom没有devName
         reachableNodes.stream().forEach(node->distanceMap.put(node, _oldBgpTree.getBestRouteFromPath(node, _dstDevName).size()-1));
         // dstNode init
         distanceMap.put(_dstDevName, 0);
+
         // 用ref的连接信息参考作为Prim的加入节点选择（MST不止一个时）
         String curNode = _oldBgpTree.chooseFirstNodeHasUnreachablePeer(_bgpTopology); // 选一个已reach的开始
-        while (unreachableNodes.size()>0) {
-            for (String peer: _bgpTopology.getConfiguredPeers(curNode)) {
-                if (reachableNodes.contains(peer) || !unreachableNodes.contains(peer)) {
-                    // 更新disMap时只考虑spec要求的节点集合
-                    continue;
+
+        // 把已有的reach节点的peer遍历更新一遍disMap【重要，不然会出现有点节点拓展失败的情况】
+        for (String reachedNode: reachableNodes) {
+            for (String peer: _bgpTopology.getConfiguredPeers(reachedNode)) {
+                if (distanceMap.get(reachedNode) + 1 < distanceMap.get(peer)) {
+                    distanceMap.put(peer, distanceMap.get(reachedNode) + 1);
+                    primNearestNodeMap.put(peer, reachedNode);
+                } else if (distanceMap.get(reachedNode) + 1 == distanceMap.get(peer)) {
+                    if (refTree!=null) {
+                        // 参考正确流的信息
+                        if (refTree.getBestRouteFromNode(peer).equals(reachedNode)) {
+                            primNearestNodeMap.put(peer, reachedNode);
+                        }
+                    }
                 }
+            }
+        }
+        // 开始在当前MST上加节点
+        Set<String> nns = _bgpTopology.getConfiguredPeers("U1-1-2-5");
+        while (reqReachNodes.size()>0) {
+            for (String peer: _bgpTopology.getConfiguredPeers(curNode)) {
+//                if (reachableNodes.contains(peer)) {
+//                    // 更新disMap时只考虑spec要求的节点集合
+//                    continue;
+//                }
                 if (distanceMap.get(curNode) + 1 < distanceMap.get(peer)) {
                     distanceMap.put(peer, distanceMap.get(curNode) + 1);
                     primNearestNodeMap.put(peer, curNode);
+                } else if (distanceMap.get(curNode) + 1 == distanceMap.get(peer)) {
+                    if (refTree != null) {
+                        // 参考正确流的信息
+                        if (refTree.getBestRouteFromNode(peer).equals(curNode)) {
+                            primNearestNodeMap.put(peer, curNode);
+                        }
+                    }
                 }
             }
             // 选下一个进入树的节点
@@ -327,11 +350,30 @@ public class Generator {
             _oldBgpTree.addBestRouteFromEdge(nextNode, primNearestNodeMap.get(nextNode));
             curNode = nextNode;
             unreachableNodes.remove(curNode);
+            reqReachNodes.remove(curNode);
             reachableNodes.add(curNode);
             printStringList(_oldBgpTree.getBestRouteFromPath(curNode, _dstDevName), "NEW-PATH", ", ");
         }
         _oldBgpTree.setUnreachableNodes(unreachableNodes);
         return _oldBgpTree;
+    }
+
+    private String getNextNodeAddToMST(Set<String> nodes, Map<String, Integer> distanceMap) {
+        if (nodes.size()<1) {
+            return null;
+        } else if (nodes.size()==1) {
+            return nodes.iterator().next();
+        } else {
+            String node = nodes.iterator().next();
+            int dis = distanceMap.get(node);
+            for (String n: nodes) {
+                if (distanceMap.get(n) < dis) {
+                    dis = distanceMap.get(n);
+                    node = n;
+                }
+            }
+            return node;
+        }
     }
 
     public boolean ifStaticConsistWithBgp(String node) {
@@ -371,6 +413,7 @@ public class Generator {
     }
 
     public Map<String, Set<Node>> computeReachIgpNodes(BgpForwardingTree newBgpTree) {
+
         if (newBgpTree!=null) {
             return newBgpTree.computeReachIgpNodes(_bgpTopology);
         } else if (_oldBgpTree!=null) {

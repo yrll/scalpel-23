@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.io.filefilter.FileFileFilter;
+import jdk.security.jarsigner.JarSigner;
 import org.sng.datamodel.Ip;
 import org.sng.datamodel.Prefix;
 import org.sng.main.common.BgpRoute;
@@ -261,7 +261,7 @@ public class BgpForwardingTree {
             JsonObject nodeRoutes = jsonObject.asMap().get(node).getAsJsonObject();
             for (String ipString : nodeRoutes.keySet()) {
                 Prefix curPrefix = Prefix.parse(ipString);
-                if (curPrefix.containsPrefix(tagetPrefix)) {
+                if (curPrefix.equals(tagetPrefix)) {
                     // 当前RIB表前缀匹配目标前缀
                     int routeIndex = Integer.MAX_VALUE;
                     for (JsonElement route_raw : nodeRoutes.get(ipString).getAsJsonArray()) {
@@ -276,9 +276,9 @@ public class BgpForwardingTree {
                         BgpRoute bgpRoute = new Gson().fromJson(route, BgpRoute.class);
 
                         String nextHopDev = route.get(KeyWord.NEXT_HOP_DEV).getAsString();
-                        String nextHopIp = route.get(KeyWord.NEXT_HOP_IP).getAsString();
-                        String peerIp = route.get(KeyWord.PEER_IP).getAsString();
-                        String peerDevName = bgpTopology.getNodeNameFromIp(Prefix.parse(peerIp).getEndIp());
+                        String nextHopIpString = route.get(KeyWord.NEXT_HOP_IP).getAsString();
+                        String peerIpString = route.get(KeyWord.PEER_IP).getAsString();
+                        String peerDevName = bgpTopology.getNodeNameFromIp(peerIpString);
                         if (_bestRouteMap.containsKey(node)) {
                             Prefix bestRoutePrefix = _bestRouteMap.get(node).getPrefix();
                             // 新的route前缀更短则更新best*Map
@@ -312,9 +312,9 @@ public class BgpForwardingTree {
         return _unreachableNodesPrev;
     }
 
-    public Map<String, List<String>> getAllInNeighbors(Map<String, String> forwardingMap) {
+    public Map<String, Set<String>> getAllInNeighbors(Map<String, String> forwardingMap, Set<String> considerNodes) {
         // 入参是BGPTree的bestRouteFromMap
-        Map<String, List<String>> maps = new HashMap<>();
+        Map<String, Set<String>> maps = new HashMap<>();
         for (String node : forwardingMap.keySet()) {
             // the value node is the out neighbor of the key node
             if (node.equals(forwardingMap.get(node))) {
@@ -322,18 +322,24 @@ public class BgpForwardingTree {
                 continue;
             }
             if (!maps.containsKey(forwardingMap.get(node))) {
-                List<String> nodes = new ArrayList<>();
-                nodes.add(node);
+                Set<String> nodes = new HashSet<>();
+                if (considerNodes.contains(node) && considerNodes.contains(forwardingMap.get(node))) {
+                    nodes.add(node);
+                }
+
                 maps.put(forwardingMap.get(node), nodes);
             } else {
-                maps.get(forwardingMap.get(node)).add(node);
+                if (considerNodes.contains(node) && considerNodes.contains(forwardingMap.get(node))) {
+                    maps.get(forwardingMap.get(node)).add(node);
+                }
+
             }
         }
         return maps;
     }
 
-    public Map<String, List<String>> getAllOutNeighbors(Map<String, String> forwardingMap) {
-        Map<String, List<String>> maps = new HashMap<>();
+    public Map<String, Set<String>> getAllOutNeighbors(Map<String, String> forwardingMap, Set<String> considerNodes) {
+        Map<String, Set<String>> maps = new HashMap<>();
         for (String node : forwardingMap.keySet()) {
             // the value node is the out neighbor of the key node
             if (node.equals(forwardingMap.get(node))) {
@@ -341,11 +347,17 @@ public class BgpForwardingTree {
                 continue;
             }
             if (!maps.containsKey(node)) {
-                List<String> nodes = new ArrayList<>();
-                nodes.add(forwardingMap.get(node));
+                Set<String> nodes = new HashSet<>();
+                if (considerNodes.contains(node) && considerNodes.contains(forwardingMap.get(node))) {
+                    nodes.add(forwardingMap.get(node));
+                }
+
                 maps.put(node, nodes);
             } else {
-                maps.get(node).add(forwardingMap.get(node));
+                if (considerNodes.contains(node) && considerNodes.contains(forwardingMap.get(node))) {
+                    maps.get(node).add(forwardingMap.get(node));
+                }
+
             }
         }
         return maps;
@@ -366,22 +378,24 @@ public class BgpForwardingTree {
         return asPathList;
     }
 
-    public Map<String, List<String>> getRRClients(Map<String, List<String>> inNodes, Map<String, List<String>> outNodes, BgpTopology bgpTopology) {
+    public Map<String, Set<String>> getRRClients(Map<String, Set<String>> inNodes, Map<String, Set<String>> outNodes, BgpTopology bgpTopology) {
         // TODO 考虑和原有改动最小
-        Map<String, List<String>> clientsMap = new HashMap<>();
+        Map<String, Set<String>> clientsMap = new HashMap<>();
         for (String node : inNodes.keySet()) {
-            List<String> clients = new ArrayList<>();
+            Set<String> clients = new HashSet<>();
             // in-nodes是要传出去路由的节点
-            List<String> nodesIn = inNodes.get(node);
+            Set<String> nodesIn = inNodes.get(node);
             // out-nodes是转发流量的下一跳，也是要优选的节点
-            List<String> nodesOut = outNodes.get(node);
+            Set<String> nodesOut = outNodes.get(node);
             if (nodesOut==null) {
                 // dstDev没有out nodes
                 continue;
             }
             // 把已经配了的删除了
-            List<String> nodesOutNotClient = bgpTopology.getNodesInAs(bgpTopology.getAsNumber(node), nodesIn).stream().filter(nodeIn->!bgpTopology.ifConfiguredRRClient(node, nodeIn)).collect(Collectors.toList());
-            List<String> nodesInNotClient = bgpTopology.getNodesInAs(bgpTopology.getAsNumber(node), nodesIn).stream().filter(nodeIn->!bgpTopology.ifConfiguredRRClient(node, nodeIn)).collect(Collectors.toList()); 
+            List<String> nodesOutNotClient = bgpTopology.getNodesInAs(bgpTopology.getAsNumber(node), nodesIn).stream()
+                                            .filter(nodeIn->!bgpTopology.ifConfiguredRRClient(node, nodeIn)).collect(Collectors.toList());
+            List<String> nodesInNotClient = bgpTopology.getNodesInAs(bgpTopology.getAsNumber(node), nodesIn).stream()
+                                            .filter(nodeIn->!bgpTopology.ifConfiguredRRClient(node, nodeIn)).collect(Collectors.toList());
             
             if (nodesInNotClient.size()==0 || nodesOutNotClient.size()==0) {
                 continue;
@@ -399,9 +413,9 @@ public class BgpForwardingTree {
         return clientsMap;
     }
 
-    public List<Ip> getNextHopList(String node, BgpTopology bgpTopology) {
+    public List<String> getNextHopList(String node, BgpTopology bgpTopology) {
         List<String> path = getBestRouteFromPath(node, _dstDevName);
-        List<Ip> ipList = new ArrayList<>();
+        List<String> ipList = new ArrayList<>();
         for (String nextNode : path) {
             if (nextNode.equals(node)) {
                 continue;
@@ -419,30 +433,45 @@ public class BgpForwardingTree {
     }
                                                     
 
-    public Map<String, BgpCondition> genBgpConditions(BgpTopology bgpTopology) {
+    public Map<String, BgpCondition> genBgpConditions(Set<String> reqSrcNodes, BgpTopology bgpTopology) {
+        Set<String> nodesSetCondition = _bestRouteFromMap.keySet();
+        if (_ifMpls) {
+            nodesSetCondition = new HashSet<>();
+            for (String node: reqSrcNodes) {
+                List<String> path = getBestRouteFromPath(node, _dstDevName);
+                nodesSetCondition.addAll(path);
+            }
+        }
         // TODO: 1. assign the nextHop attribute for each route based on the traffic forwarding tree
         Map<String, BgpCondition> conds = new HashMap<>();
         // prop是in-nodes
-        Map<String, List<String>> propNeighborMap = getAllInNeighbors(_bestRouteFromMap);
+        Map<String, Set<String>> propNeighborMap = getAllInNeighbors(_bestRouteFromMap, nodesSetCondition);
         // accept是out-nodes
-        Map<String, List<String>> acptNeighborMap = getAllOutNeighbors(_bestRouteFromMap);
+        Map<String, Set<String>> acptNeighborMap = getAllOutNeighbors(_bestRouteFromMap, nodesSetCondition);
 
-        Map<String, List<String>> clientsMap = getRRClients(propNeighborMap, acptNeighborMap, bgpTopology);
+        Map<String, Set<String>> clientsMap = getRRClients(propNeighborMap, acptNeighborMap, bgpTopology);
 
-        for (String node : _bestRouteFromMap.keySet()) {
+
+        for (String node : nodesSetCondition) {
             // dst节点单独设置
             if (node.equals(_dstDevName)) {
                 continue;
             }
-            conds.put(node, new BgpCondition.Builder(_dstPrefix)
-                                            .vpnName(_vpnName)
+            String vpnName = _vpnName;
+            if (!ConfigTaint.getVpnInstance(node, vpnName).isValid()) {
+                vpnName = KeyWord.PUBLIC_VPN_NAME;
+            }
+            // prop-neighbor和acpt-neighbor还有peer的list可以去除不在nodesSetCondition里的节点
+            conds.put(node, new BgpCondition.Builder(_dstPrefix.toString())
+                                            // vpn名称只在有vpnName的节点上设置，其余设置public
+                                            .vpnName(vpnName)
                                             .propNeighbors(propNeighborMap.get(node))
                                             .acptNeighbors(acptNeighborMap.get(node))
-                                            .ibgpPeers(bgpTopology.getBgpPeers(node, propNeighborMap.get(node), BgpPeerType.IBGP))
-                                            .ebgpPeers(bgpTopology.getBgpPeers(node, propNeighborMap.get(node), BgpPeerType.EBGP))
+                                            .ibgpPeers(getIntersectantSet(bgpTopology.getBgpPeers(node, propNeighborMap.get(node), BgpPeerType.IBGP), nodesSetCondition))
+                                            .ebgpPeers(getIntersectantSet(bgpTopology.getBgpPeers(node, propNeighborMap.get(node), BgpPeerType.EBGP), nodesSetCondition))
                                             .rrClient(clientsMap.get(node))
-                                            .selectionRoute(new SelectionRoute.Builder(_dstPrefix)
-                                                                              .vpnName(_vpnName)
+                                            .selectionRoute(new SelectionRoute.Builder(_dstPrefix.toString())
+                                                                              .vpnName(vpnName)
                                                                               .nextHop(getNextHopList(node, bgpTopology))
                                                                               .asPath(getAsPath(node, bgpTopology))
                                                                               .build())
@@ -451,16 +480,28 @@ public class BgpForwardingTree {
         }
         // 添加终点（原发）节点的redistribute约束
         String node = _dstDevName;
-        conds.put(node, new BgpCondition.Builder(_dstPrefix)
+        conds.put(node, new BgpCondition.Builder(_dstPrefix.toString())
+                                            .vpnName(_vpnName)
                                             .propNeighbors(propNeighborMap.get(node))
                                             .acptNeighbors(acptNeighborMap.get(node))
-                                            .ibgpPeers(bgpTopology.getBgpPeers(node, propNeighborMap.get(node), BgpPeerType.IBGP))
-                                            .ebgpPeers(bgpTopology.getBgpPeers(node, propNeighborMap.get(node), BgpPeerType.EBGP))
+                                            .ibgpPeers(getIntersectantSet(bgpTopology.getBgpPeers(node, propNeighborMap.get(node), BgpPeerType.IBGP), nodesSetCondition))
+                                            .ebgpPeers(getIntersectantSet(bgpTopology.getBgpPeers(node, propNeighborMap.get(node), BgpPeerType.EBGP), nodesSetCondition))
                                             .rrClient(clientsMap.get(node))
                                             .redistribution(true)
                                             .build());
         return conds;
         
+    }
+
+    /*
+    * 求set1和set2的交集
+    * */
+    private Set<String> getIntersectantSet(Set<String> set1, Set<String> set2) {
+        if (set1 != null) {
+            set1.retainAll(set2);
+        }
+
+        return set1;
     }
 
     public void serializeBgpCondition(String filePath, Map<String, BgpCondition> conditions) {
@@ -513,7 +554,17 @@ public class BgpForwardingTree {
     }
 
     public String getBestNextHop(String node) {
-        return _nextHopForwardingMap.get(node);
+        if (_nextHopForwardingMap.containsKey(node)) {
+            return _nextHopForwardingMap.get(node);
+        }
+        return "";
+    }
+
+    public String getBestRouteFromNode(String node) {
+        if (_bestRouteFromMap.containsKey(node)) {
+            return _bestRouteFromMap.get(node);
+        }
+        return "";
     }
 
     public <T> boolean ifSetContainsSameElement(Set<T> inputSet, T eleT) {
@@ -535,8 +586,9 @@ public class BgpForwardingTree {
      * @return
      */
     public Map<String, Set<Node>> computeReachIgpNodes(BgpTopology bgpTopology) {
+        //
         Map<String, Set<Node>> reachNodes = new HashMap<>();
-        Map<String, List<String>> inNeighborMap = getAllInNeighbors(_bestRouteFromMap);
+        Map<String, Set<String>> inNeighborMap = getAllInNeighbors(_bestRouteFromMap, _bestRouteFromMap.keySet());
         // Ibgp peer 互达
         for (String node : inNeighborMap.keySet()) {
             // 每个node都要和它的所有in节点建立peer关系（双向可达）
@@ -546,11 +598,11 @@ public class BgpForwardingTree {
             inNeighborMap.get(node).forEach(peer->{
                 
                 // node到peer可达
-                Ip peerIp;
+                String peerIp;
                 if (bgpTopology.getNodeIp(peer)!=null) {
                     peerIp = bgpTopology.getNodeIp(peer);
                 } else {
-                    peerIp = _bestRouteMap.get(peer).getPeerIp();
+                    peerIp = _bestRouteMap.get(peer).getPeerIpString();
                 }
                 Node reachPeerNode = new Node(peer, peerIp);
                 if (!ifSetContainsSameElement(reachNodes.get(node), reachPeerNode)) {
@@ -561,11 +613,11 @@ public class BgpForwardingTree {
                 if (!reachNodes.containsKey(peer)) {
                     reachNodes.put(peer, new HashSet<Node>());
                 }
-                Ip thisIp;
+                String thisIp;
                 if (bgpTopology.getNodeIp(node)!=null) {
                     thisIp = bgpTopology.getNodeIp(node);
                 } else {
-                    thisIp = _bestRouteMap.get(node).getPeerIp();
+                    thisIp = _bestRouteMap.get(node).getPeerIpString();
                 }
                 Node reachThisNode = new Node(node, thisIp);
                 if (!ifSetContainsSameElement(reachNodes.get(peer), reachThisNode)) {

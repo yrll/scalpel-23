@@ -23,7 +23,15 @@ public class Interface {
     }
 
     public Prefix getPrefix() {
-        return infIpv4Ip;
+        if (infIpv4Ip!=null) {
+            return infIpv4Ip;
+        } else if (infIpv4IpString!=null){
+            if (infIpv4IpString.contains("/")) {
+                return Prefix.parse(infIpv4IpString);
+            }
+            return Ip.parse(infIpv4HostIpString).toPrefix();
+        }
+        return null;
     }
 
     public void checkIp() {

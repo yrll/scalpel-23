@@ -134,6 +134,13 @@ public class Ip implements Comparable<Ip>, Serializable {
     }
 
     public static Ip parse(String ipAsString) {
+        if (ipAsString.contains("/")) {
+            String[] ips = ipAsString.split("/");
+            if (!ips[1].equals("32")) {
+                return null;
+            }
+            ipAsString = ips[0];
+        }
         return create(ipStrToLong(ipAsString));
     }
 

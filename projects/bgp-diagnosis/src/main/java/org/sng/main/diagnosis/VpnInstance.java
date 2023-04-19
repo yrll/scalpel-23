@@ -89,7 +89,7 @@ public class VpnInstance {
     }
 
     public boolean isValid() {
-        return routerDistinguisher!=null;
+        return routerDistinguisher!=null && !routerDistinguisher.equals("");
     }
 
     public String getRouteDistinguisher() {

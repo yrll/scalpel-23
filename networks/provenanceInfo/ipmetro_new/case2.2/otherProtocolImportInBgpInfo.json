@@ -1,0 +1,1 @@
+{"importedDirectRoutes":{},"importedStaticRoues":{"BR2":{"_public_":[{"deviceName":"BR2","vpnName":"_public_","addressIp":"203.0.0.4/30","nextHop":"63.0.0.6/32","outInf":{"deviceName":"BR2","infName":"GigabitEthernet3/0/1.14","vpnName":"_public_","infIpv4Ip":"63.0.0.4/30","infIpv4HostIp":"63.0.0.5/32","infIpv6Ip":null,"infIpv6HostIp":null}}]}},"importedIsIsRoutes":{}}

@@ -125,6 +125,10 @@ public class BgpRoute {
         }
     }
 
+    public String getPeerIpString() {
+        return peerIp;
+    }
+
     public String getNextHopDev() {
         return nextHopDevice;
     }
