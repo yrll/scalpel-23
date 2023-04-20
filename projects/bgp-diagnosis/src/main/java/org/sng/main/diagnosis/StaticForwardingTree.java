@@ -37,6 +37,9 @@ public class StaticForwardingTree {
         _bestRouteMap = new HashMap<>();
     }
 
+
+
+
     public String getNextHop(String node) {
         return _nextHopForwardingMap.get(node);
     }

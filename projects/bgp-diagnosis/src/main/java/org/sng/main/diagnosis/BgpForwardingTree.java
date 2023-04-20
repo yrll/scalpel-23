@@ -66,6 +66,8 @@ public class BgpForwardingTree {
     // 一开始接收的可达路由的集合, 最优的, 最长前缀匹配的
     private Map<String, BgpRoute> _bestRouteMap;
 
+
+
     public Set<String> getRouteReachableNodesInTree() {
         if (_bestRouteFromMap!=null) {
             return _bestRouteFromMap.keySet();
@@ -247,7 +249,11 @@ public class BgpForwardingTree {
         }
     }
 
+
+
+
     public Set<String> serializeBgpTreeFromProvJson(JsonObject jsonObject, String ip, BgpTopology bgpTopology) {
+        Set<String> failedDevs = bgpTopology.getFailedDevs();
         // input "updateInfo" as jsonObject
         // 解析配置里对该(vpn)ip的preference
         setProtocolPref();
@@ -258,6 +264,21 @@ public class BgpForwardingTree {
         _unreachableNodesPrev.remove(_dstDevName);
 
         for (String node : jsonObject.asMap().keySet()) {
+            // faile节点
+            if (failedDevs.contains(node)) {
+                continue;
+            }
+            if (node.equals(_dstDevName)) {
+                // 说明这个provnanceInfo不是目的设备的，把tree清空
+                _nextHopForwardingMap = new HashMap<>();
+                _bestRouteFromMap = new HashMap<>();
+                _bestRouteMap = new HashMap<>();
+                _unreachableNodesPrev = new HashSet<>(bgpTopology.getAllNodes().keySet());
+                _unreachableNodesPrev.remove(_dstDevName);
+                _bestRouteFromMap.put(_dstDevName,_dstDevName);
+                _nextHopForwardingMap.put(_dstDevName,_dstDevName);
+                return _unreachableNodesPrev;
+            }
             JsonObject nodeRoutes = jsonObject.asMap().get(node).getAsJsonObject();
             for (String ipString : nodeRoutes.keySet()) {
                 Prefix curPrefix = Prefix.parse(ipString);
@@ -279,6 +300,12 @@ public class BgpForwardingTree {
                         String nextHopIpString = route.get(KeyWord.NEXT_HOP_IP).getAsString();
                         String peerIpString = route.get(KeyWord.PEER_IP).getAsString();
                         String peerDevName = bgpTopology.getNodeNameFromIp(peerIpString);
+
+                        // fail节点不加入
+                        if (failedDevs.contains(nextHopDev) || failedDevs.contains(peerDevName)) {
+                            continue;
+                        }
+
                         if (_bestRouteMap.containsKey(node)) {
                             Prefix bestRoutePrefix = _bestRouteMap.get(node).getPrefix();
                             // 新的route前缀更短则更新best*Map

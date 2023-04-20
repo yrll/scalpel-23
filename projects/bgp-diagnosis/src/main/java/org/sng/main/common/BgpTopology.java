@@ -60,8 +60,14 @@ public class BgpTopology {
     // 每个node的peers，包含配了后无法建立session的peer，用于寻路
     Map<String, Set<String>> _configuredPeerMap;
 
+    Set<String> _failedDevs;
 
-    public BgpTopology() {
+    public Set<String> getFailedDevs() {
+        return _failedDevs;
+    }
+
+    public BgpTopology(Set<String> failedDevs) {
+        _failedDevs = failedDevs;
         _asNumMap = new HashMap<>();
         _allNodes = new HashMap<>();
         _peers = new ArrayList<>();
@@ -87,7 +93,8 @@ public class BgpTopology {
         } else {
             Set<String> nodes = new HashSet<>();
             _peers.forEach(p->{
-                if (p.getLocalAsNum()==asNumber) {
+                // fail节点判断
+                if (p.getLocalAsNum()==asNumber && !_failedDevs.contains(p.getLocalDevName())) {
                     nodes.add(p.getLocalDevName());
                 }
             });
@@ -102,15 +109,21 @@ public class BgpTopology {
 
     // 获取node（输入1）的所有type类型的，且在nodes（输入2）中的peer，无论peer的配置是否有效
     public Set<String> getBgpPeers(String node, Set<String> nodes, BgpPeer.BgpPeerType type) {
+        if (_failedDevs.contains(node)) {
+            return null;
+        }
         Set<String> peers = new HashSet<>();
         if (nodes!=null) {
             nodes.stream().forEach(n->{
-                // 简化版写法，应该要在peer list里遍历判断的，但是目前传入的nodes都是意图上要建立peer的点对，所以只判断as-number号
-                if (type==BgpPeer.BgpPeerType.IBGP && getAsNumber(node)==getAsNumber(n)) {
-                    peers.add(n);
-                } else if (type==BgpPeer.BgpPeerType.EBGP && getAsNumber(node)!=getAsNumber(n)) {
-                    peers.add(n);
+                if (!_failedDevs.contains(n)) {
+                    // 简化版写法，应该要在peer list里遍历判断的，但是目前传入的nodes都是意图上要建立peer的点对，所以只判断as-number号
+                    if (type==BgpPeer.BgpPeerType.IBGP && getAsNumber(node)==getAsNumber(n)) {
+                        peers.add(n);
+                    } else if (type==BgpPeer.BgpPeerType.EBGP && getAsNumber(node)!=getAsNumber(n)) {
+                        peers.add(n);
+                    }
                 }
+
             });
 
         }
@@ -123,7 +136,7 @@ public class BgpTopology {
     // 只要有一个节点在对应as中，就返回true “设置rr-client条件的时候用”
     public boolean hasNodeInAs(long asNumber, List<String> nodes) {
         for (String node : nodes) {
-            if (getAsNumber(node)==asNumber) {
+            if (getAsNumber(node)==asNumber && !_failedDevs.contains(node)) {
                 return true;
             }
         }
@@ -135,7 +148,7 @@ public class BgpTopology {
     public List<String> getNodesInAs(long asNumber, Set<String> nodes) {
         List<String> targetNodes = new ArrayList<>(nodes);
         for (String node : nodes) {
-            if (getAsNumber(node)!=asNumber) {
+            if (getAsNumber(node)!=asNumber && !_failedDevs.contains(node)) {
                 targetNodes.remove(node);
             }
         }
@@ -203,6 +216,9 @@ public class BgpTopology {
                 BgpPeer bgpPeer = BgpPeer.deserialize(object.getAsJsonObject());
                 String localDevName = bgpPeer.getLocalDevName();
                 String peerDevName = bgpPeer.getPeerDevName();
+                if (_failedDevs.contains(localDevName) || _failedDevs.contains(peerDevName)) {
+                    continue;
+                }
 
                 // 存node - ip - asNumber 映射
                 if (!_allNodes.containsKey(localDevName)) {
@@ -268,6 +284,9 @@ public class BgpTopology {
     }
 
     public BgpPeer getValidPeer(String n1, String n2) {
+        if (_failedDevs.contains(n1) || _failedDevs.contains(n2)) {
+            return null;
+        }
         if (_peerTable.contains(n1, n2)) {
             return _peerTable.get(n1, n2);
         } else {

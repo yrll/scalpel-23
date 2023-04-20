@@ -1,5 +1,6 @@
 package org.sng.main;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -20,12 +21,13 @@ public class Main {
         Logger logger = Logger.getLogger(KeyWord.LOGGER_NAME);
         logger.setLevel(Level.WARNING);
 
-        String caseType = "2.2";
-        NetworkType type = NetworkType.CLOUDNET;
+        String caseType = "1";
+        NetworkType type = NetworkType.IPMETRO_FAIL;
         if (args.length>1) {
             caseType = args[0];
             type = NetworkType.getType(args[1]);
         }
+        Set<String> failedDevs = InputData.getFailedNodes(caseType, type);
         // boolean ifMpls = type.name().equals(KeyWord.PUBLIC_VPN_NAME);
 
         // Set<String> reachNodes = new HashSet<>();
@@ -35,12 +37,11 @@ public class Main {
         // String fp = "E:/Java/IdeaProjects/scalpel-23/sse_conditions/bgp/case1.1.json";
         // BgpCondition.deserialize(fp);
         
-        BgpDiagnosis diagnoser = new BgpDiagnosis(caseType, type);
+        BgpDiagnosis diagnoser = new BgpDiagnosis(caseType, type, failedDevs);
         
         // VpnInstance vv = ConfigTaint.getVpnInstance("ASG1", "LTE_RAN");
-        Map<String, BgpCondition> conds = BgpCondition.deserialize("E:\\Java\\IdeaProjects\\scalpel-23\\sse_conditions\\cloudnet\\case1.1.json");
 
-        diagnoser.diagnose(null,ifSave);
+        diagnoser.diagnose(ifSave);
 
         // 定位配置行
 //        if (diagnoser.getNewGenerator()!=null) {

@@ -1,1 +1,339 @@
-{"BNG9":{"vpnName":"_public_","ipPrefix":"179.0.0.116/30","redistribution":false,"rrClients":null,"selectionRoute":{"nextHopIp":["70.0.0.1/32","70.0.0.37/32"],"asPath":[],"ipPrefix":"179.0.0.116/30","vpnName":"_public_"},"propNeighbors":null,"acptNeighbors":["CR1"],"ibgpPeers":null,"ebgpPeers":null},"CR2":{"vpnName":"_public_","ipPrefix":"179.0.0.116/30","redistribution":false,"rrClients":null,"selectionRoute":{"nextHopIp":["70.0.0.37/32"],"asPath":[],"ipPrefix":"179.0.0.116/30","vpnName":"_public_"},"propNeighbors":["BNG3"],"acptNeighbors":["BNG30"],"ibgpPeers":["BNG3"],"ebgpPeers":null},"BNG8":{"vpnName":"_public_","ipPrefix":"179.0.0.116/30","redistribution":false,"rrClients":null,"selectionRoute":{"nextHopIp":["70.0.0.1/32","70.0.0.37/32"],"asPath":[],"ipPrefix":"179.0.0.116/30","vpnName":"_public_"},"propNeighbors":null,"acptNeighbors":["CR1"],"ibgpPeers":null,"ebgpPeers":null},"CR1":{"vpnName":"_public_","ipPrefix":"179.0.0.116/30","redistribution":false,"rrClients":null,"selectionRoute":{"nextHopIp":["70.0.0.37/32"],"asPath":[],"ipPrefix":"179.0.0.116/30","vpnName":"_public_"},"propNeighbors":["BNG9","BNG8","BNG7","BNG29","BNG6","BNG5","BNG27","BNG4","BNG28","BNG2","BNG1"],"acptNeighbors":["BNG30"],"ibgpPeers":["BNG9","BNG8","BNG7","BNG29","BNG6","BNG5","BNG27","BNG4","BNG28","BNG2","BNG1"],"ebgpPeers":null},"BNG7":{"vpnName":"_public_","ipPrefix":"179.0.0.116/30","redistribution":false,"rrClients":null,"selectionRoute":{"nextHopIp":["70.0.0.1/32","70.0.0.37/32"],"asPath":[],"ipPrefix":"179.0.0.116/30","vpnName":"_public_"},"propNeighbors":null,"acptNeighbors":["CR1"],"ibgpPeers":null,"ebgpPeers":null},"BNG29":{"vpnName":"_public_","ipPrefix":"179.0.0.116/30","redistribution":false,"rrClients":null,"selectionRoute":{"nextHopIp":["70.0.0.1/32","70.0.0.37/32"],"asPath":[],"ipPrefix":"179.0.0.116/30","vpnName":"_public_"},"propNeighbors":null,"acptNeighbors":["CR1"],"ibgpPeers":null,"ebgpPeers":null},"BNG6":{"vpnName":"_public_","ipPrefix":"179.0.0.116/30","redistribution":false,"rrClients":null,"selectionRoute":{"nextHopIp":["70.0.0.1/32","70.0.0.37/32"],"asPath":[],"ipPrefix":"179.0.0.116/30","vpnName":"_public_"},"propNeighbors":null,"acptNeighbors":["CR1"],"ibgpPeers":null,"ebgpPeers":null},"BNG5":{"vpnName":"_public_","ipPrefix":"179.0.0.116/30","redistribution":false,"rrClients":null,"selectionRoute":{"nextHopIp":["70.0.0.1/32","70.0.0.37/32"],"asPath":[],"ipPrefix":"179.0.0.116/30","vpnName":"_public_"},"propNeighbors":null,"acptNeighbors":["CR1"],"ibgpPeers":null,"ebgpPeers":null},"BNG27":{"vpnName":"_public_","ipPrefix":"179.0.0.116/30","redistribution":false,"rrClients":null,"selectionRoute":{"nextHopIp":["70.0.0.1/32","70.0.0.37/32"],"asPath":[],"ipPrefix":"179.0.0.116/30","vpnName":"_public_"},"propNeighbors":null,"acptNeighbors":["CR1"],"ibgpPeers":null,"ebgpPeers":null},"BNG4":{"vpnName":"_public_","ipPrefix":"179.0.0.116/30","redistribution":false,"rrClients":null,"selectionRoute":{"nextHopIp":["70.0.0.1/32","70.0.0.37/32"],"asPath":[],"ipPrefix":"179.0.0.116/30","vpnName":"_public_"},"propNeighbors":null,"acptNeighbors":["CR1"],"ibgpPeers":null,"ebgpPeers":null},"BNG28":{"vpnName":"_public_","ipPrefix":"179.0.0.116/30","redistribution":false,"rrClients":null,"selectionRoute":{"nextHopIp":["70.0.0.1/32","70.0.0.37/32"],"asPath":[],"ipPrefix":"179.0.0.116/30","vpnName":"_public_"},"propNeighbors":null,"acptNeighbors":["CR1"],"ibgpPeers":null,"ebgpPeers":null},"BNG3":{"vpnName":"_public_","ipPrefix":"179.0.0.116/30","redistribution":false,"rrClients":null,"selectionRoute":{"nextHopIp":["70.0.0.3/32","70.0.0.37/32"],"asPath":[],"ipPrefix":"179.0.0.116/30","vpnName":"_public_"},"propNeighbors":null,"acptNeighbors":["CR2"],"ibgpPeers":null,"ebgpPeers":null},"BNG2":{"vpnName":"_public_","ipPrefix":"179.0.0.116/30","redistribution":false,"rrClients":null,"selectionRoute":{"nextHopIp":["70.0.0.1/32","70.0.0.37/32"],"asPath":[],"ipPrefix":"179.0.0.116/30","vpnName":"_public_"},"propNeighbors":null,"acptNeighbors":["CR1"],"ibgpPeers":null,"ebgpPeers":null},"BNG1":{"vpnName":"_public_","ipPrefix":"179.0.0.116/30","redistribution":false,"rrClients":null,"selectionRoute":{"nextHopIp":["70.0.0.1/32","70.0.0.37/32"],"asPath":[],"ipPrefix":"179.0.0.116/30","vpnName":"_public_"},"propNeighbors":null,"acptNeighbors":["CR1"],"ibgpPeers":null,"ebgpPeers":null},"BNG30":{"vpnName":"_public_","ipPrefix":"179.0.0.116/30","redistribution":true,"rrClients":null,"selectionRoute":null,"propNeighbors":["CR2","CR1"],"acptNeighbors":null,"ibgpPeers":["CR2","CR1"],"ebgpPeers":null}}
+{
+  "BNG9": {
+    "vpnName": "_public_",
+    "ipPrefix": "179.0.0.116/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "70.0.0.1/32",
+        "70.0.0.37/32"
+      ],
+      "asPath": [],
+      "ipPrefix": "179.0.0.116/30",
+      "vpnName": "_public_"
+    },
+    "propNeighbors": null,
+    "acptNeighbors": [
+      "CR1"
+    ],
+    "ibgpPeers": null,
+    "ebgpPeers": null
+  },
+  "CR2": {
+    "vpnName": "_public_",
+    "ipPrefix": "179.0.0.116/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "70.0.0.37/32"
+      ],
+      "asPath": [],
+      "ipPrefix": "179.0.0.116/30",
+      "vpnName": "_public_"
+    },
+    "propNeighbors": [
+      "BNG3"
+    ],
+    "acptNeighbors": [
+      "BNG30"
+    ],
+    "ibgpPeers": [
+      "BNG3"
+    ],
+    "ebgpPeers": null
+  },
+  "BNG8": {
+    "vpnName": "_public_",
+    "ipPrefix": "179.0.0.116/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "70.0.0.1/32",
+        "70.0.0.37/32"
+      ],
+      "asPath": [],
+      "ipPrefix": "179.0.0.116/30",
+      "vpnName": "_public_"
+    },
+    "propNeighbors": null,
+    "acptNeighbors": [
+      "CR1"
+    ],
+    "ibgpPeers": null,
+    "ebgpPeers": null
+  },
+  "CR1": {
+    "vpnName": "_public_",
+    "ipPrefix": "179.0.0.116/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "70.0.0.37/32"
+      ],
+      "asPath": [],
+      "ipPrefix": "179.0.0.116/30",
+      "vpnName": "_public_"
+    },
+    "propNeighbors": [
+      "BNG9",
+      "BNG8",
+      "BNG7",
+      "BNG29",
+      "BNG6",
+      "BNG5",
+      "BNG27",
+      "BNG4",
+      "BNG28",
+      "BNG2",
+      "BNG1"
+    ],
+    "acptNeighbors": [
+      "BNG30"
+    ],
+    "ibgpPeers": [
+      "BNG9",
+      "BNG8",
+      "BNG7",
+      "BNG29",
+      "BNG6",
+      "BNG5",
+      "BNG27",
+      "BNG4",
+      "BNG28",
+      "BNG2",
+      "BNG1"
+    ],
+    "ebgpPeers": null
+  },
+  "BNG7": {
+    "vpnName": "_public_",
+    "ipPrefix": "179.0.0.116/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "70.0.0.1/32",
+        "70.0.0.37/32"
+      ],
+      "asPath": [],
+      "ipPrefix": "179.0.0.116/30",
+      "vpnName": "_public_"
+    },
+    "propNeighbors": null,
+    "acptNeighbors": [
+      "CR1"
+    ],
+    "ibgpPeers": null,
+    "ebgpPeers": null
+  },
+  "BNG29": {
+    "vpnName": "_public_",
+    "ipPrefix": "179.0.0.116/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "70.0.0.1/32",
+        "70.0.0.37/32"
+      ],
+      "asPath": [],
+      "ipPrefix": "179.0.0.116/30",
+      "vpnName": "_public_"
+    },
+    "propNeighbors": null,
+    "acptNeighbors": [
+      "CR1"
+    ],
+    "ibgpPeers": null,
+    "ebgpPeers": null
+  },
+  "BNG6": {
+    "vpnName": "_public_",
+    "ipPrefix": "179.0.0.116/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "70.0.0.1/32",
+        "70.0.0.37/32"
+      ],
+      "asPath": [],
+      "ipPrefix": "179.0.0.116/30",
+      "vpnName": "_public_"
+    },
+    "propNeighbors": null,
+    "acptNeighbors": [
+      "CR1"
+    ],
+    "ibgpPeers": null,
+    "ebgpPeers": null
+  },
+  "BNG5": {
+    "vpnName": "_public_",
+    "ipPrefix": "179.0.0.116/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "70.0.0.1/32",
+        "70.0.0.37/32"
+      ],
+      "asPath": [],
+      "ipPrefix": "179.0.0.116/30",
+      "vpnName": "_public_"
+    },
+    "propNeighbors": null,
+    "acptNeighbors": [
+      "CR1"
+    ],
+    "ibgpPeers": null,
+    "ebgpPeers": null
+  },
+  "BNG27": {
+    "vpnName": "_public_",
+    "ipPrefix": "179.0.0.116/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "70.0.0.1/32",
+        "70.0.0.37/32"
+      ],
+      "asPath": [],
+      "ipPrefix": "179.0.0.116/30",
+      "vpnName": "_public_"
+    },
+    "propNeighbors": null,
+    "acptNeighbors": [
+      "CR1"
+    ],
+    "ibgpPeers": null,
+    "ebgpPeers": null
+  },
+  "BNG4": {
+    "vpnName": "_public_",
+    "ipPrefix": "179.0.0.116/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "70.0.0.1/32",
+        "70.0.0.37/32"
+      ],
+      "asPath": [],
+      "ipPrefix": "179.0.0.116/30",
+      "vpnName": "_public_"
+    },
+    "propNeighbors": null,
+    "acptNeighbors": [
+      "CR1"
+    ],
+    "ibgpPeers": null,
+    "ebgpPeers": null
+  },
+  "BNG28": {
+    "vpnName": "_public_",
+    "ipPrefix": "179.0.0.116/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "70.0.0.1/32",
+        "70.0.0.37/32"
+      ],
+      "asPath": [],
+      "ipPrefix": "179.0.0.116/30",
+      "vpnName": "_public_"
+    },
+    "propNeighbors": null,
+    "acptNeighbors": [
+      "CR1"
+    ],
+    "ibgpPeers": null,
+    "ebgpPeers": null
+  },
+  "BNG3": {
+    "vpnName": "_public_",
+    "ipPrefix": "179.0.0.116/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "70.0.0.3/32",
+        "70.0.0.37/32"
+      ],
+      "asPath": [],
+      "ipPrefix": "179.0.0.116/30",
+      "vpnName": "_public_"
+    },
+    "propNeighbors": null,
+    "acptNeighbors": [
+      "CR2"
+    ],
+    "ibgpPeers": null,
+    "ebgpPeers": null
+  },
+  "BNG2": {
+    "vpnName": "_public_",
+    "ipPrefix": "179.0.0.116/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "70.0.0.1/32",
+        "70.0.0.37/32"
+      ],
+      "asPath": [],
+      "ipPrefix": "179.0.0.116/30",
+      "vpnName": "_public_"
+    },
+    "propNeighbors": null,
+    "acptNeighbors": [
+      "CR1"
+    ],
+    "ibgpPeers": null,
+    "ebgpPeers": null
+  },
+  "BNG1": {
+    "vpnName": "_public_",
+    "ipPrefix": "179.0.0.116/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "70.0.0.1/32",
+        "70.0.0.37/32"
+      ],
+      "asPath": [],
+      "ipPrefix": "179.0.0.116/30",
+      "vpnName": "_public_"
+    },
+    "propNeighbors": null,
+    "acptNeighbors": [
+      "CR1"
+    ],
+    "ibgpPeers": null,
+    "ebgpPeers": null
+  },
+  "BNG30": {
+    "vpnName": "_public_",
+    "ipPrefix": "179.0.0.116/30",
+    "redistribution": true,
+    "rrClients": null,
+    "selectionRoute": null,
+    "propNeighbors": [
+      "CR2",
+      "CR1"
+    ],
+    "acptNeighbors": null,
+    "ibgpPeers": [
+      "CR2",
+      "CR1"
+    ],
+    "ebgpPeers": null
+  }
+}

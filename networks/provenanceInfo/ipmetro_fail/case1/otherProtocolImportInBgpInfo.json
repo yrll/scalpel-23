@@ -1,0 +1,66 @@
+{
+  "importedDirectRoutes": {
+    "BNG1": {
+      "_public_": [
+        {
+          "deviceName": "BNG1",
+          "vpnName": "_public_",
+          "ipPrefix": "10.10.10.10/32",
+          "outInf": {
+            "deviceName": "BNG1",
+            "infName": "Eth-Trunk1.1",
+            "vpnName": "_public_",
+            "infIpv4Ip": "10.10.10.8/30",
+            "infIpv4HostIp": "10.10.10.10/32",
+            "infIpv6Ip": null,
+            "infIpv6HostIp": null
+          }
+        },
+        {
+          "deviceName": "BNG1",
+          "vpnName": "_public_",
+          "ipPrefix": "10.10.10.8/30",
+          "outInf": {
+            "deviceName": "BNG1",
+            "infName": "Eth-Trunk1.1",
+            "vpnName": "_public_",
+            "infIpv4Ip": "10.10.10.8/30",
+            "infIpv4HostIp": "10.10.10.10/32",
+            "infIpv6Ip": null,
+            "infIpv6HostIp": null
+          }
+        },
+        {
+          "deviceName": "BNG1",
+          "vpnName": "_public_",
+          "ipPrefix": "10.10.10.8/30",
+          "outInf": {
+            "deviceName": "BNG1",
+            "infName": "Eth-Trunk1.1",
+            "vpnName": "_public_",
+            "infIpv4Ip": "10.10.10.8/30",
+            "infIpv4HostIp": "10.10.10.10/32",
+            "infIpv6Ip": null,
+            "infIpv6HostIp": null
+          }
+        },
+        {
+          "deviceName": "BNG1",
+          "vpnName": "_public_",
+          "ipPrefix": "10.10.10.10/32",
+          "outInf": {
+            "deviceName": "BNG1",
+            "infName": "Eth-Trunk1.1",
+            "vpnName": "_public_",
+            "infIpv4Ip": "10.10.10.8/30",
+            "infIpv4HostIp": "10.10.10.10/32",
+            "infIpv6Ip": null,
+            "infIpv6HostIp": null
+          }
+        }
+      ]
+    }
+  },
+  "importedStaticRoues": {},
+  "importedIsIsRoutes": {}
+}

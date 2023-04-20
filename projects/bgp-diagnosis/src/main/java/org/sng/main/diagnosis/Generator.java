@@ -52,6 +52,8 @@ public class Generator {
     private BgpTopology _bgpTopology;
 
     private Layer2Topology _layer2Topology;
+    //
+    private Set<String> _failedDevs;
 
     public enum Protocol {
         IBGP("ibgp", 255),
@@ -80,12 +82,13 @@ public class Generator {
         }
       }
 
-    public Generator(String nodeName, String prefix, BgpTopology bgpTopology, String vpnName, boolean ifMpls) {
+    public Generator(String nodeName, String prefix, BgpTopology bgpTopology, String vpnName, boolean ifMpls, Set<String> failedDevs) {
         _dstDevName = nodeName;
         _dstPrefix = Prefix.parse(prefix);
         _bgpTopology = bgpTopology;
         _vpnName = vpnName;
         _ifMpls = ifMpls;
+        _failedDevs = failedDevs;
     }
 
     public Layer2Topology getLayer2Topology() {
@@ -281,30 +284,49 @@ public class Generator {
      * PS: 现在暂时都不考虑ACL这种数据面的策略
     */ 
 
-    public BgpForwardingTree genBgpTree(Set<String> reqReachNodes, Set<Interface> failedInfaces, BgpForwardingTree refTree) {
+    public BgpForwardingTree genBgpTree(Set<String> reqReachNodes, BgpForwardingTree refTree) {
         // error oldTree 所在的generator调用，oldBGPTree已经在generator里
         // 目标src节点是当前generator里的unreachable nodes
         // 在现有error oldBGPTree上继续生成minTree【针对路由传播的tree: BestRouteFrom】
+        if (!_ifMpls) {
+            reqReachNodes = processReachNodes(reqReachNodes);
+        }
+
+        // 判断是不是需要bgpTopology的参考来构造转发树
+        boolean ifNeedBgpTopo = false;
+        BgpTopology bgpTopology = _bgpTopology;
+        for (String reqNode: reqReachNodes) {
+            if (!_bgpTopology.ifConnected(reqNode, _dstDevName)) {
+                ifNeedBgpTopo = true;
+                bgpTopology = InputData.getRefBgpTopology(BgpDiagnosis.networkType, _failedDevs);
+            }
+        }
+
 
         Set<String> reachableNodes = new HashSet<>(_oldBgpTree.getReachableNodes());
+        // 考虑fail节点
+        reachableNodes.removeAll(_failedDevs);
+
         reqReachNodes.removeAll(reachableNodes);
         Set<String> unreachableNodes = new HashSet<>(_oldBgpTree.getUnreachableNodes());
+        // 考虑fail节点
+        unreachableNodes.removeAll(_failedDevs);
 
         Map<String, Integer> distanceMap = new HashMap<>();
         Map<String, String> primNearestNodeMap = new HashMap<>(_oldBgpTree.getBestRouteFromMap());
         // disMap initialization
         unreachableNodes.forEach(node->distanceMap.put(node, Integer.MAX_VALUE));
         // TODO: 如果没有serialize到BGPTree时，没有节点和bgp ip的映射，这里会出现bestRouteFrom和nextHopForwarding不一致问题：nextHop有devName，但是bestRouteFrom没有devName
-        reachableNodes.stream().forEach(node->distanceMap.put(node, _oldBgpTree.getBestRouteFromPath(node, _dstDevName).size()-1));
+        reachableNodes.forEach(node->distanceMap.put(node, _oldBgpTree.getBestRouteFromPath(node, _dstDevName).size()-1));
         // dstNode init
         distanceMap.put(_dstDevName, 0);
 
         // 用ref的连接信息参考作为Prim的加入节点选择（MST不止一个时）
-        String curNode = _oldBgpTree.chooseFirstNodeHasUnreachablePeer(_bgpTopology); // 选一个已reach的开始
+        String curNode = _oldBgpTree.chooseFirstNodeHasUnreachablePeer(bgpTopology); // 选一个已reach的开始
 
         // 把已有的reach节点的peer遍历更新一遍disMap【重要，不然会出现有点节点拓展失败的情况】
         for (String reachedNode: reachableNodes) {
-            for (String peer: _bgpTopology.getConfiguredPeers(reachedNode)) {
+            for (String peer: bgpTopology.getConfiguredPeers(reachedNode)) {
                 if (distanceMap.get(reachedNode) + 1 < distanceMap.get(peer)) {
                     distanceMap.put(peer, distanceMap.get(reachedNode) + 1);
                     primNearestNodeMap.put(peer, reachedNode);
@@ -319,13 +341,15 @@ public class Generator {
             }
         }
         // 开始在当前MST上加节点
-        Set<String> nns = _bgpTopology.getConfiguredPeers("U1-1-2-5");
         while (reqReachNodes.size()>0) {
-            for (String peer: _bgpTopology.getConfiguredPeers(curNode)) {
+            for (String peer: bgpTopology.getConfiguredPeers(curNode)) {
 //                if (reachableNodes.contains(peer)) {
 //                    // 更新disMap时只考虑spec要求的节点集合
 //                    continue;
 //                }
+                System.out.println("*****************");
+                System.out.println(curNode);
+                System.out.println(peer);
                 if (distanceMap.get(curNode) + 1 < distanceMap.get(peer)) {
                     distanceMap.put(peer, distanceMap.get(curNode) + 1);
                     primNearestNodeMap.put(peer, curNode);
@@ -346,7 +370,7 @@ public class Generator {
                     nextNode = unreachNode;
                 }
             }
-            assert _bgpTopology.isConfiguredPeer(nextNode, primNearestNodeMap.get(nextNode));
+            assert bgpTopology.isConfiguredPeer(nextNode, primNearestNodeMap.get(nextNode));
             _oldBgpTree.addBestRouteFromEdge(nextNode, primNearestNodeMap.get(nextNode));
             curNode = nextNode;
             unreachableNodes.remove(curNode);
