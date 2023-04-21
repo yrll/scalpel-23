@@ -15,6 +15,9 @@ public class StaticRoute {
     @SerializedName("addressIp")
     private String ipString;
 
+    @SerializedName("ipPrefix")
+    private String ipPrefixString;
+
     @SerializedName("vpnName")
     private String vpnName;
 
@@ -30,6 +33,10 @@ public class StaticRoute {
     public void checkPrefix() {
         ipPrefix = Prefix.parse(ipString);
         outInf.checkIp();
+    }
+
+    public void setInterface(Interface inf) {
+        this.outInf = inf;
     }
 
     public String getVpnName() {
@@ -50,6 +57,10 @@ public class StaticRoute {
 
     public Ip getNextHop() {
         return Prefix.parse(nextHop).getEndIp();
+    }
+
+    public String getNextHopString() {
+        return nextHop;
     }
 
     public String getOutInfName() {
@@ -88,8 +99,12 @@ public class StaticRoute {
         if (ipPrefix!=null) {
             return ipPrefix;
         }
-        ipPrefix = Prefix.parse(ipString);
-        return ipPrefix;
+        if (ipString!=null && !ipString.equals("")) {
+            return Prefix.parse(ipString);
+        } else if (ipPrefixString!=null && !ipPrefixString.equals("")) {
+            return Prefix.parse(ipPrefixString);
+        }
+        return null;
     }
 
     public String getPrefixString() {

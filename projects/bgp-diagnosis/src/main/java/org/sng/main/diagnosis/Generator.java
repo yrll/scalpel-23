@@ -43,6 +43,7 @@ public class Generator {
     private Prefix _dstPrefix;
     private String _vpnName;
     private boolean _ifMpls;
+    private boolean strict;
 
     // 
     private BgpForwardingTree _oldBgpTree;
@@ -82,13 +83,14 @@ public class Generator {
         }
       }
 
-    public Generator(String nodeName, String prefix, BgpTopology bgpTopology, String vpnName, boolean ifMpls, Set<String> failedDevs) {
+    public Generator(String nodeName, String prefix, BgpTopology bgpTopology, String vpnName, boolean ifMpls, Set<String> failedDevs, boolean strict) {
         _dstDevName = nodeName;
         _dstPrefix = Prefix.parse(prefix);
         _bgpTopology = bgpTopology;
         _vpnName = vpnName;
         _ifMpls = ifMpls;
         _failedDevs = failedDevs;
+        this.strict = strict;
     }
 
     public Layer2Topology getLayer2Topology() {
@@ -188,7 +190,7 @@ public class Generator {
                     // get BGP RIB
                     JsonObject jsonObject = JsonParser.parseString(jsonStr).getAsJsonObject().get(UPT_TABLE).getAsJsonObject();
                     _oldBgpTree = new BgpForwardingTree(_dstDevName, _dstPrefix, _vpnName);
-                    _oldBgpTree.serializeBgpTreeFromProvJson(jsonObject, _dstPrefix.toString(), _bgpTopology);
+                    _oldBgpTree.serializeBgpTreeFromProvJson(jsonObject, _dstPrefix.toString(), _bgpTopology, strict);
                     break;
                 }
                 case STATIC: {
@@ -308,14 +310,15 @@ public class Generator {
         reachableNodes.removeAll(_failedDevs);
 
         reqReachNodes.removeAll(reachableNodes);
-        Set<String> unreachableNodes = new HashSet<>(_oldBgpTree.getUnreachableNodes());
+        Set<String> unreachableNodes = new HashSet<>(bgpTopology.getAllDevs());
+        unreachableNodes.removeAll(reachableNodes);
         // 考虑fail节点
         unreachableNodes.removeAll(_failedDevs);
 
         Map<String, Integer> distanceMap = new HashMap<>();
         Map<String, String> primNearestNodeMap = new HashMap<>(_oldBgpTree.getBestRouteFromMap());
         // disMap initialization
-        unreachableNodes.forEach(node->distanceMap.put(node, Integer.MAX_VALUE));
+        bgpTopology.getAllDevs().forEach(node->distanceMap.put(node, Integer.MAX_VALUE));
         // TODO: 如果没有serialize到BGPTree时，没有节点和bgp ip的映射，这里会出现bestRouteFrom和nextHopForwarding不一致问题：nextHop有devName，但是bestRouteFrom没有devName
         reachableNodes.forEach(node->distanceMap.put(node, _oldBgpTree.getBestRouteFromPath(node, _dstDevName).size()-1));
         // dstNode init

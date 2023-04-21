@@ -110,7 +110,12 @@ public class Violation {
         }
 
         if (violateRedis!=null && !violateRedis.equals("")) {
-            results.add(new RedistributionLocalizer(curDevName, violateRedis, originStaticRoute, this, generator.getBgpTopology()));
+            StaticRoute targetRoute = originStaticRoute;
+            if (originStaticRoute==null && originDirectRoute!=null) {
+                targetRoute = originDirectRoute;
+            }
+            results.add(new RedistributionLocalizer(curDevName, violateRedis, targetRoute, this, generator.getBgpTopology()));
+
         }
 
         Map<Integer, String> lineMap = new HashMap<>();

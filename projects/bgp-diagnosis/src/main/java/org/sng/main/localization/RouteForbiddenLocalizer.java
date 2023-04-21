@@ -61,6 +61,9 @@ public class RouteForbiddenLocalizer implements Localizer {
             }
             default: this.policyName = fordidRoute.getImportPolicyName(); 
         }
+        if (this.policyName==null || this.policyName.equals("")) {
+            this.policyName = "CAN NOT CROSS";
+        }
         this.direction = direction;
         
         this.vpnName = fordidRoute.getLatestVpnName();

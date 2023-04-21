@@ -101,18 +101,18 @@ public class PeerLocalizer implements Localizer{
                 if (isLocalIgnorePeer) {
                     errList.add(PeerErrorType.PEER_IGNORE_LOCAL);
                 }
-                if (isLocalConnectInterface && !isLocalIgnorePeer) {
-                    if (localPeer.getBgpPeerType()==BgpPeerType.EBGP) {
-                        int atLeastHop = generator.hopNumberToReachIpUsingStatic(localNode, localPeer.getPeerIpString());
-                        if (atLeastHop==0) {
-                            errList.add(PeerErrorType.PEER_IP_REACH_LOCAL);
-                        } else if (atLeastHop > localPeer.getEBgpMaxHop()) {
-                            errList.add(PeerErrorType.EBGP_MAX_HOP_LOCAL);
-                        } 
-                    } else {
+
+                if (localPeer.getBgpPeerType()==BgpPeerType.EBGP) {
+                    int atLeastHop = generator.hopNumberToReachIpUsingStatic(localNode, localPeer.getPeerIpString());
+                    if (atLeastHop==0) {
                         errList.add(PeerErrorType.PEER_IP_REACH_LOCAL);
+                    } else if (atLeastHop > localPeer.getEBgpMaxHop()) {
+                        errList.add(PeerErrorType.EBGP_MAX_HOP_LOCAL);
                     }
+                } else {
+                    errList.add(PeerErrorType.PEER_IP_REACH_LOCAL);
                 }
+
                 // remoteNode
                 boolean isRemoteConnectInterface = isConnectInterface(remoteNode);
                 boolean isRemoteIgnorePeer = isIgnorePeer(remoteNode);
@@ -122,18 +122,18 @@ public class PeerLocalizer implements Localizer{
                 if (isRemoteIgnorePeer) {
                     errList.add(PeerErrorType.PEER_IGNORE_REMOTE);
                 }
-                if (isRemoteConnectInterface && !isRemoteIgnorePeer) {
-                    if (remotePeer.getBgpPeerType()==BgpPeerType.EBGP) {
-                        int atLeastHop = generator.hopNumberToReachIpUsingStatic(remoteNode, remotePeer.getPeerIpString());
-                        if (atLeastHop==0) {
-                            errList.add(PeerErrorType.PEER_IP_REACH_REMOTE);
-                        } else if (atLeastHop > remotePeer.getEBgpMaxHop()) {
-                            errList.add(PeerErrorType.EBGP_MAX_HOP_REMOTE);
-                        } 
-                    } else {
+
+                if (remotePeer.getBgpPeerType()==BgpPeerType.EBGP) {
+                    int atLeastHop = generator.hopNumberToReachIpUsingStatic(remoteNode, remotePeer.getPeerIpString());
+                    if (atLeastHop==0) {
                         errList.add(PeerErrorType.PEER_IP_REACH_REMOTE);
+                    } else if (atLeastHop > remotePeer.getEBgpMaxHop()) {
+                        errList.add(PeerErrorType.EBGP_MAX_HOP_REMOTE);
                     }
+                } else {
+                    errList.add(PeerErrorType.PEER_IP_REACH_REMOTE);
                 }
+
             }
         } else if (localPeer!=null) {
             errList.add(PeerErrorType.PEER_NOT_CONFIGURED_REMOTE);

@@ -95,7 +95,7 @@ public class BgpDiagnosis {
         if ((dstDev==null || dstDev.equals("")) || (dstIpString==null || dstIpString.equals(""))) {
             throw new IllegalArgumentException("NULL error destination Ip or NULL error destination Node!");
         } else {
-            errGenerator = new Generator(dstDev, dstIpString, bgpTopology, dstVpnName, ifMpls, failedDevs);
+            errGenerator = new Generator(dstDev, dstIpString, bgpTopology, dstVpnName, ifMpls, failedDevs, true);
             errGenerator.setLayer2Topology(layer2Topology);
             errGenerator.serializeTreeFromJson(errStaticProvFilePath, TreeType.STATIC);
             if (ifDstPrefixOriginFromDstDev()) {
@@ -188,7 +188,7 @@ public class BgpDiagnosis {
         if ((corDstNode==null || corDstNode.equals("")) || (corDstIp==null || corDstIp.equals(""))) {
             System.out.print("NULL reference destination Ip or NULL reference destination Node!");
         } else {
-            corGenerator = new Generator(corDstNode, corDstIp, bgpTopology, dstVpnName, ifMpls, failedDevs);
+            corGenerator = new Generator(corDstNode, corDstIp, bgpTopology, dstVpnName, ifMpls, failedDevs, true);
             corGenerator.serializeTreeFromJson(corStaticProvFilePath, TreeType.STATIC);
             corGenerator.serializeTreeFromJson(corBgpProvFilePath, TreeType.BGP);
         }
@@ -232,24 +232,36 @@ public class BgpDiagnosis {
         Map<String, Map<Integer, String>> errlines = new HashMap<>();
         if (violatedRulePath!=null && !violatedRulePath.equals("")) {
             errlines = getErrorLinesEachNode(violatedRulePath, generator);
-                if (ifSave) {
-                    serializeToFile(inputData.getResultFilePath(caseType, networkType), errlines);
-                    // 如果原始BGP Tree上node路由可达，这里reachNodes会被删完，所以输入拷贝的那份
-                    // TODO 再检查一次static的错误，在newBgpTree的基础上
-                }
+
         }
         
         // STEP 2: 根据BGP路由收敛的结果诊断静态路由的错误（还需完善，这个对静态路由的检查是互相依赖的，所以如果全部查到，应该要等BGP、IGP都收敛后才行）
         errlines.putAll(localizeInconsistentStatic(new HashSet<>(this.srcNodes), generator, ifSave));
         // STEP 3: 根据BGP路由收敛的结果诊断BGP VPN上
         if (ifMpls) {
-            localizeInconsitentCrossFromVpn(generator.getBgpTree());
+            errlines = mergeLinesMap(errlines, localizeInconsitentCrossFromVpn(generator.getBgpTree()));
         }
         // STEP 4: 检查隧道使能
         if (ifMpls) {
             errlines.putAll(localizeMissingLdpLines());
         }
+        if (ifSave) {
+            serializeToFile(inputData.getResultFilePath(caseType, networkType), errlines);
+            // 如果原始BGP Tree上node路由可达，这里reachNodes会被删完，所以输入拷贝的那份
+            // TODO 再检查一次static的错误，在newBgpTree的基础上
+        }
         return errlines;
+    }
+
+    public Map<String, Map<Integer, String>> mergeLinesMap(Map<String, Map<Integer, String>> map1, Map<String, Map<Integer, String>> map2) {
+        for (String node: map2.keySet()) {
+            if (map1.containsKey(node)) {
+                map1.get(node).putAll(map2.get(node));
+            } else {
+                map1.put(node, map2.get(node));
+            }
+        }
+        return map1;
     }
 
     /*
@@ -437,32 +449,37 @@ public class BgpDiagnosis {
             }
         }
         // 先计算转发树上所有点的IGP约束
-        Map<String, Set<Node>> reachNodes = errGenerator.computeReachIgpNodes(newTree);
-        // 去除不在考虑范围的节点
-        for (String node: reachNodes.keySet()) {
-            if (!nodesSetCondition.contains(node)) {
-                reachNodes.remove(node);
-            } else {
-                for (Node reachNode: reachNodes.get(node)) {
-                    if (!nodesSetCondition.contains(reachNode.getDevName())) {
-                        reachNodes.get(node).remove(reachNode);
+        if (newTree!=null) {
+            Map<String, Set<Node>> reachNodes = newTree.computeReachIgpNodes(bgpTopology);
+            // 去除不在考虑范围的节点
+            for (String node: reachNodes.keySet()) {
+                if (!nodesSetCondition.contains(node)) {
+                    reachNodes.remove(node);
+                } else {
+                    for (Node reachNode: reachNodes.get(node)) {
+                        if (!nodesSetCondition.contains(reachNode.getDevName())) {
+                            reachNodes.get(node).remove(reachNode);
+                        }
                     }
                 }
             }
+
+            if (reachNodes!=null) {
+                if (ifSave) {
+                    String filePath = inputData.getIgpRequirementFilePath(caseType, networkType);
+                    serializeToFile(filePath, reachNodes);
+                }
+                return reachNodes;
+            }
         }
 
-        if (reachNodes!=null) {
-            if (ifSave) {
-                String filePath = inputData.getIgpRequirementFilePath(caseType, networkType);
-                serializeToFile(filePath, reachNodes);
-            }
-            return reachNodes;
-        }
         return null;
     }
 
-    public Map<VpnInstance, VpnInstance> localizeInconsitentCrossFromVpn(BgpForwardingTree bgpForwardingTree) {
+    public Map<String, Map<Integer, String>> localizeInconsitentCrossFromVpn(BgpForwardingTree bgpForwardingTree) {
         Map<VpnInstance, VpnInstance> inconsistentVpnMap = new HashMap<>();
+        Map<String, Map<Integer, String>> lines = new HashMap<>();
+
         Set<String> checkedNodes = new HashSet<>();
         for (String node : srcNodes) {
             if (node.equals(dstDev) || checkedNodes.contains(node)) {
@@ -470,27 +487,34 @@ public class BgpDiagnosis {
             }
             // 判断除dst外所有节点的路径上节点上下游的vpn是否可以匹配
             List<String> path;
-            if (ifMpls) {
-                path = bgpForwardingTree.getForwardingPath(node, dstDev); 
-            } else {
-                path = bgpForwardingTree.getBestRouteFromPath(node, dstDev);
-            }
+            path = bgpForwardingTree.getBestRouteFromPath(node, dstDev);
+
             // path的getter确保至少有一个节点在路径上
             ListIterator pathIter = path.listIterator(path.size()-1);
             String upstreamNode = path.get(path.size()-1);
             VpnInstance upstreamVpnInstance = ConfigTaint.getVpnInstance(upstreamNode, dstVpnName);
+
             while (pathIter.hasPrevious()) {
+
                 String curNode = (String) pathIter.previous();
                 VpnInstance curVpnInstance = ConfigTaint.getVpnInstance(curNode, upstreamVpnInstance.getVpnName());
-                if (!curVpnInstance.canCrossFrom(upstreamVpnInstance)) {
-                    inconsistentVpnMap.put(curVpnInstance, upstreamVpnInstance);
+                if (upstreamVpnInstance.isValid() && curVpnInstance.isValid()) {
+                    if (!curVpnInstance.canCrossFrom(upstreamVpnInstance)) {
+                        inconsistentVpnMap.put(curVpnInstance, upstreamVpnInstance);
+                    }
                 }
                 upstreamNode = curNode;
                 upstreamVpnInstance = curVpnInstance;
                 checkedNodes.add(curNode);
             }
         }
-        return inconsistentVpnMap;
+        // 处理返回不一致的vpn的配置行
+        for (VpnInstance thisVpn: inconsistentVpnMap.keySet()) {
+            VpnInstance otherVpn = inconsistentVpnMap.get(thisVpn);
+            lines.put(thisVpn.getNode(), thisVpn.getCfgLinesMap());
+            lines.put(otherVpn.getNode(), otherVpn.getCfgLinesMap());
+        }
+        return lines;
     }
 
     public Generator getNewGenerator() {
@@ -502,7 +526,7 @@ public class BgpDiagnosis {
         if ((bgpProvFilePath==null || bgpProvFilePath.equals("")) || (staticProvFilePath==null || staticProvFilePath.equals(""))) {
             return null;
         }
-        newGenerator = new Generator(dstDev, dstIpString, errGenerator.getBgpTopology(), dstVpnName, ifMpls, failedDevs);
+        newGenerator = new Generator(dstDev, dstIpString, errGenerator.getBgpTopology(), dstVpnName, ifMpls, failedDevs, false);
         newGenerator.setLayer2Topology(errGenerator.getLayer2Topology());
         newGenerator.serializeTreeFromJson(staticProvFilePath, TreeType.STATIC);
         newGenerator.serializeTreeFromJson(bgpProvFilePath, TreeType.BGP);

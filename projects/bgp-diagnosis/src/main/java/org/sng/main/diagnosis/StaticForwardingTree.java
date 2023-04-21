@@ -61,6 +61,31 @@ public class StaticForwardingTree {
     public StaticRoute getMaxPrefRoute(List<StaticRoute> routes) {
         return routes.stream().min(Comparator.comparing(StaticRoute::getPref)).get();
     }
+
+    public void addForwardingInfo(String node, StaticRoute curRoute, Layer2Topology layer2Topology) {
+        if (!_routesMap.containsKey(node)) {
+            _routesMap.put(node, new ArrayList<StaticRoute>());
+        }
+        _routesMap.get(node).add(curRoute);
+        if (_nextHopForwardingMap.containsKey(node)) {
+            if (curRoute.getPref() > _bestRouteMap.get(node).getPref()) {
+                return;
+            }
+        }
+
+        // 根据layer2 topo，把端口对应的邻接点名称加入map，如果没有对端设备，nextHop还是用接口名称
+        if (layer2Topology!=null) {
+            String nextNode = layer2Topology.getPeerDevNameFromInface(node, curRoute.getInterface());
+            if (nextNode!=null) {
+                _nextHopForwardingMap.put(node, nextNode);
+            } else {
+                _nextHopForwardingMap.put(node, curRoute.getOutInfName());
+            }
+        } else {
+            _nextHopForwardingMap.put(node, curRoute.getOutInfName());
+        }
+        _bestRouteMap.put(node, curRoute);
+    }
     
     public StaticForwardingTree serializeStaticTreeFromProvJson(JsonObject jsonObject, String ip, Layer2Topology layer2Topology) {
         // input "updateInfo" as jsonObject
@@ -75,40 +100,29 @@ public class StaticForwardingTree {
                     if (curPrefix.containsPrefix(tagetPrefix)) {
                         // 路由前缀匹配
                         for (JsonElement route_raw : allVpnRoutes.get(ipString).getAsJsonArray()) {
-                            if (!_routesMap.containsKey(node)) {
-                                _routesMap.put(node, new ArrayList<StaticRoute>());
-                            }
+
                             // 解析当前静态路由
                             StaticRoute curRoute = new Gson().fromJson(route_raw.toString(), StaticRoute.class);
                             curRoute.checkPrefix();
                             curRoute = ConfigTaint.staticRouteRefine(node, curRoute);
                             // 一些refine处理：Prefix转换，pref值读取
-
-                            _routesMap.get(node).add(curRoute);
-                            if (_nextHopForwardingMap.containsKey(node)) {
-                                if (curRoute.getPref() > _bestRouteMap.get(node).getPref()) {
-                                    continue;
-                                }
-                            }
-    
-                            // 根据layer2 topo，把端口对应的邻接点名称加入map，如果没有对端设备，nextHop还是用接口名称
-                            if (layer2Topology!=null) {
-                                String nextNode = layer2Topology.getPeerDevNameFromInface(node, curRoute.getInterface());
-                                if (nextNode!=null) {
-                                    _nextHopForwardingMap.put(node, nextNode);
-                                } else {
-                                    _nextHopForwardingMap.put(node, curRoute.getOutInfName());
-                                }
-                            } else {
-                                _nextHopForwardingMap.put(node, curRoute.getOutInfName());
-                            }
-                            _bestRouteMap.put(node, curRoute);
+                            addForwardingInfo(node, curRoute, layer2Topology);
                             
                         }
                     }
                 }
             }
             
+        }
+        // 为所有没有static的节点检查一遍配置
+        for (String node: cfgPathMap.keySet()) {
+            StaticRoute route = ConfigTaint.staticRouteFinder(node, tagetPrefix, true);
+            if (route!=null) {
+                if (route.getInterface()==null && route.getNextHopString()!=null) {
+                    route.setInterface(layer2Topology.getIpLocatedInterface(node, route.getNextHopString()));
+                }
+                addForwardingInfo(node, route, layer2Topology);
+            }
         }
         return this;
     }

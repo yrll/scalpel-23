@@ -16,6 +16,10 @@ public class Layer2Node {
         return _interface.getPrefix();
     }
 
+    public Interface getInterface() {
+        return _interface;
+    }
+
     public String getDevName() {
         return _nodeName;
     }

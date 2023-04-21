@@ -81,7 +81,7 @@ public class BgpRoute {
     }
 
     public String getLatestVpnName() {
-        if (curVpnName!=null) {
+        if (curVpnName!=null && curVpnName.size()>0) {
            return curVpnName.get(curVpnName.size()-1); 
         } else {
             return null;

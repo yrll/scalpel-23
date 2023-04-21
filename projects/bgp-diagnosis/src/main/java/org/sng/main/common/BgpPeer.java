@@ -1,12 +1,17 @@
 package org.sng.main.common;
 
 import java.io.Serializable;
+import java.util.Map;
 
+import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
+import com.google.gson.reflect.TypeToken;
 import org.sng.datamodel.Ip;
 import org.sng.datamodel.Ip6;
 import org.sng.datamodel.Prefix;
 
 import com.google.gson.JsonObject;
+import org.sng.main.localization.Violation;
 
 public class BgpPeer implements Serializable{
 
@@ -29,11 +34,17 @@ public class BgpPeer implements Serializable{
     private static String RR_CLIENT = "rrclient";
     
     private BgpPeerType _type;
+
+    @SerializedName("localDevName")
     private String _localDevName;
+
+    @SerializedName("peerDevName")
     private String _peerDevName;
 
     // 这里的string可以是ipv4的，也可以是ipv6的
+    @SerializedName("localIp")
     private String _localIpString;
+    @SerializedName("peerIp")
     private String _peerIpString;
 
     private Ip _localIp;
@@ -43,12 +54,22 @@ public class BgpPeer implements Serializable{
     private Ip6 _localIp6;
     private Ip6 _peerIp6;
 
+    @SerializedName("localAsNum")
     private long _localAsNum;
+
+    @SerializedName("localVpnName")
     private String _localVpnName;
 
+    @SerializedName("peerAsNum")
     private long _peerAsNum;
+
+    @SerializedName("ebgpMaxHopNum")
     private int _ebgpMaxHop;
 
+    @SerializedName("validTtlHops")
+    private int _validTtlHops;
+
+    @SerializedName("rrclient")
     private boolean _ifPeerClient;
 
 //    public Ip getLocalIp() {
@@ -60,11 +81,11 @@ public class BgpPeer implements Serializable{
 //    }
 
     public String getLocalIpString() {
-        return _localIpString;
+        return BgpTopology.transPrefixOrIpToIpString(_localIpString);
     }
 
     public String getPeerIpString() {
-        return _peerIpString;
+        return BgpTopology.transPrefixOrIpToIpString(_peerIpString);
     }
 
     public Ip6 getLocalIp6() {
@@ -106,6 +127,10 @@ public class BgpPeer implements Serializable{
     public boolean ifIpv6Peer() {
         // 每次获取ip的时候都预先判断一下
         return _localIp6!=null || _peerIp6!=null;
+    }
+
+    public void setPeerType(BgpPeerType type) {
+        this._type = type;
     }
 
     public boolean ifPeerBetween(String node1, String node2) {
@@ -161,34 +186,13 @@ public class BgpPeer implements Serializable{
     }
 
     public static BgpPeer deserialize(JsonObject object) {
-        BgpPeerType type = BgpPeerType.EBGP;
+        BgpPeer peer = new Gson().fromJson(object, BgpPeer.class);
 
-        if (object.get(EBGP_MAX_HOP)==null) {
-            type = BgpPeerType.IBGP;
-            return new BgpPeer(object.get(LOCAL_DEV_NAME).getAsString(), 
-                            object.get(PEER_DEV_NAME).getAsString(), 
-                            object.get(LOCAL_IP).getAsString(),
-                            object.get(PEER_IP).getAsString(),
-                            Long.valueOf(object.get(PEER_AS_NUM).getAsString()),
-                            object.get(LOCAL_VPN_NAME).toString(),
-                            Boolean.parseBoolean(object.get(RR_CLIENT).toString()),
-                            type);
-        
-        } else {
-            // type = BgpPeerType.IBGP;
-            return new BgpPeer(object.get(LOCAL_DEV_NAME).getAsString(), 
-                            object.get(PEER_DEV_NAME).getAsString(),
-                            object.get(LOCAL_IP).getAsString(),
-                            object.get(PEER_IP).getAsString(),
-                            Long.valueOf(object.get(lOCAL_AS_NUM).getAsString()),
-                            object.get(LOCAL_VPN_NAME).toString(),
-                            Long.valueOf(object.get(PEER_AS_NUM).getAsString()),
-                            Integer.valueOf(object.get(EBGP_MAX_HOP).getAsString()),
-                            type);
-
+        peer.setPeerType(BgpPeerType.IBGP);
+        if (object.get(EBGP_MAX_HOP)!=null) {
+            peer.setPeerType(BgpPeerType.EBGP);
         }
-
-        
+        return peer;
     }
 
 //    private boolean isConsistentIp(BgpPeer peer) {
@@ -203,10 +207,10 @@ public class BgpPeer implements Serializable{
         }
         switch(_type) {
             case IBGP: {
-                return (_localAsNum==peer.getLocalAsNum() && _localDevName.equals(peer.getPeerDevName()) && _localIpString.equals(peer.getPeerIpString()));
+                return (_localDevName.equals(peer.getPeerDevName()) && getLocalIpString().equals(peer.getPeerIpString()));
             }
             case EBGP: {
-                return (_peerAsNum==peer.getLocalAsNum() && _localDevName.equals(peer.getPeerDevName()) && _localIpString.equals(peer.getPeerIpString()));
+                return (_localAsNum==peer.getPeerAsNum() && _localDevName.equals(peer.getPeerDevName()) && getLocalIpString().equals(peer.getPeerIpString()));
             }
             default: return false;
         }

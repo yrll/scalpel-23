@@ -1,0 +1,1 @@
+{"importedDirectRoutes":{},"importedStaticRoues":{"BNG20":{"_public_":[{"deviceName":"BNG20","vpnName":"_public_","addressIp":"173.0.0.76/30","nextHop":"33.0.0.78/32","outInf":{"deviceName":"BNG20","infName":"GigabitEthernet4/0/1.4","vpnName":"_public_","infIpv4Ip":"33.0.0.76/30","infIpv4HostIp":"33.0.0.77/32","infIpv6Ip":null,"infIpv6HostIp":null}}]}},"importedIsIsRoutes":{}}

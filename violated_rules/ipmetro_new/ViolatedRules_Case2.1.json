@@ -1,0 +1,46 @@
+{
+  "dev2ViolateRules": {
+    "BNG10": {
+      "ipPrefix": "173.0.0.76/30",
+      "vpnName": null,
+      "violatedRrClient": [],
+      "violatedPropNeighbors": [],
+      "violatedAcptNeighbors": [
+        {
+          "id": 42,
+          "deviceName": "BNG10",
+          "toDeviceName": null,
+          "fromDeviceName": "CR2",
+          "exRoutePolicy": null,
+          "imRoutePolicy": "testCase2_2",
+          "ipPrefix": "173.0.0.76/30",
+          "nextHopIp": "70.0.0.27/32",
+          "nextHopDevice": "BNG20",
+          "importType": null,
+          "originProtocol": null,
+          "preferredValue": 0,
+          "localPreference": 100,
+          "fromType": "FROMIBGP",
+          "asPath": [],
+          "origin": "INCOMPLETE",
+          "peerIp": "70.0.0.3/32",
+          "routerId": 1174405123,
+          "med": 0,
+          "clusterList": [
+            "1174405123"
+          ],
+          "originalPreference": null,
+          "curVpnName": [],
+          "communities": [],
+          "rts": []
+        }
+      ],
+      "prefer": [],
+      "violateIbgpPeer": [],
+      "violateEbgpPeer": [],
+      "originStaticRoute": null,
+      "originDirectRoute": null,
+      "violateRedis": null
+    }
+  }
+}

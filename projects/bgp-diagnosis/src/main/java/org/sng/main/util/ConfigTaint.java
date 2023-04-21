@@ -4,13 +4,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.namespace.QName;
 
 import org.sng.datamodel.Prefix;
 import org.sng.datamodel.Ip;
@@ -93,25 +90,35 @@ public class ConfigTaint {
                     String[] words = line.split(" ");
                     boolean ifFindTargetPrefix = false; // 标识是否读取过前缀，下一个匹配的ip才是下一跳
                     for (int i=0; i<words.length; i+=1) {
+                        // 检测某一行静态路由
                         String ss = words[i];
                         if (Ip.isIpv4Addr(words[i]) && !ifFindTargetPrefix) {
                             Ip ip = Ip.parse(words[i]);
                             Prefix thisPrefix = Prefix.create(ip, Integer.valueOf(words[i+1]));
                             if (thisPrefix.equals(Prefix.ZERO)) {
+                                // 不考虑默认路由
                                 break;
                             }
                             if (strictMatch) {
+                                // 严格匹配，连掩码都要一致，不匹配则跳出
                                 if (!thisPrefix.equals(prefix)) {
                                     break;
                                 }
                             } else {
+                                // 非严格匹配，但是不考虑默认路由，
                                 if (!thisPrefix.containsPrefix(prefix)) {
                                     break;
                                 }
                             }
 
                             ifFindTargetPrefix = true;
-                            return new StaticRoute(node, thisPrefix.toString(), words[i+2]);
+                            StaticRoute targetRoute = new StaticRoute(node, thisPrefix.toString(), words[i+2]);
+                            for (int j=i+1; j<words.length; j++) {
+                                if (words[j].equals(KeyWord.PREFERENCE)) {
+                                    targetRoute.setPreference(Integer.parseInt(words[j+1]));
+                                }
+                            }
+                            return targetRoute;
                         }
                         
                     }
@@ -344,7 +351,7 @@ public class ConfigTaint {
                         // 获取group的名称
                         String[] lineWords = line.split(" ");
                         String groupName = lineWords[lineWords.length-1];
-                        String[] groupTargetWords = keyWords;
+                        String[] groupTargetWords = keyWords.clone();
                         groupTargetWords[1] = groupName;
                         // 把ref peer groupd 那行也加进来
                         lineMap.put(lineNum, line);
@@ -426,23 +433,30 @@ public class ConfigTaint {
                 // System.out.println(line);
                 // read next line
                 if (line.contains(KeyWord.IP_VPN_INSTANCE) && line.contains(vpnName)) {
+                    // 进入这段表达找到了对应名称的VPN
+                    vpnInstance.addConfigLine(lineNum, line);
                     ifReachVpnLine = true;
                     line = reader.readLine();
                     while (line != null && !line.contains(KeyWord.ENDING_TOKEN)) {
                         String[] words = line.split(" ");
                         if (line.contains(KeyWord.IP_FAMILY_TOKEN)){
                             vpnInstance.setIpFamily(line.strip());
+                            vpnInstance.addConfigLine(lineNum, line);
                         } else if (line.contains(KeyWord.TUNNEL_POLICY)){
                             // tnl-policy [policy-name]
                             vpnInstance.setTnlPolicyName(words[words.length-1]);
+                            vpnInstance.addConfigLine(lineNum, line);
                         } else if (line.contains(KeyWord.RD_TOKEN)) {
                             // route-distinguisher [route-distinguisher]
                             vpnInstance.setRouterDistinguisher(words[words.length-1]);
+                            vpnInstance.addConfigLine(lineNum, line);
                         } else if (line.contains(KeyWord.RT_TOKEN)) {
                             // vpn-target { vpn-target } &<1-8> [ vrfRtType ]
-                            vpnInstance.addRtList(words, words[words.length-1]);
+                            vpnInstance.addRtList(words, line);
+                            vpnInstance.addConfigLine(lineNum, line);
                         } 
                         line = reader.readLine();
+                        lineNum += 1;
                     }
                 }
                 if (ifReachVpnLine) {

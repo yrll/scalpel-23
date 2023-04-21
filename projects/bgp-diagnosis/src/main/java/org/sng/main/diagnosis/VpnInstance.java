@@ -1,9 +1,7 @@
 package org.sng.main.diagnosis;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import org.sng.main.util.KeyWord;
 
@@ -32,6 +30,8 @@ public class VpnInstance {
     String routerDistinguisher;
     List<String> exportRtList;
     List<String> importRtList;
+
+    Map<Integer, String> cfgLinesMap;
     
     // 其他属性暂不考虑
     public VpnInstance(String node, String name) {
@@ -40,6 +40,15 @@ public class VpnInstance {
         routerDistinguisher = "";
         exportRtList = new ArrayList<>();
         importRtList = new ArrayList<>();
+        cfgLinesMap = new HashMap<>();
+    }
+
+    public void addConfigLine(int num, String line) {
+        this.cfgLinesMap.put(num, line);
+    }
+
+    public Map<Integer, String> getCfgLinesMap() {
+        return cfgLinesMap;
     }
 
     public void setIpFamily(String ipFamilyName) {
@@ -106,6 +115,10 @@ public class VpnInstance {
 
     public String getVpnName() {
         return vpnName;
+    }
+
+    public String getNode() {
+        return node;
     }
 
     public boolean canCrossFrom(VpnInstance vpnInstance) {

@@ -1,0 +1,19 @@
+{
+  "dev2ViolateRules": {
+    "BR2": {
+      "ipPrefix": null,
+      "vpnName": "_public_",
+      "violatedRrClient": [],
+      "violatedPropNeighbors": [],
+      "violatedAcptNeighbors": [],
+      "prefer": [],
+      "violateIbgpPeer": [],
+      "violateEbgpPeer": [
+        "CR2"
+      ],
+      "violateRedis": null,
+      "originStaticRoute": null,
+      "originDirectRoute": null
+    }
+  }
+}

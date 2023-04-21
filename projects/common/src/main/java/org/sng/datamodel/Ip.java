@@ -48,6 +48,13 @@ public class Ip implements Comparable<Ip>, Serializable {
     }
 
     public static boolean isIpv4Addr(String addr) {
+        if (addr.contains("/") ) {
+            // 32位地址格式的ip
+            String[] addrs = addr.split("/");
+            if (addrs[1].equals("32")) {
+                addr = addrs[0];
+            }
+        }
         String[] addrArray = addr.split("\\.");
         if (addrArray.length != 4) {
             if ((addr.charAt(0) >= 'a' && addr.charAt(0) <= 'z') || addr.charAt(0) >= 'A' && addr.charAt(0) <= 'Z') {

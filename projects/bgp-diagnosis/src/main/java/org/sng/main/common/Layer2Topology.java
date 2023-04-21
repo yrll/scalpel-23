@@ -106,6 +106,23 @@ public class Layer2Topology {
         return creat(layer2Nodes);
     }
 
+    public Interface getIpLocatedInterface(String node, String ipString){
+        ipString = BgpTopology.transPrefixOrIpToIpString(ipString);
+
+        Ip ip = Ip.parse(ipString);
+        for (Layer2Node layer2Node: _nodes) {
+            if (node.equals(layer2Node.getDevName())) {
+                Prefix prefix = layer2Node.getInfPrefix();
+                if (prefix!=null) {
+                    if (prefix.containsIp(ip)) {
+                        return layer2Node.getInterface();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public String getPeerDevNameFromInface(String node, Interface iface) {
         if (!_edgeMap.containsKey(node) || iface.getPrefix()==null) {
             return null;

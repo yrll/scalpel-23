@@ -211,7 +211,15 @@ public class BgpForwardingTree {
             if (thisNode.equals(endDevName) || !_bestRouteFromMap.containsKey(thisNode) || thisNode.equals(_dstDevName)) {
                 break;
             }
-            path.add(_bestRouteFromMap.get(thisNode));
+            String nextNode = _bestRouteFromMap.get(thisNode);
+
+            if (!thisNode.equals(endDevName) && path.contains(nextNode)) {
+                System.out.println(path);
+                System.out.println("LOOP!!!!!!!!!!!");
+                return null;
+            }
+            path.add(nextNode);
+
         }
         // must be a valid path
         if (path.get(path.size()-1).equals(endDevName)) {
@@ -227,10 +235,18 @@ public class BgpForwardingTree {
         path.add(startDevName);
         while(true) {
             String thisNode = path.get(path.size()-1);
+
             if (thisNode.equals(endDevName) || !_nextHopForwardingMap.containsKey(thisNode)) {
                 break;
             }
-            path.add(_nextHopForwardingMap.get(thisNode));
+
+            String nextNode = _nextHopForwardingMap.get(thisNode);
+            if (!thisNode.equals(endDevName) && path.contains(nextNode)) {
+                System.out.println(path);
+                System.out.println("LOOP!!!!!!!!!!!");
+                return null;
+            }
+            path.add(nextNode);
         }
         // valid path
         if (path.get(path.size()-1).equals(endDevName)) {
@@ -252,7 +268,7 @@ public class BgpForwardingTree {
 
 
 
-    public Set<String> serializeBgpTreeFromProvJson(JsonObject jsonObject, String ip, BgpTopology bgpTopology) {
+    public Set<String> serializeBgpTreeFromProvJson(JsonObject jsonObject, String ip, BgpTopology bgpTopology, boolean ifStrict) {
         Set<String> failedDevs = bgpTopology.getFailedDevs();
         // input "updateInfo" as jsonObject
         // 解析配置里对该(vpn)ip的preference
@@ -268,57 +284,75 @@ public class BgpForwardingTree {
             if (failedDevs.contains(node)) {
                 continue;
             }
-            if (node.equals(_dstDevName)) {
-                // 说明这个provnanceInfo不是目的设备的，把tree清空
-                _nextHopForwardingMap = new HashMap<>();
-                _bestRouteFromMap = new HashMap<>();
-                _bestRouteMap = new HashMap<>();
-                _unreachableNodesPrev = new HashSet<>(bgpTopology.getAllNodes().keySet());
-                _unreachableNodesPrev.remove(_dstDevName);
-                _bestRouteFromMap.put(_dstDevName,_dstDevName);
-                _nextHopForwardingMap.put(_dstDevName,_dstDevName);
-                return _unreachableNodesPrev;
-            }
             JsonObject nodeRoutes = jsonObject.asMap().get(node).getAsJsonObject();
+
+
             for (String ipString : nodeRoutes.keySet()) {
                 Prefix curPrefix = Prefix.parse(ipString);
-                if (curPrefix.equals(tagetPrefix)) {
-                    // 当前RIB表前缀匹配目标前缀
-                    int routeIndex = Integer.MAX_VALUE;
-                    for (JsonElement route_raw : nodeRoutes.get(ipString).getAsJsonArray()) {
-                        // 保持index最小的route作为bestRoute【prov文件里并不是所有route的index都是从0开始】
-                        int index = Integer.valueOf(route_raw.getAsJsonObject().get(KeyWord.INDEX).getAsString());
-                        if (index >= routeIndex) {
-                            // 以遇到的第一个index最高的为准
-                            continue;
-                        }
-                        routeIndex = index;
-                        JsonObject route = route_raw.getAsJsonObject().get(KeyWord.ROUTE).getAsJsonObject();
-                        BgpRoute bgpRoute = new Gson().fromJson(route, BgpRoute.class);
-
-                        String nextHopDev = route.get(KeyWord.NEXT_HOP_DEV).getAsString();
-                        String nextHopIpString = route.get(KeyWord.NEXT_HOP_IP).getAsString();
-                        String peerIpString = route.get(KeyWord.PEER_IP).getAsString();
-                        String peerDevName = bgpTopology.getNodeNameFromIp(peerIpString);
-
-                        // fail节点不加入
-                        if (failedDevs.contains(nextHopDev) || failedDevs.contains(peerDevName)) {
-                            continue;
-                        }
-
-                        if (_bestRouteMap.containsKey(node)) {
-                            Prefix bestRoutePrefix = _bestRouteMap.get(node).getPrefix();
-                            // 新的route前缀更短则更新best*Map
-                            if (bgpRoute.getPrefix().getPrefixLength() > bestRoutePrefix.getPrefixLength()) {
-                                continue;
-                            }
-                        }
-                        _nextHopForwardingMap.put(node, nextHopDev);
-                        _bestRouteMap.put(node, bgpRoute);
-                        _bestRouteFromMap.put(node, peerDevName);
-                        System.out.println("Best route from: " + node + "-->" + peerDevName);
-                        System.out.println("Next-hop from: " + node + "-->" + nextHopDev);
+                if (ifStrict) {
+                    if (!curPrefix.equals(tagetPrefix)) {
+                        continue;
                     }
+                } else {
+                    if (!curPrefix.containsPrefix(tagetPrefix)) {
+                        continue;
+                    }
+                }
+                // 明细路由优于默认路由
+                if (_bestRouteMap.containsKey(node)) {
+                    if (curPrefix.equals(Prefix.ZERO)) {
+                        break;
+                    }
+                }
+
+                if (node.equals(_dstDevName) && curPrefix.equals(tagetPrefix)) {
+
+                    // 说明这个provnanceInfo不是目的设备的，把tree清空
+                    _nextHopForwardingMap = new HashMap<>();
+                    _bestRouteFromMap = new HashMap<>();
+                    _bestRouteMap = new HashMap<>();
+                    _unreachableNodesPrev = new HashSet<>(bgpTopology.getAllNodes().keySet());
+                    _unreachableNodesPrev.remove(_dstDevName);
+                    _bestRouteFromMap.put(_dstDevName,_dstDevName);
+                    _nextHopForwardingMap.put(_dstDevName,_dstDevName);
+                    return _unreachableNodesPrev;
+                }
+                // 当前RIB表前缀匹配目标前缀
+                int routeIndex = Integer.MAX_VALUE;
+                for (JsonElement route_raw : nodeRoutes.get(ipString).getAsJsonArray()) {
+                    // 保持index最小的route作为bestRoute【prov文件里并不是所有route的index都是从0开始】
+                    int index = Integer.valueOf(route_raw.getAsJsonObject().get(KeyWord.INDEX).getAsString());
+                    if (index >= routeIndex) {
+                        // 以遇到的第一个index最高的为准
+                        continue;
+                    }
+                    routeIndex = index;
+                    JsonObject route = route_raw.getAsJsonObject().get(KeyWord.ROUTE).getAsJsonObject();
+                    BgpRoute bgpRoute = new Gson().fromJson(route, BgpRoute.class);
+
+                    String nextHopDev = route.get(KeyWord.NEXT_HOP_DEV).getAsString();
+                    String nextHopIpString = route.get(KeyWord.NEXT_HOP_IP).getAsString();
+                    String peerIpString = route.get(KeyWord.PEER_IP).getAsString();
+                    String peerDevName = bgpTopology.getNodeNameFromIp(peerIpString);
+
+                    // fail节点不加入
+                    if (failedDevs.contains(nextHopDev) || failedDevs.contains(peerDevName)) {
+                        continue;
+                    }
+
+                    if (_bestRouteMap.containsKey(node)) {
+                        Prefix bestRoutePrefix = _bestRouteMap.get(node).getPrefix();
+                        // 新的route前缀更短则更新best*Map
+                        if (bgpRoute.getPrefix().getPrefixLength() > bestRoutePrefix.getPrefixLength()) {
+                            continue;
+                        }
+                    }
+                    _nextHopForwardingMap.put(node, nextHopDev);
+                    _bestRouteMap.put(node, bgpRoute);
+                    _bestRouteFromMap.put(node, peerDevName);
+                    System.out.println("Best route from: " + node + "-->" + peerDevName);
+                    System.out.println("Next-hop from: " + node + "-->" + nextHopDev);
+
                 }
                 
             }

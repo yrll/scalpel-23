@@ -76,6 +76,10 @@ public class BgpTopology {
         _configuredPeerMap =  new HashMap<>();
     }
 
+    public Set<String> getAllDevs() {
+        return _allNodes.keySet();
+    }
+
     public Protocol getNodesRelation(String node1, String node2) {
         if (node1.equals(node2)) {
             return Protocol.BGP_LOCAL;
@@ -184,8 +188,19 @@ public class BgpTopology {
         return _allNodes;
     }
 
+    public static String transPrefixOrIpToIpString(String str) {
+        if (str.contains("/")) {
+            str = str.split("/")[0];
+        }
+        return str;
+    }
+
     public String getNodeIp(String node) {
-        return _allNodes.get(node);
+        String nodeIp =  _allNodes.get(node);
+        if (nodeIp==null) {
+            return null;
+        }
+        return transPrefixOrIpToIpString(nodeIp);
     }
 
     public Table<String, String, BgpPeer> getPeerTable() {
@@ -338,6 +353,7 @@ public class BgpTopology {
     }
 
     public String getNodeNameFromIp(String ip) {
+        ip = transPrefixOrIpToIpString(ip);
         for (String node : _allNodes.keySet()) {
             if (_allNodes.get(node).toString().equals(ip)) {
                 return node;
@@ -366,6 +382,9 @@ public class BgpTopology {
     // 判断两个节点在BGP topology上是否可达（可以invalid）
     public boolean ifConnected(String node1, String node2) {
         // generates the connection component using BFS
+        if (!getAllDevs().contains(node1) || !getAllDevs().contains(node2)) {
+            return false;
+        }
         Map <String, Boolean> visitedMap = new HashMap<>();
         // vistedMap initialization
         _allNodes.forEach((node, ip)->{
