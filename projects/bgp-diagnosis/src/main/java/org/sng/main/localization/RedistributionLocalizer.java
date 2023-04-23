@@ -34,9 +34,10 @@ public class RedistributionLocalizer implements Localizer{
     }
 
     private RedisErrorType getErrorTypeFromKeyWord(String causeKeyWord) {
-        if (causeKeyWord.toLowerCase().contains("no")) {
+        causeKeyWord = causeKeyWord.toLowerCase();
+        if (causeKeyWord.contains("no") && causeKeyWord.contains("config")) {
             return RedisErrorType.NO_REDISTRIBUTE_COMMOND;
-        } else if (causeKeyWord.toLowerCase().contains("invalid")) {
+        } else if (causeKeyWord.contains("invalid") || causeKeyWord.contains("invaild")) {
             return RedisErrorType.ROUTE_INVALID;
         } else {
             return RedisErrorType.POLICY;
@@ -96,10 +97,31 @@ public class RedistributionLocalizer implements Localizer{
                     break;
                 }
                 case ROUTE_INVALID: {
-                    String[] routeKeyWords = {"route-static", targetRoute.getPrefix().getStartIp().toString(), 
-                                                String.valueOf(targetRoute.getPrefix().getPrefixLength())};
+                    // 判断是接口invalid还是下一跳ip无接口
+                    boolean ifRouteHasOrigin = false;
+                    if (targetRoute.getInterface()!=null) {
+                        Map<Integer, String> infLines = ConfigTaint.interfaceLinesFinder(node, targetRoute.getInterface());
+                        if (infLines!=null && infLines.size()>0) {
+                            lines.putAll(infLines);
+                            ifRouteHasOrigin = true;
+                        }
 
-                    lines.putAll(ConfigTaint.staticRouteLinesFinder(node, targetRoute.getPrefix()));
+                    } else {
+                        String[] routeKeyWords = {"route-static", targetRoute.getPrefix().getStartIp().toString(),
+                                String.valueOf(targetRoute.getPrefix().getPrefixLength())};
+                        Map<Integer, String> routeLines = ConfigTaint.staticRouteLinesFinder(node, targetRoute.getPrefix());
+                        if (routeLines!=null && routeLines.size()>0) {
+                            lines.putAll(routeLines);
+                            ifRouteHasOrigin = true;
+                        }
+
+                    }
+                    if (!ifRouteHasOrigin) {
+                        String missingOriginLine = ConfigTaint.genStaticRouteLine(targetRoute);
+                        lines.put(violation.getMissingLine(), missingOriginLine);
+                        lines.put(violation.getMissingLine(), ConfigTaint.genNetworkCommondLine(targetRoute.getPrefix()));
+                    }
+
                 }
             }
         });

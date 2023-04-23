@@ -1,0 +1,31 @@
+{
+    "dev2ViolateRules": {
+        "BNG2": {
+            "ipPrefix": "174.0.0.0/30",
+            "vpnName": "_public_",
+            "violatedRrClient": [],
+            "violatedPropNeighbors": [],
+            "violatedAcptNeighbors": [],
+            "prefer": [],
+            "violateIbgpPeer": [],
+            "violateEbgpPeer": [],
+            "violateRedis": "testCase1_2,testCase1_2",
+            "originDirectRoute": null,
+            "originStaticRoute": {
+                "deviceName": "BNG2",
+                "vpnName": "_public_",
+                "addressIp": "174.0.0.0/30",
+                "nextHop": "39.0.0.6/32",
+                "outInf": {
+                    "deviceName": "BNG2",
+                    "infName": "GigabitEthernet4/0/1.10",
+                    "vpnName": "_public_",
+                    "infIpv4Ip": "39.0.0.4/30",
+                    "infIpv4HostIp": "39.0.0.5/32",
+                    "infIpv6Ip": null,
+                    "infIpv6HostIp": null
+                }
+            }
+        }
+    }
+}

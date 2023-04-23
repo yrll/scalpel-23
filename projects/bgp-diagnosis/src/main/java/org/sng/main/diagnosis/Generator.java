@@ -50,6 +50,7 @@ public class Generator {
     private StaticForwardingTree _oldStaticTree;
     // private BgpForwardingTree _newBgpTree;
 
+    // 对于错误bgpTree的generator，这里的bgp topo就是错误的那个（但对new generator，初始化的时候还是用的错误的bgp topo）
     private BgpTopology _bgpTopology;
 
     private Layer2Topology _layer2Topology;
@@ -179,7 +180,7 @@ public class Generator {
 
     }
 
-    public void serializeTreeFromJson(String filePath, TreeType type) {
+    public void serializeTreeFromJson(String filePath, TreeType type, BgpForwardingTree.BgpTreeType bgpTreeType) {
         File file = new File(filePath);
         System.out.println(filePath);
         String jsonStr;
@@ -189,8 +190,8 @@ public class Generator {
                 case BGP: {
                     // get BGP RIB
                     JsonObject jsonObject = JsonParser.parseString(jsonStr).getAsJsonObject().get(UPT_TABLE).getAsJsonObject();
-                    _oldBgpTree = new BgpForwardingTree(_dstDevName, _dstPrefix, _vpnName);
-                    _oldBgpTree.serializeBgpTreeFromProvJson(jsonObject, _dstPrefix.toString(), _bgpTopology, strict);
+                    _oldBgpTree = new BgpForwardingTree(_dstDevName, _dstPrefix, _vpnName, bgpTreeType);
+                    _oldBgpTree.serializeBgpTreeFromProvJson(jsonObject, _dstPrefix.toString(), _bgpTopology, _layer2Topology, strict);
                     break;
                 }
                 case STATIC: {
@@ -403,16 +404,7 @@ public class Generator {
         }
     }
 
-    public boolean ifStaticConsistWithBgp(String node) {
-        String bgpNextHop = _oldBgpTree.getBestNextHop(node);
-        String staticNextHop = _oldStaticTree.getNextHop(node);
-        return bgpNextHop.equals(staticNextHop) || staticNextHop.equals("") || staticNextHop==null;
-    }
 
-    // public <T> T matchedSetElement(Set<T> targSet) {
-    //     for (T t : targSet) {
-    //     }
-    // }
  
     public static Map<String, Map<String, Map<String, List<StaticRoute>>>> genStaticOrDirectRouteFromFile(String filePath, Protocol protocol) {
         String jsonStr = BgpDiagnosis.fromJsonToString(filePath);

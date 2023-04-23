@@ -16,8 +16,6 @@ public class Node {
     public Node(String name, String ip) {
         ipString = ip;
         _devName = name;
-        _ip = Ip.parse(ip);
-        _prefix = _ip.toPrefix();
     }
 
     public Node(String name, Ip ip) {
@@ -42,6 +40,10 @@ public class Node {
         return _ip;
     }
 
+    public String getIpString() {
+        return ipString;
+    }
+
     public boolean ifSameDevName(String name) {
         return name.equals(_devName);
     }
@@ -50,7 +52,7 @@ public class Node {
     public boolean equals(Object object) {
         if (object instanceof Node) {
             Node node = (Node) object;
-            return node.getDevName().equals(_devName) && node.getDevIp().equals(_ip);
+            return node.getDevName().equals(_devName) && node.getIpString().equals(ipString);
         }
         return false;
     }

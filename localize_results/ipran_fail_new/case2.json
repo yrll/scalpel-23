@@ -1,0 +1,51 @@
+{
+  "CSG1-1-1": {
+    "149": "peer 110.0.0.8 group toASG"
+  },
+  "ASG1": {
+    "176": "apply cost 100",
+    "179": "ip ip-prefix default index 10 permit 0.0.0.0 0",
+    "133": "peer CSG-as-master route-policy to-csg-as-master export",
+    "182": "ip extcommunity-filter basic x2 index 10 permit rt 1:1",
+    "136": "peer 70.0.0.6 group CSG-as-master",
+    "169": "route-policy to-csg-as-master permit node 10",
+    "170": "if-match ip-prefix default",
+    "171": "apply ip-address next-hop peer-address",
+    "172": "apply cost 100",
+    "174": "route-policy to-csg-as-master permit node 20",
+    "175": "if-match extcommunity-filter x2"
+  },
+  "RSG4": {
+    "256": "ip ip-prefix EPC index 110 permit 180.0.0.0 16 greater-equal 16 less-equal 32",
+    "257": "ip ip-prefix EPC index 120 permit 181.0.0.0 16 greater-equal 16 less-equal 32",
+    "258": "ip ip-prefix EPC index 130 permit 182.0.0.0 16 greater-equal 16 less-equal 32",
+    "259": "ip ip-prefix EPC index 140 permit 183.0.0.0 16 greater-equal 16 less-equal 32",
+    "260": "ip ip-prefix EPC index 150 permit 184.0.0.0 16 greater-equal 16 less-equal 32",
+    "261": "ip ip-prefix EPC index 160 permit 185.0.0.0 16 greater-equal 16 less-equal 32",
+    "262": "ip ip-prefix EPC index 170 permit 186.0.0.0 16 greater-equal 16 less-equal 32",
+    "263": "ip ip-prefix EPC index 180 permit 187.0.0.0 16 greater-equal 16 less-equal 32",
+    "264": "ip ip-prefix EPC index 190 permit 188.0.0.0 16 greater-equal 16 less-equal 32",
+    "265": "ip ip-prefix EPC index 200 permit 189.0.0.0 16 greater-equal 16 less-equal 32",
+    "219": "import-route isis 98888 route-policy EPC",
+    "220": "import-route direct route-policy EPC",
+    "221": "import-route static route-policy EPC",
+    "233": "route-policy EPC permit node 10",
+    "234": "if-match ip-prefix EPC",
+    "235": "apply cost 200",
+    "236": "apply preferred-value 32768",
+    "238": "route-policy EPC permit node 20",
+    "239": "if-match ip-prefix loopback1",
+    "244": "ip ip-prefix loopback1 index 10 permit 90.0.0.5 32",
+    "245": "ip ip-prefix EPC index 8 deny 174.0.0.9 30",
+    "246": "ip ip-prefix EPC index 10 permit 170.0.0.0 16 greater-equal 16 less-equal 32",
+    "247": "ip ip-prefix EPC index 20 permit 171.0.0.0 16 greater-equal 16 less-equal 32",
+    "248": "ip ip-prefix EPC index 30 permit 172.0.0.0 16 greater-equal 16 less-equal 32",
+    "249": "ip ip-prefix EPC index 40 permit 173.0.0.0 16 greater-equal 16 less-equal 32",
+    "250": "ip ip-prefix EPC index 50 permit 174.0.0.0 16 greater-equal 16 less-equal 32",
+    "251": "ip ip-prefix EPC index 60 permit 175.0.0.0 16 greater-equal 16 less-equal 32",
+    "252": "ip ip-prefix EPC index 70 permit 176.0.0.0 16 greater-equal 16 less-equal 32",
+    "253": "ip ip-prefix EPC index 80 permit 177.0.0.0 16 greater-equal 16 less-equal 32",
+    "254": "ip ip-prefix EPC index 90 permit 178.0.0.0 16 greater-equal 16 less-equal 32",
+    "255": "ip ip-prefix EPC index 100 permit 179.0.0.0 16 greater-equal 16 less-equal 32"
+  }
+}

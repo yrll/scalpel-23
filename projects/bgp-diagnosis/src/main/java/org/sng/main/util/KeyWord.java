@@ -9,6 +9,7 @@ public class KeyWord {
     public static String NEXT_HOP_IP = "nextHopIp";
     public static String NEXT_HOP_DEV = "nextHopDevice";
     public static String INDEX = "index";
+    public static String CONFIG_ENDING_TOKEN = "#";
     
     // static related
     public static String NEXT_HOP = "nextHop";
@@ -16,6 +17,7 @@ public class KeyWord {
     public static String DEV_NAME = "deviceName";
     public static String IFACE_NAME = "infName";
     public static String IFACE_IP = "infIpv4HostIp";
+    public static String INTERFACE = "interface";
     
     public static String SENDER = "sender";
     public static String VPN_NAME = "vpnName";

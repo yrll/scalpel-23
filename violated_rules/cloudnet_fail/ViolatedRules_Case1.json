@@ -1,0 +1,183 @@
+{
+  "dev2ViolateRules": {
+    "cloudPE-4": {
+      "ipPrefix": "50.0.0.4/30",
+      "vpnName": "YiLiao",
+      "violatedRrClient": [],
+      "violatedPropNeighbors": [],
+      "violatedAcptNeighbors": [],
+      "prefer": [],
+      "violateIbgpPeer": [],
+      "violateEbgpPeer": [],
+      "violateRedis": "testCase1,testCase1",
+      "originDirectRoute": null,
+      "originStaticRoute": null
+    },
+    "B1-2": {
+      "ipPrefix": "50.0.0.4/30",
+      "vpnName": "YiLiao",
+      "violatedRrClient": [],
+      "violatedPropNeighbors": [
+        {
+          "id": 196,
+          "deviceName": "B1-2",
+          "toDeviceName": "U1-1-1-1",
+          "fromDeviceName": null,
+          "exRoutePolicy": "default-route-upe",
+          "imRoutePolicy": null,
+          "ipPrefix": "50.0.0.4/30",
+          "nextHopIp": "240E:0101:F000:0000:0000:0000:6E00:0003/128",
+          "nextHopDevice": "cloudPE-2",
+          "importType": null,
+          "originProtocol": null,
+          "preferredValue": 0,
+          "localPreference": 100,
+          "fromType": "FROMIBGP",
+          "asPath": [],
+          "origin": "INCOMPLETE",
+          "peerIp": "240E:0101:F000:0000:0000:0000:6E00:0006/128",
+          "routerId": 1845493766,
+          "med": 100,
+          "clusterList": [
+            "1845493766"
+          ],
+          "originalPreference": null,
+          "curVpnName": [
+            "YiLiao"
+          ],
+          "communities": [
+            "120"
+          ],
+          "rts": [
+            "10010:1"
+          ]
+        },
+        {
+          "id": 463,
+          "deviceName": "B1-2",
+          "toDeviceName": "U1-1-1-1",
+          "fromDeviceName": null,
+          "exRoutePolicy": "default-route-upe",
+          "imRoutePolicy": null,
+          "ipPrefix": "50.0.0.4/30",
+          "nextHopIp": "240E:0101:F000:0000:0000:0000:6E00:0005/128",
+          "nextHopDevice": "cloudPE-4",
+          "importType": null,
+          "originProtocol": null,
+          "preferredValue": 0,
+          "localPreference": 100,
+          "fromType": "FROMIBGP",
+          "asPath": [],
+          "origin": "INCOMPLETE",
+          "peerIp": "240E:0101:F000:0000:0000:0000:6E00:0006/128",
+          "routerId": 1845493766,
+          "med": 100,
+          "clusterList": [
+            "1845493766"
+          ],
+          "originalPreference": null,
+          "curVpnName": [
+            "YiLiao"
+          ],
+          "communities": [
+            "120"
+          ],
+          "rts": [
+            "10010:1"
+          ]
+        }
+      ],
+      "violatedAcptNeighbors": [],
+      "prefer": [],
+      "violateIbgpPeer": [],
+      "violateEbgpPeer": [],
+      "violateRedis": null,
+      "originDirectRoute": null,
+      "originStaticRoute": null
+    },
+    "U1-1-1-1": {
+      "ipPrefix": "50.0.0.4/30",
+      "vpnName": "YiLiao",
+      "violatedRrClient": [],
+      "violatedPropNeighbors": [],
+      "violatedAcptNeighbors": [
+        {
+          "id": 242,
+          "deviceName": "U1-1-1-1",
+          "toDeviceName": null,
+          "fromDeviceName": "B1-2",
+          "exRoutePolicy": null,
+          "imRoutePolicy": null,
+          "ipPrefix": "50.0.0.4/30",
+          "nextHopIp": "240E:0101:F000:0000:0000:0000:6E00:0003/128",
+          "nextHopDevice": "cloudPE-2",
+          "importType": null,
+          "originProtocol": null,
+          "preferredValue": 0,
+          "localPreference": 100,
+          "fromType": "FROMIBGP",
+          "asPath": [],
+          "origin": "INCOMPLETE",
+          "peerIp": "240E:0101:F000:0000:0000:0000:6E00:000B/128",
+          "routerId": 1845493771,
+          "med": 100,
+          "clusterList": [
+            "1845493766",
+            "1845493771"
+          ],
+          "originalPreference": null,
+          "curVpnName": [
+            "CAN_NOT_CROSS"
+          ],
+          "communities": [
+            "120"
+          ],
+          "rts": [
+            "10010:1"
+          ]
+        },
+        {
+          "id": 509,
+          "deviceName": "U1-1-1-1",
+          "toDeviceName": null,
+          "fromDeviceName": "B1-2",
+          "exRoutePolicy": null,
+          "imRoutePolicy": null,
+          "ipPrefix": "50.0.0.4/30",
+          "nextHopIp": "240E:0101:F000:0000:0000:0000:6E00:0005/128",
+          "nextHopDevice": "cloudPE-4",
+          "importType": null,
+          "originProtocol": null,
+          "preferredValue": 0,
+          "localPreference": 100,
+          "fromType": "FROMIBGP",
+          "asPath": [],
+          "origin": "INCOMPLETE",
+          "peerIp": "240E:0101:F000:0000:0000:0000:6E00:000B/128",
+          "routerId": 1845493771,
+          "med": 100,
+          "clusterList": [
+            "1845493766",
+            "1845493771"
+          ],
+          "originalPreference": null,
+          "curVpnName": [
+            "CAN_NOT_CROSS"
+          ],
+          "communities": [
+            "120"
+          ],
+          "rts": [
+            "10010:1"
+          ]
+        }
+      ],
+      "prefer": [],
+      "violateIbgpPeer": [],
+      "violateEbgpPeer": [],
+      "violateRedis": null,
+      "originDirectRoute": null,
+      "originStaticRoute": null
+    }
+  }
+}

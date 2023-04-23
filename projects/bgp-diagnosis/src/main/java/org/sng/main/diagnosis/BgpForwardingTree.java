@@ -27,6 +27,8 @@ import org.sng.datamodel.Prefix;
 import org.sng.main.common.BgpRoute;
 import org.sng.main.common.BgpTopology;
 import org.sng.main.common.BgpPeer.BgpPeerType;
+import org.sng.main.common.Layer2Topology;
+import org.sng.main.common.StaticRoute;
 import org.sng.main.conditions.BgpCondition;
 import org.sng.main.conditions.SelectionRoute;
 import org.sng.main.diagnosis.Generator.Protocol;
@@ -53,6 +55,7 @@ public class BgpForwardingTree {
     // Destination (origin) router and the prefix in it.
     private Prefix _dstPrefix;
     private String _dstDevName;
+    private BgpTreeType bgpTreeType;
 
     // The next-hop map is for each router to forward traffic 
     // 只是针对【路由级的】每个节点【对应协议】计算出的下一跳的map
@@ -89,6 +92,13 @@ public class BgpForwardingTree {
         BGP,
         STATIC
     }
+
+    public enum BgpTreeType{
+        ERROR,
+        CORRECT,
+        NEW,
+        NONE
+    }
     
     public enum PathType{
         BEST_ROUTE_FROM,
@@ -110,16 +120,7 @@ public class BgpForwardingTree {
         return reachNodes.iterator().next();
     }
 
-    public BgpForwardingTree() {
-        _dstDevName = KeyWord.UNKNOWN;
-        _dstPrefix = Prefix.ZERO;
-        _nextHopForwardingMap = new HashMap<>();
-        _bestRouteFromMap = new HashMap<>();
-        _bestRouteMap = new HashMap<>();
-        _vpnName = KeyWord.PUBLIC_VPN_NAME;
-        _ifMpls = false;
-    }
-    public BgpForwardingTree(String dstDev, Prefix prefix, String vpnName) {
+    public BgpForwardingTree(String dstDev, Prefix prefix, String vpnName, BgpTreeType bgpTreeType) {
         _dstDevName = dstDev;
         _dstPrefix = prefix;
         _nextHopForwardingMap = new HashMap<>();
@@ -127,17 +128,10 @@ public class BgpForwardingTree {
         _vpnName = vpnName;
         _bestRouteMap = new HashMap<>();
         _ifMpls = !vpnName.equals(KeyWord.PUBLIC_VPN_NAME);
+        this.bgpTreeType = bgpTreeType;
     }
 
-    public BgpForwardingTree(String dstDev, Prefix prefix, String vpnName, boolean ifMpls) {
-        _dstDevName = dstDev;
-        _dstPrefix = prefix;
-        _nextHopForwardingMap = new HashMap<>();
-        _bestRouteFromMap = new HashMap<>();
-        _ifMpls = ifMpls;
-        _vpnName = vpnName;
-        _bestRouteMap = new HashMap<>();
-    }
+
 
     public String getDstDevName() {
         return _dstDevName;
@@ -268,7 +262,7 @@ public class BgpForwardingTree {
 
 
 
-    public Set<String> serializeBgpTreeFromProvJson(JsonObject jsonObject, String ip, BgpTopology bgpTopology, boolean ifStrict) {
+    public Set<String> serializeBgpTreeFromProvJson(JsonObject jsonObject, String ip, BgpTopology bgpTopology, Layer2Topology layer2Topology, boolean ifStrict) {
         Set<String> failedDevs = bgpTopology.getFailedDevs();
         // input "updateInfo" as jsonObject
         // 解析配置里对该(vpn)ip的preference
@@ -290,10 +284,12 @@ public class BgpForwardingTree {
             for (String ipString : nodeRoutes.keySet()) {
                 Prefix curPrefix = Prefix.parse(ipString);
                 if (ifStrict) {
+                    // 严格匹配，前缀长度一致
                     if (!curPrefix.equals(tagetPrefix)) {
                         continue;
                     }
                 } else {
+                    // 非严格匹配，当前解析到的前缀包含目的前缀即可
                     if (!curPrefix.containsPrefix(tagetPrefix)) {
                         continue;
                     }
@@ -306,16 +302,25 @@ public class BgpForwardingTree {
                 }
 
                 if (node.equals(_dstDevName) && curPrefix.equals(tagetPrefix)) {
+                    if (bgpTreeType.equals(BgpTreeType.ERROR)) {
+                        // 说明这个provnanceInfo不是目的设备的，把tree清空
+                        _nextHopForwardingMap = new HashMap<>();
+                        _bestRouteFromMap = new HashMap<>();
+                        _bestRouteMap = new HashMap<>();
+                        _unreachableNodesPrev = new HashSet<>(bgpTopology.getAllNodes().keySet());
+                        _unreachableNodesPrev.remove(_dstDevName);
+                        _bestRouteFromMap.put(_dstDevName,_dstDevName);
+                        _nextHopForwardingMap.put(_dstDevName,_dstDevName);
+                        return _unreachableNodesPrev;
+                    }
+                    // 检查是否只有bgp路由。如果有直连或静态（优先级高于bgp）也可以
+//                    StaticRoute route = ConfigTaint.staticRouteFinder(node, curPrefix, true);
+//                    if (route==null) {
+//                        if (layer2Topology.getPrefixLocatedInterface(node, curPrefix.toString())==null) {
+//
+//                        }
+//                    }
 
-                    // 说明这个provnanceInfo不是目的设备的，把tree清空
-                    _nextHopForwardingMap = new HashMap<>();
-                    _bestRouteFromMap = new HashMap<>();
-                    _bestRouteMap = new HashMap<>();
-                    _unreachableNodesPrev = new HashSet<>(bgpTopology.getAllNodes().keySet());
-                    _unreachableNodesPrev.remove(_dstDevName);
-                    _bestRouteFromMap.put(_dstDevName,_dstDevName);
-                    _nextHopForwardingMap.put(_dstDevName,_dstDevName);
-                    return _unreachableNodesPrev;
                 }
                 // 当前RIB表前缀匹配目标前缀
                 int routeIndex = Integer.MAX_VALUE;
@@ -337,6 +342,7 @@ public class BgpForwardingTree {
 
                     // fail节点不加入
                     if (failedDevs.contains(nextHopDev) || failedDevs.contains(peerDevName)) {
+                        routeIndex = Integer.MAX_VALUE;
                         continue;
                     }
 
@@ -694,7 +700,7 @@ public class BgpForwardingTree {
                 }
                 // TODO 避开EBGP下一跳
                 if (bgpTopology.getAsNumber(node)==bgpTopology.getAsNumber(route.getNextHopDev())) {
-                    Node nextHopNode = new Node(route.getNextHopDev(), route.getNextHopIp());
+                    Node nextHopNode = new Node(route.getNextHopDev(), route.getNextHopIpString());
                     if (!ifSetContainsSameElement(reachNodes.get(node), nextHopNode)) {
                         reachNodes.get(node).add(nextHopNode);
                     }

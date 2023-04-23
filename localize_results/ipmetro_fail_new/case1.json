@@ -1,0 +1,8 @@
+{
+  "BNG2": {
+    "18": "interface Eth-Trunk1",
+    "19": " undo shutdown",
+    "21": "interface Eth-Trunk1.1",
+    "22": " ip address 10.10.10.10 255.255.255.252"
+  }
+}

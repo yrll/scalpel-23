@@ -1,0 +1,10 @@
+{
+  "BNG10": {
+    "96": "peer toCR route-policy testCase2_2 import",
+    "98": "route-policy testCase2_2 deny node 10",
+    "99": "if-match ip-prefix testCase2_2",
+    "101": "route-policy testCase2_2 permit node 20",
+    "103": "ip ip-prefix testCase2_2 index 10 permit 173.0.0.77 30",
+    "95": "peer 70.0.0.3 group toCR"
+  }
+}

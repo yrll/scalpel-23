@@ -1,0 +1,1 @@
+{"CSG1-1-1":[{"devName":"ASG2","ip":"110.0.0.9/32"},{"devName":"ASG2","ip":"110.0.0.9"}],"ASG2":[{"devName":"RSG4","ip":"110.0.0.5/32"},{"devName":"CSG1-1-1","ip":"70.0.0.6"},{"devName":"P-RR1","ip":"110.0.0.6"}],"RSG4":[{"devName":"P-RR1","ip":"110.0.0.6"}],"P-RR1":[{"devName":"RSG4","ip":"110.0.0.5"},{"devName":"RSG4","ip":"110.0.0.5/32"},{"devName":"ASG2","ip":"110.0.0.9"}]}

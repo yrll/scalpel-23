@@ -1,0 +1,16 @@
+{
+  "CSG1-1-1": {
+    "151": "peer 110.0.0.9 group toASG"
+  },
+  "ASG2": {
+    "160": "apply cost 200",
+    "177": "ip ip-prefix default index 10 permit 0.0.0.0 0",
+    "162": "route-policy to-csg-as-slave permit node 20",
+    "163": "if-match extcommunity-filter x2",
+    "164": "apply cost 200",
+    "180": "ip extcommunity-filter basic x2 index 10 permit rt 1:1",
+    "157": "route-policy to-csg-as-slave permit node 10",
+    "158": "if-match ip-prefix default",
+    "159": "apply ip-address next-hop peer-address"
+  }
+}

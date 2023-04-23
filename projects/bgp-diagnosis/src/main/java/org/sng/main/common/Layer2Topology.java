@@ -33,6 +33,21 @@ public class Layer2Topology {
         _nodes = nodes;
     }
 
+    public Interface getNodeInterfaceFromName(String node, String infName) {
+        for (Layer2Node layer2Node: _nodes) {
+            if (node.equals(layer2Node.getDevName())) {
+                if (layer2Node.getInterface()!=null) {
+                    String curInfName = layer2Node.getInterface().getInfName();
+                    if (curInfName.equals(infName)) {
+                        return layer2Node.getInterface();
+                    }
+                }
+
+            }
+        }
+        return null;
+    }
+
     public String getMatchInfPrefix(String devName, String ipString) {
         if (!ipString.contains("/")) {
             ipString += "/32";
@@ -123,8 +138,25 @@ public class Layer2Topology {
         return null;
     }
 
+    public Interface getPrefixLocatedInterface(String node, String prefixString){
+        prefixString = BgpTopology.transPrefixOrIpToPrefixString(prefixString);
+
+        Prefix prefix = Prefix.parse(prefixString);
+        for (Layer2Node layer2Node: _nodes) {
+            if (node.equals(layer2Node.getDevName())) {
+                Prefix infPrefix = layer2Node.getInfPrefix();
+                if (infPrefix!=null) {
+                    if (infPrefix.containsPrefix(prefix)) {
+                        return layer2Node.getInterface();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public String getPeerDevNameFromInface(String node, Interface iface) {
-        if (!_edgeMap.containsKey(node) || iface.getPrefix()==null) {
+        if (!_edgeMap.containsKey(node) || iface==null || iface.getPrefix()==null) {
             return null;
         }
         for (Layer2Edge layer2Edge : _edgeMap.get(node)) {

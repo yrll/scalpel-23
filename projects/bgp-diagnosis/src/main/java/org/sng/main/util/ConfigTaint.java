@@ -3,6 +3,7 @@ package org.sng.main.util;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -12,7 +13,10 @@ import java.util.Map;
 import org.sng.datamodel.Prefix;
 import org.sng.datamodel.Ip;
 import org.sng.main.BgpDiagnosis;
+import org.sng.main.common.BgpTopology;
+import org.sng.main.common.Interface;
 import org.sng.main.common.StaticRoute;
+import org.sng.main.diagnosis.Generator;
 import org.sng.main.diagnosis.VpnInstance;
 
 public class ConfigTaint {
@@ -89,9 +93,13 @@ public class ConfigTaint {
                     // 查询当前static route的前缀ip+mask是否和传入的route一致
                     String[] words = line.split(" ");
                     boolean ifFindTargetPrefix = false; // 标识是否读取过前缀，下一个匹配的ip才是下一跳
+                    String vpnName = KeyWord.PUBLIC_VPN_NAME;
                     for (int i=0; i<words.length; i+=1) {
                         // 检测某一行静态路由
                         String ss = words[i];
+                        if (words[i].contains("vpn")) {
+                            vpnName = words[i+1];
+                        }
                         if (Ip.isIpv4Addr(words[i]) && !ifFindTargetPrefix) {
                             Ip ip = Ip.parse(words[i]);
                             Prefix thisPrefix = Prefix.create(ip, Integer.valueOf(words[i+1]));
@@ -112,7 +120,7 @@ public class ConfigTaint {
                             }
 
                             ifFindTargetPrefix = true;
-                            StaticRoute targetRoute = new StaticRoute(node, thisPrefix.toString(), words[i+2]);
+                            StaticRoute targetRoute = new StaticRoute(node, vpnName, thisPrefix.toString(), words[i+2]);
                             for (int j=i+1; j<words.length; j++) {
                                 if (words[j].equals(KeyWord.PREFERENCE)) {
                                     targetRoute.setPreference(Integer.parseInt(words[j+1]));
@@ -132,6 +140,72 @@ public class ConfigTaint {
         }
         return null;
     }
+
+    public static String genNetworkCommondLine(Prefix prefix) {
+        return "network " + prefix.getStartIp().toString() + " " + prefix.getPrefixLength();
+    }
+
+    public static String genStaticRouteLine(StaticRoute staticRoute) {
+        String vpnName = staticRoute.getVpnName();
+        String nextHop = staticRoute.getNextHopString();
+        String prefixString = staticRoute.getPrefixString();
+        int preference = staticRoute.getPref();
+        if (prefixString==null) {
+            return null;
+        }
+        Prefix prefix = Prefix.parse(prefixString);
+        prefixString = BgpTopology.transPrefixOrIpToIpString(prefixString);
+        int maskLen = prefix.getPrefixLength();
+
+        if (vpnName.equals(KeyWord.PUBLIC_VPN_NAME)) {
+            vpnName = "";
+        } else {
+            vpnName = "vpn-instance " + vpnName;
+        }
+        if (preference != Generator.Protocol.STATIC.getPreference()) {
+            return "ip route-static " + vpnName + " " + prefixString + " " + maskLen + " " + nextHop + " preference " + preference;
+        } else {
+            return "ip route-static " + vpnName + " " + prefixString + " " + maskLen + " " + nextHop;
+        }
+    }
+
+    public static Map<Integer, String> interfaceLinesFinder(String node, Interface targetInterface) {
+        Map<Integer, String> lineMap = new HashMap<>();
+        String filePath = BgpDiagnosis.cfgPathMap.get(node);
+        BufferedReader reader;
+        try {
+            reader = new BufferedReader(new FileReader(filePath));
+            String line = reader.readLine().strip();
+            int lineNum = 1;
+            boolean reachTargetLine = false;
+            while (line != null) {
+                if (line.contains(KeyWord.ENDING_TOKEN)) {
+                    reachTargetLine = false;
+                }
+                if (reachTargetLine) {
+                    lineMap.put(lineNum, line);
+                }
+
+                if (line.startsWith(KeyWord.INTERFACE)) {
+                    String thisInfName = line.split(" ")[1];
+                    // 输入的接口名字containts当前遍历的接口名字，需要把父接口也找到，为了避开其他子接口要排除包含“.”的名字
+
+                    if (targetInterface.getInfName().equals(thisInfName) || targetInterface.getInfName().contains(thisInfName) && !thisInfName.contains(".")) {
+                        lineMap.put(lineNum, line);
+                        reachTargetLine = true;
+                    }
+                }
+                line = reader.readLine();
+                lineNum += 1;
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return lineMap;
+
+    }
+
 
 
     public static Map<Integer, String> staticRouteLinesFinder(String node, Prefix prefix) {

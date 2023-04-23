@@ -307,6 +307,13 @@ public class InputData {
         throw new IllegalArgumentException("Invalid network Type!");
     }
 
+    public String getSsePeerInfoPath(String keyString, NetworkType type) {
+        String ProvRootPath = concatFilePath(projectRootPath, relativeSseProvRootPath + type.getName());
+        String fileName = "PeerInfo"+keyString +".json";
+        String finalPath = concatFilePath(ProvRootPath, concatFilePath("case"+keyString, fileName));
+        return filterInvalidFilePath(finalPath);
+    }
+
     public static Set<String> getFailedNodes(String keyString, NetworkType type) {
         switch (type) {
             case IPMETRO_FAIL:{

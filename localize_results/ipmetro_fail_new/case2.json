@@ -1,0 +1,6 @@
+{
+  "BNG2": {
+    "97": "route-policy testCase1_2 deny node 10",
+    "91": "import-route static route-policy testCase1_2"
+  }
+}

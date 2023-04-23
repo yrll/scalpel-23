@@ -64,6 +64,9 @@ public class StaticRoute {
     }
 
     public String getOutInfName() {
+        if (outInf==null) {
+            return null;
+        }
         return outInf.getInfName();
     }
 
@@ -75,14 +78,10 @@ public class StaticRoute {
         this.outInf = outInf;
     }
 
-    public StaticRoute(String deviceName, String ipString) {
-        this.deviceName = deviceName;
-        this.ipString = ipString;
-        this.ipPrefix = Prefix.parse(ipString);
-    }
 
-    public StaticRoute(String deviceName, String ipString, String nextHop) {
+    public StaticRoute(String deviceName, String vpnName, String ipString, String nextHop) {
         this.deviceName = deviceName;
+        this.vpnName = vpnName;
         this.ipString = ipString;
         this.ipPrefix = Prefix.parse(ipString);
         this.nextHop = nextHop;
@@ -108,8 +107,14 @@ public class StaticRoute {
     }
 
     public String getPrefixString() {
-        return ipString;
+        if (ipString!=null) {
+            return ipString;
+        } else if (ipPrefixString!=null) {
+            return ipPrefixString;
+        }
+        return null;
     }
+
 
     public void setPreference(int pref) {
         this.preference = pref;
@@ -122,4 +127,6 @@ public class StaticRoute {
     public Interface getInterface() {
         return outInf;
     }
+
+
 }

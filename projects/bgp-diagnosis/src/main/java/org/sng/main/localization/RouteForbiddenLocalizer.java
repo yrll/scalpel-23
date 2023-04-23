@@ -1,6 +1,7 @@
 package org.sng.main.localization;
 
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +26,10 @@ public class RouteForbiddenLocalizer implements Localizer {
     BgpRoute route;
     private Violation violation;
     private BgpTopology bgpTopology;
+    // direction是按照violatedRule类型设置的，绝对准确
     Direction direction;
+    // 这个表示没有正常建立peer关系的节点
+    private String violatedPeer;
 
     public enum Direction{
         IN("import"),
@@ -74,17 +78,30 @@ public class RouteForbiddenLocalizer implements Localizer {
 
     @Override
     public Map<Integer, String> getErrorConfigLines() {
-        // TODO Auto-generated method stub
+        // TODO 先检查是不是因为 policy filter route【可能是 peer不通或者路由交叉不了】
+
+
         // 调涵洋的接口
         String peerIp = "0.0.0.0";
         if (direction.equals(Direction.IN)) {
-            peerIp = bgpTopology.getNodeIp(route.getFromDevName()).toString();
+            String fromDev = route.getFromDevName();
+            if (fromDev==null) {
+                peerIp = route.getPeerIpString();
+            } else {
+                peerIp = bgpTopology.getNodeIp(fromDev);
+            }
+
         } else if (direction.equals(Direction.OUT)) {
-            peerIp = bgpTopology.getNodeIp(route.getToDevName()).toString();
+            String toDev = route.getToDevName();
+            peerIp = bgpTopology.getNodeIp(toDev);
+
         }
         // STEP1: 检测是否直接配了peer ip policy
         String[] keyWords = {"peer", peerIp, policyName, direction.getName()};
-        Map<Integer, String> taintResult = ConfigTaint.peerTaint(node, keyWords);
+        Map<Integer, String> taintResult = new HashMap<>();
+        if (policyName!=null) {
+             taintResult.putAll(ConfigTaint.peerTaint(node, keyWords));
+        }
 
         taintResult.putAll(ConfigTaint.policyLinesFinder(node, policyName));
         return taintResult;

@@ -1,0 +1,21 @@
+{
+  "CSG1-1-1": {
+    "149": "peer 110.0.0.8 group toASG"
+  },
+  "ASG1": {
+    "176": "apply cost 100",
+    "179": "ip ip-prefix default index 10 permit 0.0.0.0 0",
+    "133": "peer CSG-as-master route-policy to-csg-as-master export",
+    "182": "ip extcommunity-filter basic x2 index 10 permit rt 1:1",
+    "136": "peer 70.0.0.6 group CSG-as-master",
+    "169": "route-policy to-csg-as-master permit node 10",
+    "170": "if-match ip-prefix default",
+    "171": "apply ip-address next-hop peer-address",
+    "172": "apply cost 100",
+    "174": "route-policy to-csg-as-master permit node 20",
+    "175": "if-match extcommunity-filter x2"
+  },
+  "RSG4": {
+    "-1": "network 174.0.0.8 30"
+  }
+}

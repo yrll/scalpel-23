@@ -1,11 +1,6 @@
 package org.sng.main.localization;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import org.sng.main.BgpDiagnosis;
@@ -21,6 +16,7 @@ import com.google.gson.annotations.SerializedName;
 public class Violation {
     @SerializedName("ipPrefix")
     String ipPrefixString;
+    String vpnName;
     List<String> violatedRrClient;
     List<BgpRoute> violatedPropNeighbors;
     List<BgpRoute> violatedAcptNeighbors;
@@ -113,12 +109,16 @@ public class Violation {
             StaticRoute targetRoute = originStaticRoute;
             if (originStaticRoute==null && originDirectRoute!=null) {
                 targetRoute = originDirectRoute;
+            } else {
+                // 有redistribution的错，但是没有violatedRoute，生成一条valid的静态路由
+                String nextHopString = generator.getBgpTopology().getNodeIp(curDevName);
+                targetRoute = new StaticRoute(curDevName, vpnName, ipPrefixString, nextHopString);
             }
             results.add(new RedistributionLocalizer(curDevName, violateRedis, targetRoute, this, generator.getBgpTopology()));
 
         }
 
-        Map<Integer, String> lineMap = new HashMap<>();
+        Map<Integer, String> lineMap = new LinkedHashMap<>();
         results.forEach(n->{
             lineMap.putAll(n.getErrorConfigLines());
         });

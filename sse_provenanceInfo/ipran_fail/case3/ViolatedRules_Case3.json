@@ -1,0 +1,1 @@
+{"dev2ViolateRules":{"RSG4":{"ipPrefix":"50.0.0.9/32","vpnName":"LTE_RAN","violatedRrClient":[],"violatedPropNeighbors":[],"violatedAcptNeighbors":[],"prefer":[],"violateIbgpPeer":[],"violateEbgpPeer":[],"violateRedis":"invaild","originDirectRoute":null,"originStaticRoute":null}}}

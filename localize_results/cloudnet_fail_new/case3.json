@@ -1,0 +1,18 @@
+{
+  "cloudPE-4": {
+    "202": "interface GigabitEthernet3/0/1.31",
+    "99": "interface GigabitEthernet3/0/1",
+    "203": " ip binding vpn-instance YiLiao",
+    "100": " undo shutdown",
+    "204": " ip address 50.0.0.5 255.255.255.252"
+  },
+  "B1-2": {
+    "390": "ip ip-prefix default-route index 10 permit 0.0.0.0 0",
+    "377": "route-policy default-route-upe permit node 20",
+    "378": "if-match ip-prefix default-route",
+    "379": "apply cost 120",
+    "381": "route-policy default-route-upe permit node 200",
+    "382": "if-match route-type evpn ad es inclusive mac",
+    "383": "apply cost 120"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "B1-2": {
+    "390": "ip ip-prefix default-route index 10 permit 0.0.0.0 0",
+    "377": "route-policy default-route-upe permit node 20",
+    "378": "if-match ip-prefix default-route",
+    "379": "apply cost 120",
+    "381": "route-policy default-route-upe permit node 200",
+    "382": "if-match route-type evpn ad es inclusive mac",
+    "383": "apply cost 120"
+  },
+  "U1-1-1-1": {
+    "156": "ip route-static vpn-instance YiLiao 50.0.0.13 32 37.0.0.6"
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "CSG1-1-1": {
+    "vpnName": "LTE_RAN",
+    "ipPrefix": "174.0.0.8/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "110.0.0.8/32",
+        "110.0.0.7/32"
+      ],
+      "asPath": [
+        0
+      ],
+      "ipPrefix": "174.0.0.8/30",
+      "vpnName": "LTE_RAN"
+    },
+    "propNeighbors": null,
+    "acptNeighbors": [
+      "ASG1"
+    ],
+    "ibgpPeers": null,
+    "ebgpPeers": null
+  },
+  "ASG1": {
+    "vpnName": "LTE_RAN",
+    "ipPrefix": "174.0.0.8/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": [
+        "110.0.0.7/32"
+      ],
+      "asPath": [
+        0
+      ],
+      "ipPrefix": "174.0.0.8/30",
+      "vpnName": "LTE_RAN"
+    },
+    "propNeighbors": [
+      "CSG1-1-1"
+    ],
+    "acptNeighbors": [
+      "P-RR2"
+    ],
+    "ibgpPeers": [
+      "CSG1-1-1"
+    ],
+    "ebgpPeers": null
+  },
+  "P-RR2": {
+    "vpnName": "_public_",
+    "ipPrefix": "174.0.0.8/30",
+    "redistribution": false,
+    "rrClients": null,
+    "selectionRoute": {
+      "nextHopIp": null,
+      "asPath": [
+        0
+      ],
+      "ipPrefix": "174.0.0.8/30",
+      "vpnName": "_public_"
+    },
+    "propNeighbors": [
+      "ASG1"
+    ],
+    "acptNeighbors": [
+      "RSG2"
+    ],
+    "ibgpPeers": [
+      "ASG1"
+    ],
+    "ebgpPeers": null
+  },
+  "RSG2": {
+    "vpnName": "LTE_RAN",
+    "ipPrefix": "174.0.0.8/30",
+    "redistribution": true,
+    "rrClients": null,
+    "selectionRoute": null,
+    "propNeighbors": [
+      "P-RR2"
+    ],
+    "acptNeighbors": null,
+    "ibgpPeers": null,
+    "ebgpPeers": [
+      "P-RR2"
+    ]
+  }
+}

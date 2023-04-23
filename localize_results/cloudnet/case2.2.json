@@ -1,0 +1,22 @@
+{
+  "B1-2": {
+    "16": "  route-distinguisher 10010:1",
+    "17": "  vpn-target 10010:1 export-extcommunity evpn",
+    "18": "  vpn-target 10010:1 import-extcommunity evpn",
+    "19": "  tnl-policy NCE-VRF-YiLiao evpn",
+    "390": "ip ip-prefix default-route index 10 permit 0.0.0.0 0",
+    "377": "route-policy default-route-upe permit node 20",
+    "378": "if-match ip-prefix default-route",
+    "379": "apply cost 120",
+    "381": "route-policy default-route-upe permit node 200",
+    "382": "if-match route-type evpn ad es inclusive mac",
+    "383": "apply cost 120",
+    "15": " ipv4-family"
+  },
+  "U1-1-1-1": {
+    "16": "  tnl-policy NCE-VRF-YiLiao evpn",
+    "13": " ipv4-family",
+    "14": "  route-distinguisher 10010:1",
+    "15": "  vpn-target 10010:1 export-extcommunity evpn"
+  }
+}

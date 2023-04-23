@@ -115,6 +115,10 @@ public class BgpRoute {
         }
     }
 
+    public String getNextHopIpString() {
+        return nextHopIp;
+    }
+
     public Ip getPeerIp() {
         if (Prefix.tryParse(peerIp).isPresent()) {
             return Prefix.parse(peerIp).getEndIp();

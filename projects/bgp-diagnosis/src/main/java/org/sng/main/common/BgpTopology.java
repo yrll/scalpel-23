@@ -195,12 +195,22 @@ public class BgpTopology {
         return str;
     }
 
-    public String getNodeIp(String node) {
-        String nodeIp =  _allNodes.get(node);
-        if (nodeIp==null) {
-            return null;
+    public static String transPrefixOrIpToPrefixString(String str) {
+        if (!str.contains("/")) {
+            str += "/32";
         }
-        return transPrefixOrIpToIpString(nodeIp);
+        return str;
+    }
+
+    public String getNodeIp(String node) {
+        if (_allNodes.containsKey(node)) {
+            String nodeIp =  _allNodes.get(node);
+            if (nodeIp==null) {
+                return null;
+            }
+            return transPrefixOrIpToIpString(nodeIp);
+        }
+        return null;
     }
 
     public Table<String, String, BgpPeer> getPeerTable() {

@@ -1,0 +1,8 @@
+{
+  "BNG20": {
+    "92": "import-route direct route-policy testCase4_1",
+    "100": "route-policy testCase4_1 deny node 10",
+    "101": "if-match ip-prefix testCase2_2",
+    "103": "route-policy testCase4_1 permit node 20"
+  }
+}

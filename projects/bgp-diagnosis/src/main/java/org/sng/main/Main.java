@@ -35,7 +35,6 @@ public class Main {
         String caseType = "1";
         NetworkType netType = NetworkType.IPMETRO;
         boolean ifLocalize = false;
-        Set<String> failedDevs = InputData.getFailedNodes(caseType, netType);
         boolean ifSave = false;
 
         // 被main输入覆盖
@@ -51,6 +50,8 @@ public class Main {
         if (parsedArgs.get(arg4)!=null) {
             ifSave = parsedArgs.get(arg4);
         }
+        Set<String> failedDevs = InputData.getFailedNodes(caseType, netType);
+
 
         BgpDiagnosis diagnoser = new BgpDiagnosis(caseType, netType, failedDevs);
 

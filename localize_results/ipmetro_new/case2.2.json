@@ -1,0 +1,10 @@
+{
+  "CR2": {
+    "356": "peer 70.0.0.5 group toBR",
+    "-1": "peer 70.0.0.5 ebgp-max-hop 255"
+  },
+  "BR2": {
+    "-1": "peer 70.0.0.3 ebgp-max-hop 255",
+    "134": "peer 70.0.0.3 group toCR"
+  }
+}

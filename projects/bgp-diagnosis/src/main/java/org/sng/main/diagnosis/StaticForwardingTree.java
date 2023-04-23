@@ -79,7 +79,8 @@ public class StaticForwardingTree {
             if (nextNode!=null) {
                 _nextHopForwardingMap.put(node, nextNode);
             } else {
-                _nextHopForwardingMap.put(node, curRoute.getOutInfName());
+                String nextOutString = curRoute.getOutInfName();
+                _nextHopForwardingMap.put(node, nextOutString);
             }
         } else {
             _nextHopForwardingMap.put(node, curRoute.getOutInfName());
@@ -114,7 +115,8 @@ public class StaticForwardingTree {
             }
             
         }
-        // 为所有没有static的节点检查一遍配置
+        // 为所有没有static的节点检查一遍配置，这里检查静态路由还会加入interface的信息（如果有对于inf
+        // 也查找直连路由
         for (String node: cfgPathMap.keySet()) {
             StaticRoute route = ConfigTaint.staticRouteFinder(node, tagetPrefix, true);
             if (route!=null) {
