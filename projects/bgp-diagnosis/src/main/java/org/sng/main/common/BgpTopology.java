@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 
 import org.sng.datamodel.Ip;
 import org.sng.main.BgpDiagnosis;
+import org.sng.main.Main;
 import org.sng.main.diagnosis.Generator.Protocol;
 import org.sng.main.util.KeyWord;
 
@@ -253,7 +254,10 @@ public class BgpTopology {
                         _peerTable.put(localDevName, peerDevName, bgpPeer);
                     }
                 } else {
-                    printPeerInfo(bgpPeer);
+                    if (Main.printLog) {
+                        printPeerInfo(bgpPeer);
+                    }
+
                     _peerTable.put(localDevName, peerDevName, bgpPeer);
                     // unilateral peer configuration detection
                     tmpPeerNameMap.add(localDevName+"|"+peerDevName);
@@ -281,8 +285,10 @@ public class BgpTopology {
                 }
             }
         }
-        System.out.println("VALID PEER PAIR SIZE: "+ _peerTable.size());
-     
+        if (Main.printLog) {
+            System.out.println("VALID PEER PAIR SIZE: "+ _peerTable.size());
+        }
+
     }
 
     private void printPeerInfo(BgpPeer peer) {

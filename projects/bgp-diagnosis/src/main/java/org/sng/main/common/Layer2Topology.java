@@ -123,7 +123,10 @@ public class Layer2Topology {
 
     public Interface getIpLocatedInterface(String node, String ipString){
         ipString = BgpTopology.transPrefixOrIpToIpString(ipString);
-
+        // 这里的ipString可能是接口名，如果想让传进来的都是ip，需要修改ConfigTaint.staticRouteFinder方法
+        if (!ipString.contains(".")) {
+            return getNodeInterfaceFromName(node, ipString);
+        }
         Ip ip = Ip.parse(ipString);
         for (Layer2Node layer2Node: _nodes) {
             if (node.equals(layer2Node.getDevName())) {

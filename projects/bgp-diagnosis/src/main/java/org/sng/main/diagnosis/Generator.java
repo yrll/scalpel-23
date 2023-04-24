@@ -57,6 +57,7 @@ public class Generator {
     //
     private Set<String> _failedDevs;
 
+
     public enum Protocol {
         IBGP("ibgp", 255),
         EBGP("ebgp", 255),
@@ -151,7 +152,7 @@ public class Generator {
         // 如果是静态路由，
         String filePath = InputData.getCorrectProvFilePath(BgpDiagnosis.caseType, BgpDiagnosis.networkType, KeyWord.RELATED_STATIC_INFO_FILE);
         Map<String, Map<String, Map<String, List<StaticRoute>>>> relatedStaticRoutes = genStaticOrDirectRouteFromFile(filePath, Protocol.STATIC);
-        Optional<Prefix> prefix = Prefix.tryParse(ip);
+        Optional<Prefix> prefix = Prefix.tryParse(BgpTopology.transPrefixOrIpToPrefixString(ip));
         int hopNum = 0;
 
         // TODO： 需要全部的static信息

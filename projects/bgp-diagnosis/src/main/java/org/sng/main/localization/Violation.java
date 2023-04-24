@@ -3,8 +3,10 @@ package org.sng.main.localization;
 import java.util.*;
 import java.util.stream.Stream;
 
+import org.sng.datamodel.Prefix;
 import org.sng.main.BgpDiagnosis;
 import org.sng.main.common.BgpRoute;
+import org.sng.main.common.BgpTopology;
 import org.sng.main.common.StaticRoute;
 import org.sng.main.diagnosis.Generator;
 import org.sng.main.localization.RouteForbiddenLocalizer.Direction;
@@ -128,9 +130,16 @@ public class Violation {
             } else {
                 // 有redistribution的错，但是没有violatedRoute，生成一条valid的静态路由
                 String nextHopString = errGenerator.getBgpTopology().getNodeIp(curDevName);
-                targetRoute = new StaticRoute(curDevName, vpnName, ipPrefixString, nextHopString);
+                String targetPrefixString = ipPrefixString;
+                Prefix targetPrefix = Prefix.parse(BgpTopology.transPrefixOrIpToPrefixString(targetPrefixString));
+                if (targetPrefix.getPrefixLength()==32) {
+                    // 目标IP是32位主机号， 换成一个随便的网段
+                    targetPrefixString = targetPrefix.getStartIp().toString() + "/30";
+                }
+
+                targetRoute = new StaticRoute(curDevName, vpnName, targetPrefixString, nextHopString);
             }
-            results.add(new RedistributionLocalizer(curDevName, violateRedis, targetRoute, this, errGenerator.getBgpTopology()));
+            results.add(new RedistributionLocalizer(curDevName, violateRedis, targetRoute, this, errGenerator.getLayer2Topology()));
         }
 
         Map<Integer, String> lineMap = new LinkedHashMap<>();
@@ -139,6 +148,8 @@ public class Violation {
         });
         return lineMap;
     }
+
+
 
 //    public Set<PeerLocalizer> postProcessRouteForbiddenError() {
 //        // 检测单边的，因为如果peer没配对，两边都会受影响

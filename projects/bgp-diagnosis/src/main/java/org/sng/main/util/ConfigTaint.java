@@ -4,16 +4,14 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.security.Key;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.checkerframework.checker.units.qual.A;
+import org.sng.datamodel.Ip6;
 import org.sng.datamodel.Prefix;
 import org.sng.datamodel.Ip;
 import org.sng.main.BgpDiagnosis;
+import org.sng.main.Main;
 import org.sng.main.common.BgpTopology;
 import org.sng.main.common.Interface;
 import org.sng.main.common.StaticRoute;
@@ -123,6 +121,9 @@ public class ConfigTaint {
                             ifFindTargetPrefix = true;
                             StaticRoute targetRoute = new StaticRoute(node, vpnName, thisPrefix.toString(), words[i+2]);
                             for (int j=i+1; j<words.length; j++) {
+                                if (Ip.isIpv4Addr(words[j])) {
+                                    targetRoute = new StaticRoute(node, vpnName, thisPrefix.toString(), words[j]);
+                                }
                                 if (words[j].equals(KeyWord.PREFERENCE)) {
                                     targetRoute.setPreference(Integer.parseInt(words[j+1]));
                                 }
@@ -171,6 +172,9 @@ public class ConfigTaint {
     }
 
     public static Map<Integer, String> interfaceLinesFinder(String node, Interface targetInterface) {
+        if (targetInterface==null) {
+            return null;
+        }
         Map<Integer, String> lineMap = new HashMap<>();
         String filePath = BgpDiagnosis.cfgPathMap.get(node);
         BufferedReader reader;
@@ -243,10 +247,12 @@ public class ConfigTaint {
     public static Map<Integer, String> policyLinesFinder(String node, String policyName) {
 
         String fileName = BgpDiagnosis.cfgPathMap.get(node);//fileName改成自己存放配置的目录
-        System.out.println("filename:"+fileName);
-
         String route_policy = "route-policy "+policyName;
-        System.out.println("route-policy:"+route_policy);
+        if (Main.printLog) {
+            System.out.println("filename:"+fileName);
+            System.out.println("route-policy:"+route_policy);
+        }
+
 
         BufferedReader reader = null;
         try {
@@ -259,7 +265,10 @@ public class ConfigTaint {
             while ((tempString = reader.readLine()) != null) {
                 tempString = tempString.trim();
                 if(tempString.startsWith(route_policy)) {//输出route-policy那行
-                    System.out.println("line " + line + ": " + tempString);
+                    if (Main.printLog) {
+                        System.out.println("line " + line + ": " + tempString);
+                    }
+
                     route_policy_map.put(line,tempString);
                     flag = true;
                 }
@@ -269,7 +278,10 @@ public class ConfigTaint {
 //                        route_policy_map.put(line,tempString);
                         flag = false;
                     }else if(flag){//#输出route-policy到#之间的内容
-                        System.out.println("line " + line + ": " + tempString);
+                        if (Main.printLog) {
+                            System.out.println("line " + line + ": " + tempString);
+                        }
+
                         route_policy_map.put(line,tempString);
                         if(tempString.startsWith("if-match")){
                             tempString = tempString.replaceAll("if-match","ip");
@@ -286,7 +298,9 @@ public class ConfigTaint {
                         }
                         for(String keyword:if_match_list){
                             if(modified_tempString.startsWith(keyword)){
-                                System.out.println("line " + line + ": " + tempString);
+                                if (Main.printLog) {
+                                    System.out.println("line " + line + ": " + tempString);
+                                }
                                 route_policy_map.put(line,tempString);
                                 break;
                             }
@@ -407,11 +421,23 @@ public class ConfigTaint {
         return lineMap;
     }
 
+    public static boolean isIpv4OrIpv6(String ipString) {
+        ipString = BgpTopology.transPrefixOrIpToIpString(ipString);
+        Optional<Ip> ipv4 = Ip.tryParse(ipString);
+        if (!ipv4.isPresent()) {
+            Optional<Ip6> ipv6 = Ip6.tryParse(ipString);
+            if (!ipv6.isPresent()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // 查找 peer ip [keyword] 语句是否存在，遇到group可以迭代找到相关语句
     public static Map<Integer, String> peerTaint(String node, String[] keyWords) {
         Map<Integer, String> lineMap = new HashMap<>();
-        // 检查关键词前两位是否是peer和ip地址, 固定index 0是peer关键字, index 1是peer ip
-        if (keyWords.length<2 || !keyWords[0].equals("peer") || !Ip.isIpv4Addr(keyWords[1])) {
+        // 检查关键词前两位是否是peer和ip地址, 固定index 0是peer关键字, index 1是peer ip【ipv4和ipv6都考虑】
+        if (keyWords.length<2 || !keyWords[0].equals("peer") || !isIpv4OrIpv6(keyWords[1])) {
             return lineMap;
         }
 

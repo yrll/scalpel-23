@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.sng.main.common.BgpTopology;
 import org.sng.main.common.Interface;
+import org.sng.main.common.Layer2Topology;
 import org.sng.main.common.StaticRoute;
 import org.sng.main.util.ConfigTaint;
 
@@ -25,11 +26,13 @@ public class RedistributionLocalizer implements Localizer{
     private static String splitSymbol = ",";
     private Violation violation;
     private BgpTopology bgpTopology;
+    private Layer2Topology layer2Topology;
 
     public enum RedisErrorType{
         NO_REDISTRIBUTE_COMMOND,
         ROUTE_INVALID,
-        POLICY
+        POLICY,
+        NOT_BEST
     }
 
     private RedisErrorType getErrorTypeFromKeyWord(String causeKeyWord) {
@@ -38,9 +41,11 @@ public class RedistributionLocalizer implements Localizer{
             return RedisErrorType.NO_REDISTRIBUTE_COMMOND;
         } else if (causeKeyWord.contains("invalid") || causeKeyWord.contains("invaild")) {
             return RedisErrorType.ROUTE_INVALID;
+        } else if (causeKeyWord.contains("best")) {
+            return RedisErrorType.NOT_BEST;
         } else {
             return RedisErrorType.POLICY;
-        }  
+        }
     }
 
     public String getPolicyName() {
@@ -52,20 +57,15 @@ public class RedistributionLocalizer implements Localizer{
         return null;
     }
 
-    public RedistributionLocalizer(String node, String causeKeyWord, StaticRoute route, Violation violation, BgpTopology bgpTopology) {
+    public RedistributionLocalizer(String node, String causeKeyWord, StaticRoute route, Violation violation, Layer2Topology layer2Topology) {
         this.node = node;
         this.targetRoute = route;
         this.causeKeyWords = causeKeyWord.split(splitSymbol);
         this.inf = route.getInterface();
         this.violation = violation;
+        this.layer2Topology = layer2Topology;
     }
 
-    public RedistributionLocalizer(String node, String causeKeyWord, Interface iface, Violation violation) {
-        this.node = node;
-        this.inf = iface;
-        this.causeKeyWords = causeKeyWord.split(splitSymbol);
-        this.violation = violation;
-    }
 
     public List<RedisErrorType> getErrorTypes() {
         List<RedisErrorType> errList = new ArrayList<>();
@@ -116,11 +116,17 @@ public class RedistributionLocalizer implements Localizer{
 
                     }
                     if (!ifRouteHasOrigin) {
+
                         String missingOriginLine = ConfigTaint.genStaticRouteLine(targetRoute);
                         lines.put(violation.getMissingLine(), missingOriginLine);
                         lines.put(violation.getMissingLine(), ConfigTaint.genMissingNetworkConfigLine(targetRoute.getPrefix()));
                     }
+                    break;
 
+                }
+                case NOT_BEST:{
+                    lines.putAll(ConfigTaint.staticRouteLinesFinder(node, targetRoute.getPrefix()));
+                    lines.putAll(ConfigTaint.interfaceLinesFinder(node, layer2Topology.getIpLocatedInterface(node, targetRoute.getPrefixString())));
                 }
             }
         });

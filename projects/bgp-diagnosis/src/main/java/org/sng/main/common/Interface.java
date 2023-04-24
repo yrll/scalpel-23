@@ -34,6 +34,10 @@ public class Interface {
         return null;
     }
 
+    public StaticRoute transToStaticRoute() {
+        return new StaticRoute(deviceName, infIpv4IpString, vpnName, this);
+    }
+
     public void checkIp() {
         if (!hasPrefix()) {
             return;

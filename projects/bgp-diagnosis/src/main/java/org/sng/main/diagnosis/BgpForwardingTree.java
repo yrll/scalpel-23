@@ -24,6 +24,7 @@ import java.util.Set;
 import jdk.security.jarsigner.JarSigner;
 import org.sng.datamodel.Ip;
 import org.sng.datamodel.Prefix;
+import org.sng.main.Main;
 import org.sng.main.common.BgpRoute;
 import org.sng.main.common.BgpTopology;
 import org.sng.main.common.BgpPeer.BgpPeerType;
@@ -68,6 +69,7 @@ public class BgpForwardingTree {
     private Set<String> _unreachableNodesPrev;
     // 一开始接收的可达路由的集合, 最优的, 最长前缀匹配的
     private Map<String, BgpRoute> _bestRouteMap;
+
 
 
 
@@ -129,6 +131,7 @@ public class BgpForwardingTree {
         _bestRouteMap = new HashMap<>();
         _ifMpls = !vpnName.equals(KeyWord.PUBLIC_VPN_NAME);
         this.bgpTreeType = bgpTreeType;
+
     }
 
 
@@ -208,8 +211,11 @@ public class BgpForwardingTree {
             String nextNode = _bestRouteFromMap.get(thisNode);
 
             if (!thisNode.equals(endDevName) && path.contains(nextNode)) {
-                System.out.println(path);
-                System.out.println("LOOP!!!!!!!!!!!");
+                if (Main.printLog) {
+                    System.out.println(path);
+                    System.out.println("LOOP!!!!!!!!!!!");
+                }
+
                 return null;
             }
             path.add(nextNode);
@@ -236,8 +242,11 @@ public class BgpForwardingTree {
 
             String nextNode = _nextHopForwardingMap.get(thisNode);
             if (!thisNode.equals(endDevName) && path.contains(nextNode)) {
-                System.out.println(path);
-                System.out.println("LOOP!!!!!!!!!!!");
+                if (Main.printLog) {
+                    System.out.println(path);
+                    System.out.println("LOOP!!!!!!!!!!!");
+                }
+
                 return null;
             }
             path.add(nextNode);
@@ -356,8 +365,11 @@ public class BgpForwardingTree {
                     _nextHopForwardingMap.put(node, nextHopDev);
                     _bestRouteMap.put(node, bgpRoute);
                     _bestRouteFromMap.put(node, peerDevName);
-                    System.out.println("Best route from: " + node + "-->" + peerDevName);
-                    System.out.println("Next-hop from: " + node + "-->" + nextHopDev);
+                    if (Main.printLog) {
+                        System.out.println("Best route from: " + node + "-->" + peerDevName);
+                        System.out.println("Next-hop from: " + node + "-->" + nextHopDev);
+                    }
+
 
                 }
                 

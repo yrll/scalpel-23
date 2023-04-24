@@ -247,7 +247,21 @@ public class BgpDiagnosis {
             // 如果原始BGP Tree上node路由可达，这里reachNodes会被删完，所以输入拷贝的那份
             // TODO 再检查一次static的错误，在newBgpTree的基础上
         }
+        printErrorLines(errlines);
         return errlines;
+    }
+
+    public void printErrorLines(Map<String, Map<Integer, String>> lines) {
+        for (String node: lines.keySet()) {
+            System.out.println("---------------------------" + node + "---------------------------");
+            List<Integer> lineNumList = new ArrayList<>(lines.get(node).keySet());
+            Collections.sort(lineNumList);
+            lineNumList.forEach(num->{
+                System.out.println("[" + num + "]" + " " +lines.get(node).get(num));
+            });
+
+            System.out.println();
+        }
     }
 
 
@@ -277,7 +291,7 @@ public class BgpDiagnosis {
             // TODO 如果mpls，检查bestForwardingPath上的所有节点就行
             Set<String> nodesInSameAS = generator.getBgpTopology().getAllNodesInSameAs(node);
             for (String nodeInSameAS : nodesInSameAS) {
-                if (nodeInSameAS.equals(generator.getDstDevName())) {
+                if (nodeInSameAS.equals(generator.getDstDevName()) || checkedNodes.contains(nodeInSameAS)) {
                     continue;
                 }
                 // bgp的next-hop应该是一个远端节点？邻接的下一跳节点还是需要迭代查IGP的路径？
@@ -293,36 +307,50 @@ public class BgpDiagnosis {
                     if (bgpNextHop!=null && !staticNextHop.equals(bgpNextHop)) {
                         int staticPref = generator.getStaticTree().getBestRoute(nodeInSameAS).getPref();
                         int bgpRoutePref = generator.getBgpTree().getRouteTypePref(generator.getBgpTopology().getNodesRelation(nodeInSameAS, bgpNextHop));
-                        if (staticPref >= bgpRoutePref) {
+                        if (staticPref <= bgpRoutePref) {
+                            StaticRoute route = generator.getStaticTree().getBestRoute(nodeInSameAS);
+
+                            route.printRoute();
+
                             lineMap.put(nodeInSameAS, ConfigTaint.staticRouteLinesFinder(nodeInSameAS, generator.getStaticTree().getBestRoute(nodeInSameAS).getPrefix()));
                         }
                     }
                 } else {
                     // 检查是否有direct路由
-                    Interface inf = generator.getLayer2Topology().getIpLocatedInterface(node, inputDstPrefixString);
+                    Interface inf = generator.getLayer2Topology().getIpLocatedInterface(nodeInSameAS, inputDstPrefixString);
                     if (inf!=null) {
-                        String infNextHop = generator.getLayer2Topology().getPeerDevNameFromInface(node, inf);
+                        String infNextHop = generator.getLayer2Topology().getPeerDevNameFromInface(nodeInSameAS, inf);
                         if (infNextHop!=null) {
                             if (infNextHop.equals(bgpNextHop)) {
                                 continue;
                             }
                         }
-                        Map<Integer, String> targetLines = ConfigTaint.interfaceLinesFinder(node, inf);
-                        if (!lineMap.containsKey(node)) {
-                            lineMap.put(node, targetLines);
+                        Map<Integer, String> targetLines = ConfigTaint.interfaceLinesFinder(nodeInSameAS, inf);
+                        if (!lineMap.containsKey(nodeInSameAS)) {
+                            // 打印错误路由
+                            inf.transToStaticRoute().printRoute();
+                            lineMap.put(nodeInSameAS, targetLines);
                         } else {
-                            lineMap.get(node).putAll(targetLines);
+                            // 打印错误路由
+                            inf.transToStaticRoute().printRoute();
+                            lineMap.get(nodeInSameAS).putAll(targetLines);
                         }
                     } else {
                         // 检查有没有dstPrefix包含的网段受到静态路由影响，这里输入的prefix是spec里指定的那个
                         Prefix inputPrefix = Prefix.parse(inputDstPrefixString);
-                        StaticRoute route = ConfigTaint.staticRouteFinder(node, inputPrefix, false);
+                        StaticRoute route = ConfigTaint.staticRouteFinder(nodeInSameAS, inputPrefix, false);
                         if (route!=null) {
                             // 加入lineMap
-                            if (!lineMap.containsKey(node)) {
-                                lineMap.put(node, ConfigTaint.staticRouteLinesFinder(node, route.getPrefix()));
+                            if (!lineMap.containsKey(nodeInSameAS)) {
+                                // 打印错误路由
+                                route.printRoute();
+
+                                lineMap.put(nodeInSameAS, ConfigTaint.staticRouteLinesFinder(nodeInSameAS, route.getPrefix()));
                             } else {
-                                lineMap.get(node).putAll(ConfigTaint.staticRouteLinesFinder(node, route.getPrefix()));
+                                // 打印错误路由
+                                route.printRoute();
+
+                                lineMap.get(nodeInSameAS).putAll(ConfigTaint.staticRouteLinesFinder(nodeInSameAS, route.getPrefix()));
                             }
                         }
 
@@ -347,7 +375,10 @@ public class BgpDiagnosis {
             if (!file.getName().contains("cfg")) {
                 continue;
             }
-            System.out.println(file.getName());
+            if (Main.printLog) {
+                System.out.println(file.getName());
+            }
+
             cfgPathMap.put(file.getName().split("\\.")[0], file.getAbsolutePath());
         }
         return cfgPathMap;
@@ -409,7 +440,10 @@ public class BgpDiagnosis {
     // 把peer connection这种双向的错误分发到两端的设备上
     public static Map<String, Violation> genViolationsFromFile(String filePath) {
         String jsonStr = fromJsonToString(filePath);
-        System.out.println(jsonStr);
+        if (Main.printLog) {
+            System.out.println(jsonStr);
+        }
+
         if (jsonStr==null || jsonStr.equals("")) {
             throw new IllegalArgumentException("There is no violated rules file! " + "(" + filePath + ")");
         }
@@ -530,7 +564,9 @@ public class BgpDiagnosis {
             path = bgpForwardingTree.getBestRouteFromPath(node, dstDev);
 
             if (path==null) {
-                System.out.println("BEST-ROUTE_FROM_PATH has LOOP");
+                if (Main.printLog) {
+                    System.out.println("BEST-ROUTE_FROM_PATH has LOOP");
+                }
                 continue;
             }
             // path的getter确保至少有一个节点在路径上
@@ -546,9 +582,10 @@ public class BgpDiagnosis {
                     if (!curVpnInstance.canCrossFrom(upstreamVpnInstance)) {
                         inconsistentVpnMap.put(curVpnInstance, upstreamVpnInstance);
                     }
+                    upstreamNode = curNode;
+                    upstreamVpnInstance = curVpnInstance;
                 }
-                upstreamNode = curNode;
-                upstreamVpnInstance = curVpnInstance;
+
                 checkedNodes.add(curNode);
             }
         }

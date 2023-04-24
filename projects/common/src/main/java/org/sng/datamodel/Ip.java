@@ -47,6 +47,8 @@ public class Ip implements Comparable<Ip>, Serializable {
         return (bits & (long)(1 << 31 - position)) != 0L;
     }
 
+
+
     public static boolean isIpv4Addr(String addr) {
         if (addr.contains("/") ) {
             // 32位地址格式的ip

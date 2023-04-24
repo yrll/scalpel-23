@@ -18,17 +18,21 @@ import org.sng.main.util.ConfigTaint;
 import org.sng.main.util.KeyWord;
 
 public class Main {
+    public static boolean printLog = false;
+
     public static void main(String[] args) throws ArgumentParserException {
         String arg1 = "case";
         String arg2 = "netType";
         String arg3 = "localize";
         String arg4 = "ifSave";
+        String arg5 = "ifPrint";
 
         ArgumentParser parser = ArgumentParsers.newFor("scalpel").build().description("Diagnosis inputs");
         parser.addArgument("-case").type(String.class).help("network case index");
         parser.addArgument("-netType").type(String.class).help("network type");
         parser.addArgument("-localize").type(boolean.class).help("fasle means only diagnosing");
         parser.addArgument("-ifSave").type(boolean.class).help("save flag");
+        parser.addArgument("-ifPrint").type(boolean.class).help("log print");
         Namespace parsedArgs = parser.parseArgs(args);
 
         // 网络类型，case序号，标志
@@ -50,6 +54,7 @@ public class Main {
         if (parsedArgs.get(arg4)!=null) {
             ifSave = parsedArgs.get(arg4);
         }
+
         Set<String> failedDevs = InputData.getFailedNodes(caseType, netType);
 
 
@@ -68,7 +73,7 @@ public class Main {
             diagnoser.diagnose(ifSave);
         }
 
-        System.out.println("pause");
+        System.out.println("end");
 
     }
 

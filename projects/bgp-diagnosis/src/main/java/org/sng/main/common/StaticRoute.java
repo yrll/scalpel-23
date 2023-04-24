@@ -51,6 +51,17 @@ public class StaticRoute {
         }
     }
 
+    public void printRoute() {
+        String nextHopIpString = "?";
+        if (nextHop!=null) {
+            nextHopIpString = nextHop;
+        } else if (outInf!=null) {
+            nextHopIpString = outInf.getInfName();
+        }
+        System.out.println("( " + getPrefixString() + ", " + nextHopIpString + " ) @" + deviceName);
+        System.out.println();
+    }
+
     public int getPref() {
         return preference;
     }

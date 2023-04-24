@@ -1,1 +1,5 @@
-{"BNG30":{"103":"ip route-static 179.0.0.117 30 39.1.1.1 preference 5"}}
+{
+  "BNG30": {
+    "103": "ip route-static 179.0.0.117 30 39.1.1.1 preference 5"
+  }
+}

@@ -7,7 +7,7 @@ import org.sng.datamodel.Prefix;
 
 import com.google.gson.Gson;
 
-public class BgpRoute {
+public class BgpRoute{
     public enum FromType{
         FROMORIGIN("FROMORIGIN"),
         FROMIBGP("FROMIBGP"),
@@ -72,6 +72,7 @@ public class BgpRoute {
     private String exRoutePolicy;
     private String imRoutePolicy;
 
+
     public Prefix getPrefix() {
         return Prefix.parse(ipPrefix);
     }
@@ -135,6 +136,14 @@ public class BgpRoute {
 
     public String getNextHopDev() {
         return nextHopDevice;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof BgpRoute) {
+            return true;
+        }
+        return false;
     }
 
 }
