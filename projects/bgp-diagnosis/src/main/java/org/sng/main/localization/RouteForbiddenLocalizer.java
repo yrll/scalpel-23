@@ -25,11 +25,13 @@ public class RouteForbiddenLocalizer implements Localizer {
     String vpnName;
     BgpRoute route;
     private Violation violation;
+    // 新的bgpTopology
     private BgpTopology bgpTopology;
     // direction是按照violatedRule类型设置的，绝对准确
     Direction direction;
     // 这个表示没有正常建立peer关系的节点
-    private String violatedPeer;
+    private String relatedPeer;
+    private String peerIp;
 
     public enum Direction{
         IN("import"),
@@ -41,7 +43,10 @@ public class RouteForbiddenLocalizer implements Localizer {
         String getName() {
             return name;
         }
-    
+    }
+
+    public String getRelatedPeer() {
+        return relatedPeer;
     }
 
     // public RouteForbiddenLocalizer(String node, String policyName, String vpnName, Violation violation) {
@@ -52,6 +57,7 @@ public class RouteForbiddenLocalizer implements Localizer {
     // }
 
     public RouteForbiddenLocalizer(String node, BgpRoute fordidRoute, Direction direction, Violation violation, BgpTopology bgpTopology) {
+        // 传入的bgp topo需要是假设的，不然可能找不到peer dev
         this.node = node;
         // 如果是因为export被deny的，在export那端会有记录
         switch (direction) {
@@ -69,11 +75,26 @@ public class RouteForbiddenLocalizer implements Localizer {
             this.policyName = "CAN NOT CROSS";
         }
         this.direction = direction;
-        
         this.vpnName = fordidRoute.getLatestVpnName();
         this.violation = violation;
         this.route = fordidRoute;
         this.bgpTopology = bgpTopology;
+        // 获取peer信息（按方向
+        peerIp = "0.0.0.0";
+        if (direction.equals(Direction.IN)) {
+            relatedPeer = route.getFromDevName();
+            peerIp = BgpTopology.transPrefixOrIpToIpString(route.getPeerIpString());
+            if (relatedPeer==null) {
+                relatedPeer = bgpTopology.getNodeNameFromIp(peerIp);
+            }
+
+        } else if (direction.equals(Direction.OUT)) {
+            String toDev = route.getToDevName();
+            relatedPeer = route.getToDevName();
+            peerIp = bgpTopology.getNodeIp(toDev);
+
+        }
+
     }
 
     @Override
@@ -81,31 +102,15 @@ public class RouteForbiddenLocalizer implements Localizer {
         // TODO 先检查是不是因为 policy filter route【可能是 peer不通或者路由交叉不了】
 
 
-        // 调涵洋的接口
-        String peerIp = "0.0.0.0";
-        if (direction.equals(Direction.IN)) {
-            String fromDev = route.getFromDevName();
-            if (fromDev==null) {
-                peerIp = route.getPeerIpString();
-            } else {
-                peerIp = bgpTopology.getNodeIp(fromDev);
-            }
-
-        } else if (direction.equals(Direction.OUT)) {
-            String toDev = route.getToDevName();
-            peerIp = bgpTopology.getNodeIp(toDev);
-
-        }
         // STEP1: 检测是否直接配了peer ip policy
         String[] keyWords = {"peer", peerIp, policyName, direction.getName()};
         Map<Integer, String> taintResult = new HashMap<>();
-        if (policyName!=null) {
+        if (policyName!=null && peerIp!=null) {
              taintResult.putAll(ConfigTaint.peerTaint(node, keyWords));
         }
 
         taintResult.putAll(ConfigTaint.policyLinesFinder(node, policyName));
         return taintResult;
-        
     }
     
 }

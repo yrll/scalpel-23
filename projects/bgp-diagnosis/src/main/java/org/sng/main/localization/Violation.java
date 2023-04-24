@@ -65,6 +65,14 @@ public class Violation {
         return missingLineCounter;
     }
 
+    public List<BgpRoute> getViolatedPropNeighbors() {
+        return violatedPropNeighbors;
+    }
+
+    public List<BgpRoute> getViolatedAcptNeighbors() {
+        return violatedAcptNeighbors;
+    }
+
     public Set<String> getViolateEbgpPeers() {
         return violateEbgpPeer;
     }
@@ -73,35 +81,43 @@ public class Violation {
         return violateIbgpPeer;
     }
 
-    public Map<Integer, String> localize(String curDevName, Generator generator) {
+    public Map<Integer, String> localize(String curDevName, Generator newGenerator, Generator errGenerator) {
 
-        List<Localizer> results = new ArrayList<>();
+        Set<Localizer> results = new HashSet<>();
 
         if (ifListValid(violatedRrClient)) {
-            results.add(new ReflectClientLocalizer(curDevName, violatedRrClient, this, generator.getBgpTopology()));
+            results.add(new ReflectClientLocalizer(curDevName, violatedRrClient, this, errGenerator.getBgpTopology()));
         }
 
         if (ifListValid(violatedAcptNeighbors)) {
             violatedAcptNeighbors.forEach(n->{
-                results.add(new RouteForbiddenLocalizer(curDevName, n, Direction.IN, this, generator.getBgpTopology()));
+                RouteForbiddenLocalizer routeForbiddenLocalizer = new RouteForbiddenLocalizer(curDevName, n, Direction.IN, this, newGenerator.getBgpTopology());
+                String peer = routeForbiddenLocalizer.getRelatedPeer();
+                if (peer!=null) {
+                    if (!errGenerator.getBgpTopology().isValidPeer(curDevName, peer)) {
+                        results.add(new PeerLocalizer(curDevName, peer, errGenerator, this, newGenerator.getBgpTopology()));
+                    }
+                }
+                results.add(routeForbiddenLocalizer);
             });
         }
 
         if (ifListValid(violatedPropNeighbors)) {
             violatedPropNeighbors.forEach(n->{
-                results.add(new RouteForbiddenLocalizer(curDevName, n, Direction.OUT, this, generator.getBgpTopology()));
+
+                results.add(new RouteForbiddenLocalizer(curDevName, n, Direction.OUT, this, errGenerator.getBgpTopology()));
             });
         }
 
         if (ifSetValid(violateEbgpPeer)) {
             violateEbgpPeer.forEach(n->{
-                results.add(new PeerLocalizer(curDevName, n, generator, this));
+                results.add(new PeerLocalizer(curDevName, n, errGenerator, this));
             });
         }
 
         if (ifSetValid(violateIbgpPeer)) {
             violateIbgpPeer.forEach(n->{
-                results.add(new PeerLocalizer(curDevName, n, generator, this));
+                results.add(new PeerLocalizer(curDevName, n, errGenerator, this));
             });
         }
 
@@ -111,11 +127,10 @@ public class Violation {
                 targetRoute = originDirectRoute;
             } else {
                 // 有redistribution的错，但是没有violatedRoute，生成一条valid的静态路由
-                String nextHopString = generator.getBgpTopology().getNodeIp(curDevName);
+                String nextHopString = errGenerator.getBgpTopology().getNodeIp(curDevName);
                 targetRoute = new StaticRoute(curDevName, vpnName, ipPrefixString, nextHopString);
             }
-            results.add(new RedistributionLocalizer(curDevName, violateRedis, targetRoute, this, generator.getBgpTopology()));
-
+            results.add(new RedistributionLocalizer(curDevName, violateRedis, targetRoute, this, errGenerator.getBgpTopology()));
         }
 
         Map<Integer, String> lineMap = new LinkedHashMap<>();
@@ -125,4 +140,11 @@ public class Violation {
         return lineMap;
     }
 
+//    public Set<PeerLocalizer> postProcessRouteForbiddenError() {
+//        // 检测单边的，因为如果peer没配对，两边都会受影响
+//        for (BgpRoute bgpRoute: violatedAcptNeighbors) {
+//
+//        }
+//        return null;
+//    }
 }

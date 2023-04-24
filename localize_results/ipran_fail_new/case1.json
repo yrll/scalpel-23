@@ -1,0 +1,10 @@
+{
+  "P-RR2": {
+    "-1": "peer 110.0.0.3 100",
+    "-2": "peer 110.0.0.3 connect-interface 110.0.0.7",
+    "-3": "peer 110.0.0.3 enable",
+    "-4": "peer 110.0.0.3 100",
+    "-5": "peer 110.0.0.3 connect-interface 110.0.0.7",
+    "-6": "peer 110.0.0.3 enable"
+  }
+}

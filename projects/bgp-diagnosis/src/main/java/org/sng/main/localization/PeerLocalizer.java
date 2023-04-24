@@ -26,6 +26,7 @@ public class PeerLocalizer implements Localizer{
     private String localCfgFilePath;
     private String remoteCfgFilePath;
     private Generator generator;
+    private BgpTopology refBgpTopology;
     private Violation violation;
 
     public enum PeerErrorType{
@@ -66,6 +67,20 @@ public class PeerLocalizer implements Localizer{
         this.remotePeer = generator.getBgpTopology().getBgpPeer(node2, node1);
         this.violation = violation;
     }
+
+    public PeerLocalizer(String node1, String node2, Generator generator, Violation violation, BgpTopology refBgpTopology) {
+        this.localNode = node1;
+        this.remoteNode = node2;
+        this.localCfgFilePath = BgpDiagnosis.cfgPathMap.get(node1);
+        this.remoteCfgFilePath = BgpDiagnosis.cfgPathMap.get(node2);
+        this.generator = generator;
+        this.localPeer = generator.getBgpTopology().getBgpPeer(node1, node2);
+        this.remotePeer = generator.getBgpTopology().getBgpPeer(node2, node1);
+        this.violation = violation;
+        this.refBgpTopology = refBgpTopology;
+    }
+
+
 
     public List<PeerErrorType> getErrorTypes() {
         List<PeerErrorType> errList = new ArrayList<PeerErrorType>();
@@ -191,10 +206,17 @@ public class PeerLocalizer implements Localizer{
                 // }
 
                 case PEER_NOT_CONFIGURED_LOCAL: {
-                    String line1 = "peer " + localPeer.getPeerIpString().toString() + " enable";
-                    lines.put(violation.getMissingLine(), line1);
-                    String line2 = "peer " + localPeer.getPeerIpString().toString() + " connect-interface " + localPeer.getLocalIpString().toString();
-                    lines.put(violation.getMissingLine(), line2);
+                    String peerIp = remoteNode;
+                    String localIp = localNode;
+                    String asNumber = "as-number";
+                    if (refBgpTopology!=null) {
+                        peerIp = refBgpTopology.getNodeIp(remoteNode);
+                        localIp = refBgpTopology.getNodeIp(localNode);
+                        asNumber = Long.toString(refBgpTopology.getAsNumber(remoteNode));
+                    }
+                    List<String> missingLines = ConfigTaint.genMissingPeerConfigLines(localIp, peerIp, asNumber);
+
+                    missingLines.forEach(line->lines.put(violation.getMissingLine(), line));
                     break;
                 }
                 // case PEER_NOT_CONFIGURED_REMOTE: {

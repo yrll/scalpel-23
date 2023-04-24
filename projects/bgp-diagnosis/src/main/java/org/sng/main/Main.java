@@ -58,7 +58,7 @@ public class Main {
         if (ifLocalize) {
             // 定位配置行
             if (diagnoser.getNewGenerator()!=null) {
-                diagnoser.localize(ifSave, diagnoser.getNewGenerator());
+                diagnoser.localize(ifSave, diagnoser.getNewGenerator(), diagnoser.getErrGenerator());
                 diagnoser.genIgpConstraints(diagnoser.getNewGenerator().getBgpTree(), ifSave);
             } else {
                 throw new IllegalArgumentException("no sse provenance info!");

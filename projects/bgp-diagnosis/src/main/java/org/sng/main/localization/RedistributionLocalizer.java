@@ -9,7 +9,6 @@ import org.sng.main.common.BgpTopology;
 import org.sng.main.common.Interface;
 import org.sng.main.common.StaticRoute;
 import org.sng.main.util.ConfigTaint;
-import org.sng.main.util.KeyWord;
 
 /*
  * Localize "violateRedis" errors (3 types):
@@ -119,7 +118,7 @@ public class RedistributionLocalizer implements Localizer{
                     if (!ifRouteHasOrigin) {
                         String missingOriginLine = ConfigTaint.genStaticRouteLine(targetRoute);
                         lines.put(violation.getMissingLine(), missingOriginLine);
-                        lines.put(violation.getMissingLine(), ConfigTaint.genNetworkCommondLine(targetRoute.getPrefix()));
+                        lines.put(violation.getMissingLine(), ConfigTaint.genMissingNetworkConfigLine(targetRoute.getPrefix()));
                     }
 
                 }

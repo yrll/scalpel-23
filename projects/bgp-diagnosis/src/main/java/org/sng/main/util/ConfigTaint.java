@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.checkerframework.checker.units.qual.A;
 import org.sng.datamodel.Prefix;
 import org.sng.datamodel.Ip;
 import org.sng.main.BgpDiagnosis;
@@ -141,7 +142,7 @@ public class ConfigTaint {
         return null;
     }
 
-    public static String genNetworkCommondLine(Prefix prefix) {
+    public static String genMissingNetworkConfigLine(Prefix prefix) {
         return "network " + prefix.getStartIp().toString() + " " + prefix.getPrefixLength();
     }
 
@@ -309,6 +310,14 @@ public class ConfigTaint {
             }
         }
         return new LinkedHashMap<Integer, String>();
+    }
+
+    public static List<String> genMissingPeerConfigLines(String localIp, String peerIp, String asNumber) {
+        List<String> lines = new ArrayList<>();
+        lines.add("peer " + peerIp + " " + asNumber);
+        lines.add("peer " + peerIp + " connect-interface " + localIp);
+        lines.add("peer " + peerIp + " enable");
+        return lines;
     }
 
     public static boolean ifLineContaintsPrefix(String line, Prefix prefix) {

@@ -1,1 +1,92 @@
-{"dev2ViolateRules":{"P-RR2":{"ipPrefix":"174.0.0.8/30","vpnName":"VPNV4","violatedRrClient":[],"violatedPropNeighbors":[],"violatedAcptNeighbors":[{"id":345,"deviceName":"P-RR2","toDeviceName":null,"fromDeviceName":null,"exRoutePolicy":null,"imRoutePolicy":null,"ipPrefix":"174.0.0.8/30","nextHopIp":"110.0.0.3/32","nextHopDevice":"RSG2","importType":null,"originProtocol":null,"preferredValue":0,"localPreference":100,"fromType":"FROMIBGP","asPath":[],"origin":"INCOMPLETE","peerIp":"110.0.0.3/32","routerId":1845493763,"med":200,"clusterList":[],"originalPreference":null,"curVpnName":["CAN_NOT_CROSS"],"communities":[],"rts":["100:1"]}],"prefer":[],"violateIbgpPeer":[],"violateEbgpPeer":[],"violateRedis":null,"originDirectRoute":null,"originStaticRoute":null},"RSG2":{"ipPrefix":"174.0.0.8/30","vpnName":"VPNV4","violatedRrClient":[],"violatedPropNeighbors":[{"id":343,"deviceName":"RSG2","toDeviceName":null,"fromDeviceName":null,"exRoutePolicy":null,"imRoutePolicy":null,"ipPrefix":"174.0.0.8/30","nextHopIp":null,"nextHopDevice":"RSG2","importType":null,"originProtocol":null,"preferredValue":32768,"localPreference":100,"fromType":"FROMORIGIN","asPath":[],"origin":"INCOMPLETE","peerIp":null,"routerId":0,"med":200,"clusterList":[],"originalPreference":null,"curVpnName":["LTE_RAN"],"communities":[],"rts":["100:1"]}],"violatedAcptNeighbors":[],"prefer":[],"violateIbgpPeer":[],"violateEbgpPeer":[],"violateRedis":null,"originDirectRoute":null,"originStaticRoute":null}}}
+{
+  "dev2ViolateRules": {
+    "P-RR2": {
+      "ipPrefix": "174.0.0.8/30",
+      "vpnName": "VPNV4",
+      "violatedRrClient": [],
+      "violatedPropNeighbors": [],
+      "violatedAcptNeighbors": [
+        {
+          "id": 345,
+          "deviceName": "P-RR2",
+          "toDeviceName": null,
+          "fromDeviceName": null,
+          "exRoutePolicy": null,
+          "imRoutePolicy": null,
+          "ipPrefix": "174.0.0.8/30",
+          "nextHopIp": "110.0.0.3/32",
+          "nextHopDevice": "RSG2",
+          "importType": null,
+          "originProtocol": null,
+          "preferredValue": 0,
+          "localPreference": 100,
+          "fromType": "FROMIBGP",
+          "asPath": [],
+          "origin": "INCOMPLETE",
+          "peerIp": "110.0.0.3/32",
+          "routerId": 1845493763,
+          "med": 200,
+          "clusterList": [],
+          "originalPreference": null,
+          "curVpnName": [
+            "CAN_NOT_CROSS"
+          ],
+          "communities": [],
+          "rts": [
+            "100:1"
+          ]
+        }
+      ],
+      "prefer": [],
+      "violateIbgpPeer": [],
+      "violateEbgpPeer": [],
+      "violateRedis": null,
+      "originDirectRoute": null,
+      "originStaticRoute": null
+    },
+    "RSG2": {
+      "ipPrefix": "174.0.0.8/30",
+      "vpnName": "VPNV4",
+      "violatedRrClient": [],
+      "violatedPropNeighbors": [
+        {
+          "id": 343,
+          "deviceName": "RSG2",
+          "toDeviceName": null,
+          "fromDeviceName": null,
+          "exRoutePolicy": null,
+          "imRoutePolicy": null,
+          "ipPrefix": "174.0.0.8/30",
+          "nextHopIp": null,
+          "nextHopDevice": "RSG2",
+          "importType": null,
+          "originProtocol": null,
+          "preferredValue": 32768,
+          "localPreference": 100,
+          "fromType": "FROMORIGIN",
+          "asPath": [],
+          "origin": "INCOMPLETE",
+          "peerIp": null,
+          "routerId": 0,
+          "med": 200,
+          "clusterList": [],
+          "originalPreference": null,
+          "curVpnName": [
+            "LTE_RAN"
+          ],
+          "communities": [],
+          "rts": [
+            "100:1"
+          ]
+        }
+      ],
+      "violatedAcptNeighbors": [],
+      "prefer": [],
+      "violateIbgpPeer": [],
+      "violateEbgpPeer": [],
+      "violateRedis": null,
+      "originDirectRoute": null,
+      "originStaticRoute": null
+    }
+  }
+}

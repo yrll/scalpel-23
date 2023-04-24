@@ -1,35 +1,22 @@
 package org.sng.main.common;
 
-import java.io.File;
-import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
-import javax.lang.model.element.Element;
-
-import org.apache.commons.io.FileUtils;
 import org.sng.datamodel.Ip;
 import org.sng.main.BgpDiagnosis;
-import org.sng.main.diagnosis.Node;
 import org.sng.main.diagnosis.Generator.Protocol;
-import org.sng.main.util.ConfigTaint;
 import org.sng.main.util.KeyWord;
 
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -174,12 +161,12 @@ public class BgpTopology {
         return false;
     }
 
-    public long getAsNumber(String node) {
+    public Long getAsNumber(String node) {
         if (_asNumMap.containsKey(node)) {
             return _asNumMap.get(node);
         } else {
             // TODO 会有这种情况？
-            return 0;
+            return null;
         }
         
     }

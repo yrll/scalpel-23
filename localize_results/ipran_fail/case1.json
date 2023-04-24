@@ -1,6 +1,18 @@
 {
   "CSG1-1-1": {
-    "151": "peer 110.0.0.9 group toASG"
+    "-1": "peer 110.0.0.9 100",
+    "-2": "peer 110.0.0.9 connect-interface 70.0.0.6",
+    "-3": "peer 110.0.0.9 enable",
+    "-4": "peer 110.0.0.9 100",
+    "-5": "peer 110.0.0.9 connect-interface 70.0.0.6",
+    "-6": "peer 110.0.0.9 enable",
+    "151": "peer 110.0.0.9 group toASG",
+    "-7": "peer 110.0.0.9 100",
+    "-8": "peer 110.0.0.9 connect-interface 70.0.0.6",
+    "-9": "peer 110.0.0.9 enable",
+    "-10": "peer 110.0.0.9 100",
+    "-11": "peer 110.0.0.9 connect-interface 70.0.0.6",
+    "-12": "peer 110.0.0.9 enable"
   },
   "ASG2": {
     "160": "apply cost 200",

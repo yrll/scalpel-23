@@ -78,7 +78,7 @@ public class BgpPeer implements Serializable{
 //
 //    public Ip getPeerIp() {
 //        return _peerIp;
-//    }
+//
 
     public String getLocalIpString() {
         return BgpTopology.transPrefixOrIpToIpString(_localIpString);
@@ -101,6 +101,9 @@ public class BgpPeer implements Serializable{
     }
 
     public long getLocalAsNum() {
+        if (_type.equals(BgpPeerType.IBGP)) {
+            return _peerAsNum;
+        }
         return _localAsNum;
     }
 

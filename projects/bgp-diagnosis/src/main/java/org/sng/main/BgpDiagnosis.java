@@ -23,6 +23,7 @@ import org.sng.main.diagnosis.Generator;
 import org.sng.main.diagnosis.Node;
 import org.sng.main.diagnosis.VpnInstance;
 import org.sng.main.diagnosis.BgpForwardingTree.TreeType;
+import org.sng.main.localization.PeerLocalizer;
 import org.sng.main.localization.Violation;
 import org.sng.main.util.ConfigTaint;
 import org.sng.main.util.KeyWord;
@@ -222,12 +223,12 @@ public class BgpDiagnosis {
         return reqTree;
     }
     
-    public Map<String, Map<Integer, String>> localize(boolean ifSave, Generator generator) {
+    public Map<String, Map<Integer, String>> localize(boolean ifSave, Generator generator, Generator oldGenerator) {
         // STEP 1: 解析CPV返回的violated_rules，定位BGP协议相关的配置错误行
         String violatedRulePath = inputData.getViolateRulePath(caseType, networkType);
         Map<String, Map<Integer, String>> errlines = new HashMap<>();
         if (violatedRulePath!=null && !violatedRulePath.equals("")) {
-            errlines = getErrorLinesEachNode(violatedRulePath, generator);
+            errlines = getErrorLinesEachNode(violatedRulePath, generator, oldGenerator);
 
         }
         
@@ -248,6 +249,7 @@ public class BgpDiagnosis {
         }
         return errlines;
     }
+
 
     public Map<String, Map<Integer, String>> mergeLinesMap(Map<String, Map<Integer, String>> map1, Map<String, Map<Integer, String>> map2) {
         for (String node: map2.keySet()) {
@@ -388,13 +390,13 @@ public class BgpDiagnosis {
         }
     }
 
-    public static Map<String, Map<Integer, String>> getErrorLinesEachNode(String filePath, Generator generator) {
+    public static Map<String, Map<Integer, String>> getErrorLinesEachNode(String filePath, Generator generator, Generator oldGenerator) {
         Map<String, Map<Integer, String>> errMap = new LinkedHashMap<>();
         // 输入是violated condition文件的路径
         Map<String, Violation> violations = genViolationsFromFile(filePath);
         if (violations!=null && violations.size()>0) {
             violations.forEach((node, vio)->{
-                errMap.put(node, vio.localize(node, generator));
+                errMap.put(node, vio.localize(node, generator, oldGenerator));
             });
             return errMap.entrySet().stream().filter(m->m.getValue()!=null && m.getValue().size()>0).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));  
         } else {
@@ -568,9 +570,13 @@ public class BgpDiagnosis {
         if ((bgpProvFilePath==null || bgpProvFilePath.equals("")) || (staticProvFilePath==null || staticProvFilePath.equals(""))) {
             return null;
         }
+        BgpTopology newBgpTopology = bgpTopology;
         String newBgpTopoFilePath = inputData.getSsePeerInfoPath(caseType, networkType);
-        BgpTopology newBgpTopology = new BgpTopology(this.failedDevs);
-        newBgpTopology.genBgpPeersFromJsonFile(newBgpTopoFilePath);
+        if (newBgpTopoFilePath!=null) {
+            newBgpTopology = new BgpTopology(this.failedDevs);
+            newBgpTopology.genBgpPeersFromJsonFile(newBgpTopoFilePath);
+        }
+
         newGenerator = new Generator(dstDev, dstPrefixString, newBgpTopology, dstVpnName, ifMpls, failedDevs, false);
         newGenerator.setLayer2Topology(errGenerator.getLayer2Topology());
         newGenerator.serializeTreeFromJson(staticProvFilePath, TreeType.STATIC, BgpForwardingTree.BgpTreeType.NONE);
