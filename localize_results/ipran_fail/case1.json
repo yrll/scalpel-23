@@ -1,18 +1,9 @@
 {
   "CSG1-1-1": {
-    "-1": "peer 110.0.0.9 100",
-    "-2": "peer 110.0.0.9 connect-interface 70.0.0.6",
-    "-3": "peer 110.0.0.9 enable",
-    "-4": "peer 110.0.0.9 100",
-    "-5": "peer 110.0.0.9 connect-interface 70.0.0.6",
-    "-6": "peer 110.0.0.9 enable",
-    "151": "peer 110.0.0.9 group toASG",
-    "-7": "peer 110.0.0.9 100",
-    "-8": "peer 110.0.0.9 connect-interface 70.0.0.6",
-    "-9": "peer 110.0.0.9 enable",
-    "-10": "peer 110.0.0.9 100",
-    "-11": "peer 110.0.0.9 connect-interface 70.0.0.6",
-    "-12": "peer 110.0.0.9 enable"
+    "137": "peer 110.0.0.9 as-number 100",
+    "138": "peer 110.0.0.9 connect-interface LoopBack0",
+    "150": "peer 110.0.0.9 enable",
+    "151": "peer 110.0.0.9 group toASG"
   },
   "ASG2": {
     "160": "apply cost 200",
@@ -21,6 +12,8 @@
     "163": "if-match extcommunity-filter x2",
     "164": "apply cost 200",
     "180": "ip extcommunity-filter basic x2 index 10 permit rt 1:1",
+    "90": "peer 70.0.0.6 as-number 100",
+    "91": "peer 70.0.0.6 connect-interface LoopBack0",
     "157": "route-policy to-csg-as-slave permit node 10",
     "158": "if-match ip-prefix default",
     "159": "apply ip-address next-hop peer-address"

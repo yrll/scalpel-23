@@ -1,10 +1,12 @@
 {
   "P-RR2": {
-    "-1": "peer 110.0.0.3 100",
-    "-2": "peer 110.0.0.3 connect-interface 110.0.0.7",
-    "-3": "peer 110.0.0.3 enable",
-    "-4": "peer 110.0.0.3 100",
-    "-5": "peer 110.0.0.3 connect-interface 110.0.0.7",
-    "-6": "peer 110.0.0.3 enable"
+    "88": "peer 110.0.0.3 as-number 100",
+    "89": "peer 110.0.0.3 connect-interface LoopBack0"
+  },
+  "RSG2": {
+    "230": "peer 110.0.0.7 enable",
+    "215": "peer 110.0.0.7 as-number 100",
+    "231": "peer 110.0.0.7 group toPRR",
+    "216": "peer 110.0.0.7 connect-interface LoopBack0"
   }
 }

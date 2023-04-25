@@ -3,27 +3,26 @@
     "16": "  vpn-target 100:1 export-extcommunity",
     "17": "  vpn-target 1:1 export-extcommunity",
     "18": "  vpn-target 1:1 import-extcommunity",
-    "148": "peer 110.0.0.8 group toASG",
     "13": " ipv4-family",
     "14": "  route-distinguisher 100:1",
     "15": "  tnl-policy IPRAN"
   },
   "ASG1": {
+    "176": "apply cost 100",
+    "179": "ip ip-prefix default index 10 permit 0.0.0.0 0",
     "133": "peer CSG-as-master route-policy to-csg-as-master export",
+    "182": "ip extcommunity-filter basic x2 index 10 permit rt 1:1",
     "136": "peer 70.0.0.6 group CSG-as-master",
     "169": "route-policy to-csg-as-master permit node 10",
     "170": "if-match ip-prefix default",
     "171": "apply ip-address next-hop peer-address",
     "172": "apply cost 100",
-    "13": " ipv4-family",
     "174": "route-policy to-csg-as-master permit node 20",
-    "14": "  route-distinguisher 100:1",
     "175": "if-match extcommunity-filter x2",
-    "15": "  tnl-policy IPRAN",
-    "176": "apply cost 100",
     "16": "  vpn-target 100:1 export-extcommunity",
     "17": "  vpn-target 100:1 import-extcommunity",
-    "179": "ip ip-prefix default index 10 permit 0.0.0.0 0",
-    "182": "ip extcommunity-filter basic x2 index 10 permit rt 1:1"
+    "13": " ipv4-family",
+    "14": "  route-distinguisher 100:1",
+    "15": "  tnl-policy IPRAN"
   }
 }

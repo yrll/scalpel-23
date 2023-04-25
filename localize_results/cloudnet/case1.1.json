@@ -1,6 +1,12 @@
 {
   "cloudPE-4": {
-    "-1": "network 50.0.0.12 30"
+    "99": "interface GigabitEthernet3/0/1",
+    "100": " undo shutdown",
+    "102": "interface GigabitEthernet3/0/1.1",
+    "103": " vlan-type dot1q 200",
+    "104": " ip binding vpn-instance YiLiao",
+    "105": " ip address 50.0.0.13 255.255.255.252",
+    "316": "ip route-static vpn-instance YiLiao 50.0.0.13 30 67.0.0.14"
   },
   "B1-2": {
     "390": "ip ip-prefix default-route index 10 permit 0.0.0.0 0",

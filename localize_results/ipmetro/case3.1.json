@@ -1,1 +1,5 @@
-{}
+{
+  "CR2": {
+    "362": "ip route-static 209.0.0.13 30 GigabitEthernet3/0/1 10.0.0.22 preference 10"
+  }
+}
