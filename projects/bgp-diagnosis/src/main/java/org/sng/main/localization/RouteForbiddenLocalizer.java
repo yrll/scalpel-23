@@ -2,7 +2,6 @@ package org.sng.main.localization;
 
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.sng.main.common.BgpRoute;
@@ -82,15 +81,15 @@ public class RouteForbiddenLocalizer implements Localizer {
         // 获取peer信息（按方向
         peerIp = "0.0.0.0";
         if (direction.equals(Direction.IN)) {
-            relatedPeer = route.getFromDevName();
+            relatedPeer = route.getFromDeviceName();
             peerIp = BgpTopology.transPrefixOrIpToIpString(route.getPeerIpString());
             if (relatedPeer==null) {
                 relatedPeer = bgpTopology.getNodeNameFromIp(peerIp);
             }
 
         } else if (direction.equals(Direction.OUT)) {
-            String toDev = route.getToDevName();
-            relatedPeer = route.getToDevName();
+            String toDev = route.getToDeviceName();
+            relatedPeer = route.getToDeviceName();
             peerIp = bgpTopology.getNodeIp(toDev);
 
         }

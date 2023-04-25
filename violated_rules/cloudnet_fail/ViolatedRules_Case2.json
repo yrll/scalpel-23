@@ -1,16 +1,16 @@
 {
   "dev2ViolateRules": {
-    "B1-1": {
+    "B1-2": {
       "ipPrefix": "50.0.0.4/30",
-      "vpnName": "YiLiao",
+      "vpnName": "EVPN",
       "violatedRrClient": [],
       "violatedPropNeighbors": [
         {
-          "id": 190,
-          "deviceName": "B1-1",
-          "toDeviceName": "U1-1-1-1",
+          "id": 410,
+          "deviceName": "B1-2",
+          "toDeviceName": null,
           "fromDeviceName": null,
-          "exRoutePolicy": "default-route-upe",
+          "exRoutePolicy": null,
           "imRoutePolicy": null,
           "ipPrefix": "50.0.0.4/30",
           "nextHopIp": "240E:0101:F000:0000:0000:0000:6E00:0003/128",
@@ -24,7 +24,7 @@
           "origin": "INCOMPLETE",
           "peerIp": "240E:0101:F000:0000:0000:0000:6E00:0006/128",
           "routerId": 1845493766,
-          "med": 120,
+          "med": 100,
           "clusterList": [
             "1845493766"
           ],
@@ -44,21 +44,21 @@
       "prefer": [],
       "violateIbgpPeer": [],
       "violateEbgpPeer": [],
-      "originDirectRoute": null,
       "violateRedis": null,
+      "originDirectRoute": null,
       "originStaticRoute": null
     },
     "U1-1-1-1": {
       "ipPrefix": "50.0.0.4/30",
-      "vpnName": "YiLiao",
+      "vpnName": "EVPN",
       "violatedRrClient": [],
       "violatedPropNeighbors": [],
       "violatedAcptNeighbors": [
         {
-          "id": 212,
+          "id": 436,
           "deviceName": "U1-1-1-1",
           "toDeviceName": null,
-          "fromDeviceName": "B1-1",
+          "fromDeviceName": null,
           "exRoutePolicy": null,
           "imRoutePolicy": null,
           "ipPrefix": "50.0.0.4/30",
@@ -71,16 +71,16 @@
           "fromType": "FROMIBGP",
           "asPath": [],
           "origin": "INCOMPLETE",
-          "peerIp": "240E:0101:F000:0000:0000:0000:6E00:000A/128",
-          "routerId": 1845493770,
-          "med": 120,
+          "peerIp": "240E:0101:F000:0000:0000:0000:6E00:000B/128",
+          "routerId": 1845493771,
+          "med": 100,
           "clusterList": [
             "1845493766",
-            "1845493770"
+            "1845493771"
           ],
           "originalPreference": null,
           "curVpnName": [
-            "CAN_NOT_CROSS"
+            "YiLiao"
           ],
           "communities": [
             "120"
@@ -93,8 +93,8 @@
       "prefer": [],
       "violateIbgpPeer": [],
       "violateEbgpPeer": [],
-      "originDirectRoute": null,
       "violateRedis": null,
+      "originDirectRoute": null,
       "originStaticRoute": null
     }
   }

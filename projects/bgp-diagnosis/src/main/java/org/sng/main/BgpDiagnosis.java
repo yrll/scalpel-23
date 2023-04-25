@@ -52,6 +52,8 @@ public class BgpDiagnosis {
 
     private final Set<String> failedDevs;
 
+    public static Map<String, Map<Integer, String>> errMap = new LinkedHashMap<>();
+
     public BgpDiagnosis(String caseType, NetworkType networkType, Set<String> failedDevs) {
         inputData = new InputData();
         // input数据初始化
@@ -422,12 +424,17 @@ public class BgpDiagnosis {
     }
 
     public static Map<String, Map<Integer, String>> getErrorLinesEachNode(String filePath, Generator generator, Generator oldGenerator) {
-        Map<String, Map<Integer, String>> errMap = new LinkedHashMap<>();
+
         // 输入是violated condition文件的路径
         Map<String, Violation> violations = genViolationsFromFile(filePath);
         if (violations!=null && violations.size()>0) {
             violations.forEach((node, vio)->{
-                errMap.put(node, vio.localize(node, generator, oldGenerator));
+                if (errMap.containsKey(node)) {
+                    errMap.get(node).putAll(vio.localize(node, generator, oldGenerator));
+                } else {
+                    errMap.put(node, vio.localize(node, generator, oldGenerator));
+                }
+
             });
             return errMap.entrySet().stream().filter(m->m.getValue()!=null && m.getValue().size()>0).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));  
         } else {
@@ -582,6 +589,8 @@ public class BgpDiagnosis {
                     if (!curVpnInstance.canCrossFrom(upstreamVpnInstance)) {
                         inconsistentVpnMap.put(curVpnInstance, upstreamVpnInstance);
                     }
+                    // 更新上游vpn为最近的一个配置了vpn的节点，因为传播中途可以有非vpn节点，但遇到这样的非VPN节点当前做法是跳过
+                    // 所以要保证非vpn最近两端的VPN的RT RD一致
                     upstreamNode = curNode;
                     upstreamVpnInstance = curVpnInstance;
                 }

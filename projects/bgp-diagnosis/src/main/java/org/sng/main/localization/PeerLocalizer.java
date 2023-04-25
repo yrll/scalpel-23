@@ -28,6 +28,8 @@ public class PeerLocalizer implements Localizer{
     private Generator generator;
     private BgpTopology refBgpTopology;
     private Violation violation;
+    // 表示创建的时候是通过其他节点的violation创建的，所以这里定位出的error lines要写入全局变量
+    private boolean initializeFromOtherNode;
 
     public enum PeerErrorType{
         PEER_IP_REACH_LOCAL,
@@ -57,7 +59,7 @@ public class PeerLocalizer implements Localizer{
         UNKOWN_REMOTE;
     }
 
-    public PeerLocalizer(String node1, String node2, Generator generator, Violation violation) {
+    public PeerLocalizer(String node1, String node2, Generator generator, Violation violation, boolean initializeFromOtherNode) {
         this.localNode = node1;
         this.remoteNode = node2;
         this.localCfgFilePath = BgpDiagnosis.cfgPathMap.get(node1);
@@ -66,9 +68,10 @@ public class PeerLocalizer implements Localizer{
         this.localPeer = generator.getBgpTopology().getBgpPeer(node1, node2);
         this.remotePeer = generator.getBgpTopology().getBgpPeer(node2, node1);
         this.violation = violation;
+        this.initializeFromOtherNode = initializeFromOtherNode;
     }
 
-    public PeerLocalizer(String node1, String node2, Generator generator, Violation violation, BgpTopology refBgpTopology) {
+    public PeerLocalizer(String node1, String node2, Generator generator, Violation violation, BgpTopology refBgpTopology, boolean initializeFromOtherNode) {
         this.localNode = node1;
         this.remoteNode = node2;
         this.localCfgFilePath = BgpDiagnosis.cfgPathMap.get(node1);
@@ -78,6 +81,7 @@ public class PeerLocalizer implements Localizer{
         this.remotePeer = generator.getBgpTopology().getBgpPeer(node2, node1);
         this.violation = violation;
         this.refBgpTopology = refBgpTopology;
+        this.initializeFromOtherNode =initializeFromOtherNode;
     }
 
 
@@ -152,10 +156,20 @@ public class PeerLocalizer implements Localizer{
             }
         } else if (localPeer!=null) {
             errList.add(PeerErrorType.PEER_NOT_CONFIGURED_REMOTE);
-        } else {
+        } else if (remotePeer!=null){
             errList.add(PeerErrorType.PEER_NOT_CONFIGURED_LOCAL);
         }
         return errList;
+    }
+
+    public void putErrorLinesToGlobalErrorMap(String node, Map<Integer, String> lines) {
+
+        if (BgpDiagnosis.errMap.containsKey(localNode)) {
+            BgpDiagnosis.errMap.get(localNode).putAll(lines);
+        } else {
+            BgpDiagnosis.errMap.put(localNode, lines);
+        }
+
     }
 
     @Override
@@ -167,7 +181,16 @@ public class PeerLocalizer implements Localizer{
             switch (err) {
                 case PEER_AS_NUMBER_INCONSISTENT_LOCAL: {
                     String[] keyWords = {"peer", localPeer.getPeerIpString().toString(), String.valueOf(localPeer.getPeerAsNum())};
-                    lines.putAll(ConfigTaint.peerTaint(localNode, keyWords));
+                    if (!initializeFromOtherNode) {
+                        lines.putAll(ConfigTaint.peerTaint(localNode, keyWords));
+                    } else {
+                        if (BgpDiagnosis.errMap.containsKey(localNode)) {
+                            BgpDiagnosis.errMap.get(localNode).putAll(ConfigTaint.peerTaint(localNode, keyWords));
+                        } else {
+                            BgpDiagnosis.errMap.put(localNode, ConfigTaint.peerTaint(localNode, keyWords));
+                        }
+                    }
+
                     break;
                 }
                 // case PEER_AS_NUMBER_INCONSISTENT_REMOTE: {
@@ -214,9 +237,28 @@ public class PeerLocalizer implements Localizer{
                         localIp = refBgpTopology.getNodeIp(localNode);
                         asNumber = Long.toString(refBgpTopology.getAsNumber(remoteNode));
                     }
-                    List<String> missingLines = ConfigTaint.genMissingPeerConfigLines(localIp, peerIp, asNumber);
+                    // 因为有的peer只配了单边，但是bgp topo上两端的peer info都会缺失，所以要在配置里再检查一遍
+                    Map<Integer, String> peerConfig = getPeerConfiguration(localNode, remoteNode, peerIp);
+                    if (peerConfig.size()==0) {
+                        List<String> missingLines = ConfigTaint.genMissingPeerConfigLines(localIp, peerIp, asNumber);
+                        if (initializeFromOtherNode) {
+                            missingLines.forEach(line->peerConfig.put(violation.getMissingLine(), line));
+                            putErrorLinesToGlobalErrorMap(localNode, peerConfig);
+                        } else {
+                            missingLines.forEach(line->lines.put(violation.getMissingLine(), line));
+                        }
 
-                    missingLines.forEach(line->lines.put(violation.getMissingLine(), line));
+                    } else {
+                        if (initializeFromOtherNode) {
+                            putErrorLinesToGlobalErrorMap(localNode, peerConfig);
+                        } else {
+                            lines.putAll(peerConfig);
+                        }
+
+                    }
+
+
+
                     break;
                 }
                 // case PEER_NOT_CONFIGURED_REMOTE: {
@@ -255,6 +297,12 @@ public class PeerLocalizer implements Localizer{
             }
         }
         return lines;
+    }
+
+    public Map<Integer, String> getPeerConfiguration(String localDev, String peerDev, String peerIpString) {
+        String[] peerWords = {"peer", BgpTopology.transPrefixOrIpToIpString(peerIpString)};
+        String[] enableWords = {"enable", "connect"};
+        return ConfigTaint.peerTaint(localDev, peerWords);
     }
 
     private boolean isConnectInterface(String node) {

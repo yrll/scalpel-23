@@ -2,6 +2,8 @@ package org.sng.main.common;
 
 import java.util.List;
 
+import com.google.gson.annotations.SerializedName;
+import org.apache.commons.collections.ListUtils;
 import org.sng.datamodel.Ip;
 import org.sng.datamodel.Prefix;
 
@@ -45,8 +47,9 @@ public class BgpRoute{
 
     // prov bgpRoute attrs
     private int id;
-    private String deviceName; 
-    private String ipPrefix; 
+    private String deviceName;
+    @SerializedName("ipPrefix")
+    private String ipPrefixString;
     private String nextHopIp; 
     private String nextHopDevice;
 
@@ -63,7 +66,7 @@ public class BgpRoute{
     private int med;
     private List<Long> clusterList;
     // private String originalPreference;
-    private List<String> curVpnName;
+    private List<String> curVpnList;
 
 
     // violated bgpRoute attrs
@@ -72,9 +75,36 @@ public class BgpRoute{
     private String exRoutePolicy;
     private String imRoutePolicy;
 
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public String getIpPrefixString() {
+        return ipPrefixString;
+    }
+
+    public String getNextHopDevice() {
+        return nextHopDevice;
+    }
+
+    public String getExRoutePolicy() {
+        return exRoutePolicy;
+    }
+
+    public String getImportType() {
+        return importType;
+    }
+
+    public String getOriginProtocol() {
+        return originProtocol;
+    }
+
+    public List<String> getCurVpnList() {
+        return curVpnList;
+    }
 
     public Prefix getPrefix() {
-        return Prefix.parse(ipPrefix);
+        return Prefix.parse(ipPrefixString);
     }
 
     public static BgpRoute deserialize(String jsonStr) {
@@ -82,19 +112,19 @@ public class BgpRoute{
     }
 
     public String getLatestVpnName() {
-        if (curVpnName!=null && curVpnName.size()>0) {
-           return curVpnName.get(curVpnName.size()-1); 
+        if (curVpnList !=null && curVpnList.size()>0) {
+           return curVpnList.get(curVpnList.size()-1);
         } else {
             return null;
         }
         
     }
 
-    public String getToDevName() {
+    public String getToDeviceName() {
         return toDeviceName;
     }
 
-    public String getFromDevName() {
+    public String getFromDeviceName() {
         return fromDeviceName;
     }
 
@@ -138,10 +168,30 @@ public class BgpRoute{
         return nextHopDevice;
     }
 
+    public boolean ifTwoStringEqual(String str1, String str2) {
+        if (str1!=null && str2!=null) {
+            return str1.equals(str2);
+        } else if (str1!=null || str2!=null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     @Override
     public boolean equals(Object object) {
         if (object instanceof BgpRoute) {
-            return true;
+            BgpRoute bgpRoute = (BgpRoute) object;
+            return ifTwoStringEqual(bgpRoute.getDeviceName(), deviceName) &&
+                    ifTwoStringEqual(bgpRoute.getFromDeviceName(), fromDeviceName) &&
+                    ifTwoStringEqual(bgpRoute.getToDeviceName(), toDeviceName) &&
+                    ifTwoStringEqual(bgpRoute.getPeerIpString(), peerIp) &&
+                    ifTwoStringEqual(bgpRoute.getExportPolicyName(), exRoutePolicy) &&
+                    ifTwoStringEqual(bgpRoute.getImportPolicyName(), importType) &&
+                    ifTwoStringEqual(bgpRoute.getImportType(), importType) &&
+                    ifTwoStringEqual(bgpRoute.getNextHopDev(), nextHopDevice) &&
+                    ifTwoStringEqual(bgpRoute.getOriginProtocol(), originProtocol) &&
+                    ListUtils.isEqualList(bgpRoute.getCurVpnList(), curVpnList);
         }
         return false;
     }

@@ -67,6 +67,8 @@ public class Violation {
         return missingLineCounter;
     }
 
+//    public List<BgpRoute>
+
     public List<BgpRoute> getViolatedPropNeighbors() {
         return violatedPropNeighbors;
     }
@@ -92,12 +94,15 @@ public class Violation {
         }
 
         if (ifListValid(violatedAcptNeighbors)) {
+            Set<BgpRoute> routeSet = new HashSet<>(violatedAcptNeighbors);
             violatedAcptNeighbors.forEach(n->{
                 RouteForbiddenLocalizer routeForbiddenLocalizer = new RouteForbiddenLocalizer(curDevName, n, Direction.IN, this, newGenerator.getBgpTopology());
                 String peer = routeForbiddenLocalizer.getRelatedPeer();
                 if (peer!=null) {
                     if (!errGenerator.getBgpTopology().isValidPeer(curDevName, peer)) {
-                        results.add(new PeerLocalizer(curDevName, peer, errGenerator, this, newGenerator.getBgpTopology()));
+                        // peer都是new两边，但是mei
+                        results.add(new PeerLocalizer(curDevName, peer, errGenerator, this, newGenerator.getBgpTopology(), false));
+                        results.add(new PeerLocalizer(peer, curDevName, errGenerator, this, newGenerator.getBgpTopology(), true));
                     }
                 }
                 results.add(routeForbiddenLocalizer);
@@ -106,20 +111,27 @@ public class Violation {
 
         if (ifListValid(violatedPropNeighbors)) {
             violatedPropNeighbors.forEach(n->{
-
-                results.add(new RouteForbiddenLocalizer(curDevName, n, Direction.OUT, this, errGenerator.getBgpTopology()));
+                RouteForbiddenLocalizer routeForbiddenLocalizer = new RouteForbiddenLocalizer(curDevName, n, Direction.OUT, this, errGenerator.getBgpTopology());
+                String peer = routeForbiddenLocalizer.getRelatedPeer();
+                if (peer!=null) {
+                    if (!errGenerator.getBgpTopology().isValidPeer(curDevName, peer)) {
+                        // peer都是new两边，但是mei
+                        results.add(new PeerLocalizer(curDevName, peer, errGenerator, this, newGenerator.getBgpTopology(), false));
+                    }
+                }
+                results.add(routeForbiddenLocalizer);
             });
         }
 
         if (ifSetValid(violateEbgpPeer)) {
             violateEbgpPeer.forEach(n->{
-                results.add(new PeerLocalizer(curDevName, n, errGenerator, this));
+                results.add(new PeerLocalizer(curDevName, n, errGenerator, this, false));
             });
         }
 
         if (ifSetValid(violateIbgpPeer)) {
             violateIbgpPeer.forEach(n->{
-                results.add(new PeerLocalizer(curDevName, n, errGenerator, this));
+                results.add(new PeerLocalizer(curDevName, n, errGenerator, this, false));
             });
         }
 
